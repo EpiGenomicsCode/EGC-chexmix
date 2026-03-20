@@ -1,0 +1,8 @@
+// core/build.gradle
+plugins { id 'java' }
+group = 'org.egc'
+version = '1.0-SNAPSHOT'
+dependencies {
+    // vendor JARs from seqcode-core/lib/ that survive the audit
+    implementation fileTree(dir: 'libs', include: ['**/*.jar'])
+}
