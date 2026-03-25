@@ -4,7 +4,7 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 group = 'org.egc'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 dependencies {
     implementation project(':core')
     implementation fileTree(dir: 'libs', include: ['**/*.jar'])
