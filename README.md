@@ -25,6 +25,16 @@ Command to compile ChExMix
 ./gradlew :chexmix:shadowJar
 ```
 
+Command to clean up failed builds
+```
+./gradlew clean
+```
+
+Command to test that Gradle works
+```
+./gradlew test
+```
+
 #### Dependencies:
 1. ChExMix requires Java 11+.
 2. You need [MEME](http://meme-suite.org/) installed and being available in $PATH if you want to find subtypes using motif (tested with MEME version 4.11.3).
