@@ -20,19 +20,13 @@ N Yamada, PK Kuntala, BF Pugh, S Mahony. "ChExMix: a method for identifying and 
 
 Building from Source
 --------------
-If you want to build the code yourself, first make sure Gradle is available.
-```
-wget https://services.gradle.org/distributions/gradle-8.7-bin.zip
-nzip gradle-8.7-bin.zip
-```
-
 Command to compile ChExMix
 ```
-./gradle-8.7/bin/gradle :chexmix:shadowJar
+./gradlew :chexmix:shadowJar
 ```
 
 #### Dependencies:
-1. ChExMix requires Java 8+.
+1. ChExMix requires Java 11+.
 2. You need [MEME](http://meme-suite.org/) installed and being available in $PATH if you want to find subtypes using motif (tested with MEME version 4.11.3).
 2. ChExMix loads all data to memory, so you will need a lot of available memory if you are running analysis over many conditions or large datasets.
 
