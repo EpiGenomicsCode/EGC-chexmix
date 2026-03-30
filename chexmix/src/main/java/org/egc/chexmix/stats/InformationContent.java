@@ -45,8 +45,8 @@ public class InformationContent {
         }
         if (!fm.islogodds) { 
         	wm.islogodds = true;
-        	if (back !=null){ wm.toLogOdds();}
-			else{ wm.toLogOdds(back);}
+        	if (back !=null) { wm.toLogOdds(back); }
+		else { wm.toLogOdds(); }
         }
         
 		IC = new double[fm.length()];
