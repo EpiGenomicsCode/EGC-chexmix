@@ -2,7 +2,6 @@ package org.egc.core.viz.metaprofile;
 
 import java.util.*;
 
-import org.egc.core.data.core.*;
 import org.egc.core.genome.location.Point;
 
 

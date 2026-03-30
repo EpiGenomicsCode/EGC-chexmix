@@ -12,6 +12,9 @@ import org.egc.core.gsebricks.verbs.Expander;
 
 /**
  * @author tdanford
+ * 
+ * Note: Gene annotation loading from database tables has been removed.
+ * This stub remains to satisfy AnnotationLoader's factory registration.
  */
 public class RefGeneGeneratorFactory implements RegionExpanderFactory<Gene>, GeneFactory {
     private String type;
@@ -23,15 +26,12 @@ public class RefGeneGeneratorFactory implements RegionExpanderFactory<Gene>, Gen
     public String getType() {return type;}
     public String getProduct() {return "Gene";}
     public Expander<Region, Gene> getExpander(Genome g) {
-        return getExpander(g,type);
+        throw new UnsupportedOperationException(
+            "Database-backed gene annotation loading has been removed.");
     }
 
     public Expander<Region, Gene> getExpander(Genome g, String type) {
-        if (type == null) {
-            return new RefGeneGenerator(g);
-        } else {
-            RefGeneGenerator gg = new RefGeneGenerator(g, type);
-            return gg;
-        }
+        throw new UnsupportedOperationException(
+            "Database-backed gene annotation loading has been removed.");
     }
 }

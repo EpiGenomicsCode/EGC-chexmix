@@ -28,6 +28,8 @@ import org.egc.core.gseutils.Pair;
  */
 public class CountsBackgroundModel extends BackgroundModel implements BackgroundModelFrequencySupport {
   
+  private static final String MODEL_TYPE = "FREQUENCY";
+
 	 /**
    * Map for holding the kmer counts for the model. Each 
    * element of the array holds kmers whose length is the index of that element.
@@ -40,27 +42,13 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
 
   
   /**
-   * Construct a new CountsBackgroundModel from the supplied metadata object
-   * @param md the metadata describing this model
-   * @throws NotFoundException if a Genome can't be found for the metadata's
-   * genome ID
-   */
-  public CountsBackgroundModel(BackgroundModelMetadata md) throws NotFoundException {
-    super(md);
-    if (!md.hasDBModelType()) {
-      this.dbModelType = BackgroundModelLoader.FREQUENCY_TYPE_STRING;
-    }
-  }
-
-  
-  /**
    * Construct a new CountsBackground model with the specified name, for the
    * specified genome, and with a default max kmer length
    * @param name
    * @param gen
    */
   public CountsBackgroundModel(String name, Genome gen) {
-    super(name, gen, BackgroundModelLoader.FREQUENCY_TYPE_STRING);
+    super(name, gen, MODEL_TYPE);
   }
 
 
@@ -72,9 +60,7 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
    * @param maxKmerLen
    */
   public CountsBackgroundModel(String name, Genome gen, int maxKmerLen) {
-    //Note: typically Count based models will go into the DB as frequency models
-    //so use frequency as a model type
-    super(name, gen, maxKmerLen, BackgroundModelLoader.FREQUENCY_TYPE_STRING);
+    super(name, gen, maxKmerLen, MODEL_TYPE);
   }
   
   

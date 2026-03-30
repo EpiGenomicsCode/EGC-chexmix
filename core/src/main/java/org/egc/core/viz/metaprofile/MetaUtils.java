@@ -4,17 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Vector;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.genome.location.Gene;
 import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gsebricks.verbs.Mapper;
-import org.egc.core.gsebricks.verbs.MapperIterator;
-import org.egc.core.gsebricks.verbs.location.GenomeExpander;
-import org.egc.core.gsebricks.verbs.location.RefGeneGenerator;
 
 
 /**
@@ -30,29 +24,6 @@ public class MetaUtils {
 	
 	public MetaUtils(Genome g){
 		genome = g;
-	}
-	
-	/**
-	 * Load TSSs from the named table (e.g. refGene)
-	 * @param geneTable
-	 * @return
-	 */
-	public Iterator<Point> loadTSSs(String geneTable) { 
-		System.err.println("Loading gene TSSs");
-		RefGeneGenerator gen = new RefGeneGenerator(genome, geneTable);
-		Mapper<Gene,Point> tssMapper = new Mapper<Gene,Point>() { 
-			public Point execute(Gene g) { 
-				if(g.getStrand() == '+') { 
-					return new StrandedPoint(g.getGenome(), g.getChrom(), g.getStart(), '+');
-				} else { 
-					return new StrandedPoint(g.getGenome(), g.getChrom(), g.getEnd(), '-');
-				}
-			}
-		};
-		GenomeExpander<Gene> gexp = new GenomeExpander<Gene>(gen);
-		Iterator<Gene> genes = gexp.execute(genome);
-		Iterator<Point> points = new MapperIterator<Gene,Point>(tssMapper, genes);
-		return points;
 	}
 	
 	/**

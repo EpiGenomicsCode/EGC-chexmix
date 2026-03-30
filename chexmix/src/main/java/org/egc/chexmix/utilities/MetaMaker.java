@@ -2,7 +2,6 @@ package org.egc.chexmix.utilities;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -74,9 +73,7 @@ public class MetaMaker {
 									handler.addPoints(points);
 								}
 							}else{
-								System.out.println("All TSS mode...");
-								Iterator<Point> points = nonframe.getUtils().loadTSSs("refGene");
-								handler.addPoints(points);
+								System.err.println("All TSS mode requires gene annotation loading, which has been removed. Provide a peak file with --peaks instead.");
 							}
 							while(handler.addingPoints()){}
 							if(mconfig.cluster)

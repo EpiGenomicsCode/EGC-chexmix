@@ -19,19 +19,7 @@ import org.egc.core.math.stats.Fmath;
  */
 public class FrequencyBackgroundModel extends BackgroundModel implements BackgroundModelFrequencySupport {
   
-  
-  /**
-   * Construct a new FrequencyBackgroundModel from the supplied metadata object
-   * @param md the metadata describing this model
-   * @throws NotFoundException if a Genome can't be found for the metadata's
-   * genome ID
-   */
-  public FrequencyBackgroundModel(BackgroundModelMetadata md) throws NotFoundException {
-    super(md);
-    if (!BackgroundModelLoader.FREQUENCY_TYPE_STRING.equals(md.getDBModelType())) {
-      throw new IllegalArgumentException("Metadata model type must be FREQUENCY");
-    }
-  }
+  private static final String MODEL_TYPE = "FREQUENCY";
   
   /**
    * Construct a new FrequencyBackground model with the specified name, for the
@@ -40,7 +28,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
    * @param gen
    */
   public FrequencyBackgroundModel(String name, Genome gen) {
-    super(name, gen, BackgroundModelLoader.FREQUENCY_TYPE_STRING);
+    super(name, gen, MODEL_TYPE);
   }
 
   /**
@@ -51,7 +39,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
    * @param maxKmerLen
    */
   public FrequencyBackgroundModel(String name, Genome gen, int maxKmerLen) {
-    super(name, gen, maxKmerLen, BackgroundModelLoader.FREQUENCY_TYPE_STRING);
+    super(name, gen, maxKmerLen, MODEL_TYPE);
   }
   
   
@@ -60,7 +48,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
    * @param cbg the existing CountsBackgroundModel
    */
   public FrequencyBackgroundModel(CountsBackgroundModel cbg) {
-  	super(cbg, BackgroundModelLoader.FREQUENCY_TYPE_STRING);
+  	super(cbg, MODEL_TYPE);
   	for (int i = 1; i <= cbg.getMaxKmerLen(); i++) {
   		cbg.computeFrequencies(i);
   		modelProbs[i].putAll(cbg.modelProbs[i]);

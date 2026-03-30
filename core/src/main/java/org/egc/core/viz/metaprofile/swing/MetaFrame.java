@@ -11,13 +11,11 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
-import org.egc.core.data.core.*;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Point;
 import org.egc.core.gsebricks.verbs.Mapper;
 import org.egc.core.gsebricks.verbs.MapperIterator;
 import org.egc.core.gsebricks.verbs.location.GenomeExpander;
-import org.egc.core.gsebricks.verbs.location.RefGeneGenerator;
 import org.egc.core.viz.metaprofile.*;
 import org.egc.core.viz.paintable.PaintableChangedEvent;
 import org.egc.core.viz.paintable.PaintableChangedListener;
@@ -148,8 +146,7 @@ public class MetaFrame extends JFrame {
 	private Action createLoadTSSsAction() { 
 		return new AbstractAction("Load TSSs...") { 
 			public void actionPerformed(ActionEvent e) { 
-				Iterator<Point> points = utils.loadTSSs("refGene");
-				handler.addPoints(points);
+				System.err.println("TSS loading from database gene tables has been removed.");
 			}
 		};
 	}
@@ -187,4 +184,3 @@ public class MetaFrame extends JFrame {
 	
 	
 }
-

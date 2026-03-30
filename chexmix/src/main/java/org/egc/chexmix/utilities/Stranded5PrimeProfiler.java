@@ -2,7 +2,6 @@ package org.egc.chexmix.utilities;
 
 import java.util.*;
 
-import org.egc.core.data.seqdata.SeqHit;
 import org.egc.core.deepseq.StrandedBaseCount;
 import org.egc.core.deepseq.experiments.ControlledExperiment;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
@@ -86,14 +85,13 @@ public class Stranded5PrimeProfiler implements PointProfiler<Point,PointProfile>
 			List<StrandedBaseCount> sbcs = expt.getSignal().getBases(extQuery);
 			for(StrandedBaseCount sbc : sbcs){
 				if(base=='.' || (seq!=null && getBaseAtPosition(sbc, baseRelPosition, extQuery, seq)==base)){
-					SeqHit hit = new SeqHit(genome, a.getChrom(), sbc);
-					if (this.strand=='.' || hit.getStrand()==wantedStrand){  //only count one strand
-						if (start<=hit.getFivePrime() && end>=hit.getFivePrime()){
-							int hitPos = hit.getStrand()=='+' ? hit.getFivePrime()+fivePrimeShift : hit.getFivePrime()-fivePrimeShift; 
+					if (this.strand=='.' || sbc.getStrand()==wantedStrand){  //only count one strand
+						if (start<=sbc.getCoordinate() && end>=sbc.getCoordinate()){
+							int hitPos = sbc.getStrand()=='+' ? sbc.getCoordinate()+fivePrimeShift : sbc.getCoordinate()-fivePrimeShift; 
 							int hit5Prime = hitPos-start;
 							if(pointStrand=='-')
 								hit5Prime = end-hitPos;
-							array[params.findBin(hit5Prime)]+=hit.getWeight();
+							array[params.findBin(hit5Prime)]+=sbc.getCount();
 						}				
 					}
 				}

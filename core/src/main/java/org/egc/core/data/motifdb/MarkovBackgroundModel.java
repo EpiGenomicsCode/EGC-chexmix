@@ -21,20 +21,7 @@ import cern.jet.math.Functions;
  */
 public class MarkovBackgroundModel extends BackgroundModel {
   
-  
-  /**
-   * Construct a new MarkovBackgroundModel from the supplied metadata object
-   * @param md the metadata describing this model
-   * @throws NotFoundException if a Genome can't be found for the metadata's
-   * genome ID
-   */
-  public MarkovBackgroundModel(BackgroundModelMetadata md) throws NotFoundException {
-    super(md);
-    if (!BackgroundModelLoader.MARKOV_TYPE_STRING.equals(md.getDBModelType())) {
-      throw new IllegalArgumentException("Metadata model type must be MARKOV");
-    }
-  }
-
+  private static final String MODEL_TYPE = "MARKOV";
   
   /**
    * Construct a new MarkovBackground model with the specified name, for the
@@ -43,7 +30,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
    * @param gen
    */
   public MarkovBackgroundModel(String name, Genome gen) {
-    super(name, gen, BackgroundModelLoader.MARKOV_TYPE_STRING);
+    super(name, gen, MODEL_TYPE);
   }
 
 
@@ -55,7 +42,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
    * @param maxKmerLen the max Kmer Length for the model
    */
   public MarkovBackgroundModel(String name, Genome gen, int maxKmerLen) {
-    super(name, gen, maxKmerLen, BackgroundModelLoader.MARKOV_TYPE_STRING);
+    super(name, gen, maxKmerLen, MODEL_TYPE);
   }
   
   
@@ -65,7 +52,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
    * @param fbg the existing frequency background model
    */
   public MarkovBackgroundModel(FrequencyBackgroundModel fbg) {
-  	super(fbg, BackgroundModelLoader.MARKOV_TYPE_STRING);
+  	super(fbg, MODEL_TYPE);
     
     //iterate over each order level of the model
     for (int i = 1; i <= this.getMaxKmerLen(); i++) {

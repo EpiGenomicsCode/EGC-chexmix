@@ -1,7 +1,6 @@
 package org.egc.core.data.motifdb;
 
 import java.util.*;
-import java.sql.*;
 import java.text.DecimalFormat;
 
 import org.egc.core.gseutils.NotFoundException;
@@ -35,59 +34,6 @@ public class WeightMatrix {
     public int zeroOffset=0;
     public int bgMapID = -1;
     
-    WeightMatrix(ResultSet wmData, ResultSet wmColData) throws SQLException {  
-    	dbid = wmData.getInt(1);
-    	speciesid = wmData.getInt(2);
-    	name = wmData.getString(3);
-    	version = wmData.getString(4);
-    	type = wmData.getString(5);
-    	bgMapID = wmData.getInt(6);
-    	if (wmData.wasNull()) {
-    	  bgMapID = -1;
-    	}
-    	
-    	hasdbid = true; hasspeciesid = true;
-    	islogodds = false;
-    	
-    	int maxPos = -1;
-    	Map<Integer,Map<Character,Float>> weights = new HashMap<Integer,Map<Character,Float>>();
-    	
-    	while(wmColData.next()) { 
-    		int pos = wmColData.getInt(1);
-    		char posChar = wmColData.getString(2).charAt(0);
-    		float weight = wmColData.getFloat(3);
-            if(weight < 0.0) { islogodds = true; }
-
-            if(!weights.containsKey(pos)) { 
-    			maxPos = Math.max(maxPos, pos);
-    			weights.put(pos, new HashMap<Character,Float>());
-    		}
-    		
-    		weights.get(pos).put(posChar, weight);
-    	}
-
-        float nullWeight = islogodds ? (float)-9999.0 : (float)0.0;
-    	
-    	matrix = new float[maxPos+1][MAXLETTERVAL];
-        for(int i = 0; i < matrix.length; i++) { 
-            for(int j = 0; j < matrix[j].length; j++) { 
-                matrix[i][j] = nullWeight;
-            }
-        }
-		for(int j = 0; j < letters.length; j++) { 
-			char letter = letters[j];
-			for(int i = 0; i < matrix.length; i++) { 
-				if(weights.containsKey(i) && weights.get(i).containsKey(letter)) { 
-					matrix[i][Character.toLowerCase(letter)] = weights.get(i).get(letter);
-					matrix[i][Character.toUpperCase(letter)] = weights.get(i).get(letter);
-				} else { 
-					matrix[i][Character.toLowerCase(letter)] = nullWeight;
-					matrix[i][Character.toUpperCase(letter)] = nullWeight;
-				}
-    		}
-    	}
-    }    
-
     public WeightMatrix (int length) {
         dbid = -1;
         hasdbid = false;
@@ -104,61 +50,6 @@ public class WeightMatrix {
         hasspeciesid = false;
         matrix = pwm; 
         islogodds = true;
-    }
-
-    public static Collection<WeightMatrix> getAllWeightMatrices() {
-	return null;
-    }
-    /**
-     * Gets all the matrices specified in the result set which is
-     * the result of joining weightmatrix and weightmatrixcols, eg
-     * select m.id, m.species, m.name, m.version, m.type, m.bg_model_map_id, c.position, c.letter, c.weight from weightmatrix m, 
-     * weightmatrixcols c where m.id = c.weightmatrix order by c.weightmatrix, c.position desc
-     *
-     * sorting by descending position is critical so that the first row of a new matrix gives
-     * the largest index (ie, the length of the matrix)
-     */
-    public static Collection<WeightMatrix> getWeightMatrices(ResultSet rs) throws SQLException {
-        Map<Integer,WeightMatrix> output = new HashMap<Integer,WeightMatrix>();
-        long start = System.currentTimeMillis();
-        while (rs.next()) {
-            int id = rs.getInt(1);
-            if (!output.containsKey(id)) {
-                WeightMatrix m = new WeightMatrix(rs.getInt(7) + 1);
-                m.dbid = rs.getInt(1);
-                m.hasdbid = true;
-                m.speciesid = rs.getInt(2);
-                if (m.speciesid > 0) {
-                  m.hasspeciesid = true;
-                }
-                m.name = rs.getString(3);
-                m.version = rs.getString(4);
-                m.type = rs.getString(5);
-                m.bgMapID = rs.getInt(6);
-                if ((m.bgMapID == 0) && rs.wasNull()) {
-                  m.bgMapID = -1;
-                }
-                output.put(id,m);
-            }
-            output.get(id).matrix[rs.getInt(7)][rs.getString(8).charAt(0)] = rs.getFloat(9);
-        }
-        long end = System.currentTimeMillis();
-        System.err.println("Returning " + output.size() + " from WeightMatrix.getWeightMatrices(ResultSet).  Took " + (end - start));
-        for (WeightMatrix matrix : output.values()) {
-            for(int i = 0; i < matrix.matrix.length; i++) { 
-                matrix.matrix[i]['a'] = matrix.matrix[i]['A'];
-                matrix.matrix[i]['c'] = matrix.matrix[i]['C'];
-                matrix.matrix[i]['g'] = matrix.matrix[i]['G'];
-                matrix.matrix[i]['t'] = matrix.matrix[i]['T'];
-            }
-        }
-            
-        return output.values();
-    }
-
-    /* creates a new weightMatrixObject based on the provided database identifier */
-    public static WeightMatrix getWeightMatrix(int dbid) throws NotFoundException {
-	return null;
     }
 
     public int length () {return matrix.length;}
@@ -339,33 +230,15 @@ public class WeightMatrix {
 	     }                
 	 }
     
-    /* converts this matrix to log-odds form.  Uses either the matrix's
-       default background model or a uniform .25 model
-    */
+    /* converts this matrix to log-odds form.  Uses a uniform .25 background model */
     public void toLogOdds() {
         setLogOdds();  // tests for log-oddsness by looking for weights < 0
         if (islogodds) {return;} 
         islogodds = true;
-        MarkovBackgroundModel bgModel = null;
-        
-        if (bgMapID != -1) {
-            try {
-                bgModel = BackgroundModelLoader.getMarkovModel(bgMapID);
-            } catch (NotFoundException nfex) {
-                nfex.printStackTrace();
-            } catch (SQLException sqlex) {
-                sqlex.printStackTrace();
-            }                
-        }            	
 
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < allLetters.length; j++) {
-            	if (bgModel != null) {
-            	  matrix[i][allLetters[j]] = (float)(Math.log(Math.max(matrix[i][allLetters[j]], .000001) / bgModel.getMarkovProb(("" + allLetters[j]).toUpperCase()))/LOG2);
-            	}
-            	else {
-            		matrix[i][allLetters[j]] = (float)(Math.log(Math.max(matrix[i][allLetters[j]], .000001) / .25)/LOG2);
-            	}
+                matrix[i][allLetters[j]] = (float)(Math.log(Math.max(matrix[i][allLetters[j]], .000001) / .25)/LOG2);
             }
         }        
     }
