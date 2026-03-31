@@ -3,7 +3,6 @@ package org.egc.core.data.motifdb;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import java.sql.*;
 import java.text.ParseException;
 
 import org.egc.core.data.io.parsing.PWMParser;
@@ -71,8 +70,6 @@ public class WeightMatrixImport {
                 }
                 insertWMFromFile(species,wmname,wmversion,wmtype,wmfile);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         } catch (NotFoundException ex) {
             ex.printStackTrace();
             System.err.println("Must supply a valid species and genome");
@@ -227,7 +224,7 @@ public class WeightMatrixImport {
   }
 
     public static Set<Integer> insertMultiWMFromFile(String species, String wmtype, String wmfile, String wmversion) 
-        throws IOException, SQLException, NotFoundException { 
+        throws IOException, NotFoundException { 
 
         HashSet<Integer> ids = new HashSet<Integer>();
         List<WeightMatrix> matrices = null;
@@ -261,7 +258,7 @@ public class WeightMatrixImport {
                                        String wmname,
                                        String wmversion,
                                        String wmtype,
-                                       String wmfile) throws SQLException, NotFoundException, FileNotFoundException, ParseException, IOException {
+                                       String wmfile) throws NotFoundException, FileNotFoundException, ParseException, IOException {
         WeightMatrix matrix;
         System.err.println("name " + wmname + " version " + wmversion + " type " + wmtype);
         if (wmtype.matches(".*TAMO.*")) {
@@ -296,7 +293,7 @@ public class WeightMatrixImport {
     version, and returns its dbid.  This means that the file may contain
     only a single weight matrix*/
   public static int insertWMFromFile(String species, String wmname, String wmversion, String wmtype, String wmfile, String bgFreq) 
-  throws SQLException, NotFoundException, FileNotFoundException, ParseException, IOException {
+  throws NotFoundException, FileNotFoundException, ParseException, IOException {
     WeightMatrix matrix;
     if (wmtype.matches(".*TAMO.*")) {
       matrix = PWMParser.readTamoMatrix(wmfile);
@@ -379,4 +376,3 @@ public class WeightMatrixImport {
     }
 
 }
-

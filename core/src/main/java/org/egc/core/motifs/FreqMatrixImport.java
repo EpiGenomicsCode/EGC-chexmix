@@ -1,7 +1,6 @@
 package org.egc.core.motifs;
 import java.io.*;
 import java.util.*;
-import java.sql.*;
 import java.text.ParseException;
 
 import org.egc.core.data.io.BackgroundModelIO;
@@ -92,8 +91,6 @@ public class FreqMatrixImport {
                 }
                 insertFMFromFile(species,fmname,fmversion,fmtype,fmfile);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         } catch (NotFoundException ex) {
             ex.printStackTrace();
             System.err.println("Must supply a valid species and genome");
@@ -254,7 +251,7 @@ public class FreqMatrixImport {
     }
     
     public static Set<Integer> insertMultiFMFromFile(String species, String version,String fmtype, String fmfile) 
-        throws IOException, SQLException, NotFoundException { 
+        throws IOException, NotFoundException { 
     	LinkedList<WeightMatrix> matrices=null;
         HashSet<Integer> ids = new HashSet<Integer>();
         
@@ -291,7 +288,7 @@ public class FreqMatrixImport {
                                        String fmname,
                                        String fmversion,
                                        String fmtype,
-                                       String fmfile) throws SQLException, NotFoundException, FileNotFoundException, ParseException, IOException {
+                                       String fmfile) throws NotFoundException, FileNotFoundException, ParseException, IOException {
     	LinkedList<WeightMatrix> matrices;
     	
         if (fmtype.matches(".*TRANSFAC.*")) {
@@ -410,4 +407,3 @@ public class FreqMatrixImport {
     }
 
 }
-

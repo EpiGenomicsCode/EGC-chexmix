@@ -2,9 +2,6 @@ package org.egc.core.genome;
 
 import java.util.*;
 
-
-import java.sql.*;
-
 import org.egc.core.gseutils.*;
 
 /**
@@ -168,17 +165,5 @@ public class Species{
         }
     	return organisms.keySet();
     }
-
-    /**
-     * Insert a new Species into the database
-     * @param species
-     * @throws SQLException
-     */
-    public static void insertSpecies(String species) throws SQLException {
-        java.sql.Connection cxn = null;
-        Statement stmt = null;
-        
-    }
-
 
 }

@@ -3,7 +3,6 @@ package org.egc.core.genome;
 
 import java.util.*;
 import java.io.*;
-import java.sql.*;
 
 import org.egc.core.genome.location.ChromosomeInfo;
 import org.egc.core.gseutils.*;
@@ -30,28 +29,8 @@ public class Genome{
     public Genome(Species species, String version) throws NotFoundException {
         this.species = species;
         this.version = version;
-        Connection cxn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
     }
        
-    /**
-     * Constructs a new Genome from almost complete info
-     * 	Only used when a connection is open already for populating chromosome lengths
-     *  Only used within the static methods below to populate a table of all genomes
-     */
-    private Genome(Species s, int dbid, String version, Connection cxn) throws NotFoundException {
-        this.species = s;
-        this.version = version;
-        this.dbid = dbid;
-        
-        try {
-			fillChroms(cxn);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-    }
-    
     /**
      * Construct a Genome from a file of chromosome lengths
      * @param tempName
@@ -116,38 +95,6 @@ public class Genome{
     	}
     }
     
-    /**
-     * Retrieves the chromosomes for this Genome from the database and fills
-     * the relevant data structures: chroms and chromsByID
-     * @param cxn
-     * @throws SQLException
-     */
-    private void fillChroms(Connection cxn) throws SQLException {
-        chromsByName = new HashMap<String,ChromosomeInfo>();
-        chromsByID = new HashMap<Integer,ChromosomeInfo>();
-
-        Statement stmt = cxn.createStatement();
-        ResultSet rs = stmt.executeQuery("select c.id, c.name, cs.len from chromosome c, chromsequence cs " +
-                "where c.id=cs.id and c.genome=" + dbid);
-        while(rs.next()) { 
-            int dbid = rs.getInt(1);
-            String name = rs.getString(2);
-            int length = rs.getInt(3);
-            
-            ChromosomeInfo info = new ChromosomeInfo(dbid, length, name);
-            if(chromsByName.containsKey(name) || chromsByID.containsKey(dbid)) { 
-                throw new IllegalArgumentException("Duplicate name \"" + name + 
-                        "\" seems to exist in genome " + version);
-            }
-            chromsByName.put(name, info);
-            chromsByID.put(dbid, info);
-        }
-        
-        if (rs != null) { try {rs.close(); } catch (SQLException ex) {  }}
-        if (stmt != null) { try { stmt.close();} catch (SQLException ex) { } }
-    	
-    }
-
     //Accessors
     public String getVersion() {return version;}
     public int getDBID() {return dbid;}
@@ -299,14 +246,6 @@ public class Genome{
 
     
     
-    /** 
-     * Returns a read connection to the annotation database for this genome 
-     */
-    public Connection getAnnotationDBConnection() throws SQLException {
-	return null;
-    }
-        
-    
     /**
 	 * Load all Genomes from database 
 	 * @return
@@ -316,9 +255,6 @@ public class Genome{
     	
     	if(staticGenomes.isEmpty() || forceRefreshFromDB){
     		staticGenomes.clear(); genomeids.clear();
-	    	Connection cxn = null;
-	        Statement stmt = null;
-	        ResultSet rs = null;
     	}else{
     		gens.addAll(staticGenomes.values());
     	}
@@ -356,10 +292,6 @@ public class Genome{
 		if (genomeids.containsKey(gid)) {
 	        return genomeids.get(gid);
 	    }
-	
-	    Connection cxn=null;
-	    Statement stmt = null;
-	    ResultSet rs = null;
 		return null;    
 	}
 
@@ -375,9 +307,6 @@ public class Genome{
 		if (staticGenomes.containsKey(genomeName)) {
 	        return staticGenomes.get(genomeName);
 	    }
-	    Connection cxn=null;
-	    Statement stmt = null;
-	    ResultSet rs = null;
 		return null;    
 	}
 	
@@ -392,16 +321,6 @@ public class Genome{
     	return staticGenomes.keySet();
     }
 
-	/**
-     * Insert a new Genome into the database 
-     * @param version
-     * @throws SQLException
-     */
-    public static void insertGenome(Species species, String version) throws SQLException {
-        Connection cxn = null;
-        Statement stmt = null;
-    }
-    
 	public int hashCode() {
         return getSpeciesName().hashCode()*37 + getVersion().hashCode();
     }
@@ -417,4 +336,3 @@ public class Genome{
     }
 
 }
-
