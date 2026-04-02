@@ -50,15 +50,12 @@ public class ExptConfig {
 	protected boolean cacheAllHits=true; //Cache all hits
 	protected String fileCacheDir = "hitcache";
 	protected List<Region> initialCachedRegions=null;
-	//Different loaders will have different behaviors in the following
-	//For example, some file formats cannot store pairs. ReadDB ignores the difference between R1 & R2 in single-end, etc.
 	protected boolean loadType1Reads = true; //Load Type1 reads
 	protected boolean loadType2Reads = false; //Load Type2 reads (if exists and distinguishable)
 	protected boolean loadRead2=true; //Load second in pair reads (only used by BAM loader for now)
 	protected boolean loadReads = true;  //Load read information
 	protected boolean loadPairs = false; //Load pair information (if exists)
 	protected boolean sortMid = false; //Sort pairs according to midpoint
-	protected boolean keepHDF5 = false; // Keep the hdf5 file for future use
 	protected double NCISMinBinFrac = 0.75; //NCIS estimates begin using the lower fraction of the genome (based on total tags)
 	
 	    
@@ -117,11 +114,6 @@ public class ExptConfig {
 				loadRead2 = !Args.parseFlags(args).contains("noread2");
 				sortMid = Args.parseArgs(args).contains("sortMid");
 				
-				//////////////////////
-				//keep the HDF5Cache file?
-				////////////////////////
-				keepHDF5 = Args.parseFlags(args).contains("keepHDF5Cache");
-				
 				////////////////////////
 				//Read limit parameters
 				////////////////////////
@@ -175,41 +167,33 @@ public class ExptConfig {
 				ArrayList<String> exptTags = new ArrayList<String>();
 				for(String s : ap.getKeys()){
 					if(!exptTags.contains(s)){
-			        	if(s.contains("expt") || s.contains("ctrl")){
-			        		String datatype = "";
-			        		String condrep = "";
-			        		boolean signal = true;
-			        		if(s.contains("ctrl"))
-			        			signal = false;
-			        		if(s.startsWith("rdb")){
-			        			datatype = "READDB";
-			        			condrep = s.replaceFirst("rdbexpt", "");
-			        			condrep = condrep.replaceFirst("rdbctrl", "");
-			        		}else{
-			        			datatype = fileFormat;
-			        			condrep = s.replaceFirst("expt", "");
-			        			condrep = condrep.replaceFirst("ctrl", "");
-			        		}
-			        		//Parse the condition & replicate names
-			        		String cond = condrep.split("-")[0];
-			        		if(cond.length()==0 || cond.equals(""))
-			        			cond = signal ? "experiment" : "DEFAULT";
-			        		String rep = condrep.split("-").length>1 ? condrep.split("-")[1] : "";
-			        		if(rep.length()==0 || rep.equals("")){
-			        			rep = signal ? "rep1" : "DEFAULT";
-			        		}
-			        		//Parse the file/rdb names
-			        		Collection<String> sourceNames = Args.parseStrings(args, s);
-			        		List<Pair<String,String>> sources = new ArrayList<Pair<String,String>>();
-			        		for(String n : sourceNames)
-			        			sources.add(new Pair<String,String>(n,datatype));
-			        		
-			        		expts.add(new ExptDescriptor("", "", cond, rep, signal, sources, perBaseReadLimit));			        		
-			        		exptTags.add(s);
-			        	}
-		        	}
+		        		if(s.contains("expt") || s.contains("ctrl")){
+		        			String condrep = "";
+		        			boolean signal = true;
+		        			if(s.contains("ctrl"))
+		        				signal = false;
+		        			condrep = s.replaceFirst("expt", "");
+		        			condrep = condrep.replaceFirst("ctrl", "");
+		        			//Parse the condition & replicate names
+		        			String cond = condrep.split("-")[0];
+		        			if(cond.length()==0 || cond.equals(""))
+		        				cond = signal ? "experiment" : "DEFAULT";
+		        			String rep = condrep.split("-").length>1 ? condrep.split("-")[1] : "";
+		        			if(rep.length()==0 || rep.equals("")){
+		        				rep = signal ? "rep1" : "DEFAULT";
+		        			}
+		        			//Parse the file names
+		        			Collection<String> sourceNames = Args.parseStrings(args, s);
+		        			List<Pair<String,String>> sources = new ArrayList<Pair<String,String>>();
+		        			for(String n : sourceNames)
+		        				sources.add(new Pair<String,String>(n,fileFormat));
+		        			
+		        			expts.add(new ExptDescriptor("", "", cond, rep, signal, sources, perBaseReadLimit));		        		
+		        			exptTags.add(s);
+		        		}
+	        		}
 				}
-		     
+			     
 				//Parse experiment design file
 				// Format: (tab separated)
 				// SrcName	Signal/Control   DataType   Condition   Replicate	[ExptType]	[per-base max]	[Target]
@@ -327,7 +311,6 @@ public class ExptConfig {
 	public boolean getLoadRead2(){return loadRead2;}
 	public boolean getLoadReads() {return loadReads;}
 	public boolean getLoadPairs(){return loadPairs;}
-	public boolean getKeepHDF5() {return keepHDF5;}
 	public double getNCISMinBinFrac(){return NCISMinBinFrac;}
 	
 	//Some accessors to allow modification of options after config .
@@ -376,10 +359,8 @@ public class ExptConfig {
 				"Experiments:\n" +
 				"\t--design <design file name>\n" +
 				"\tOR\n" +
-				"\t--expt/--ctrl <signal/control experiment file name> AND --format <SAM/BED/SCIDX/BOWTIE/NOVO>\n" +
-				"\tAND/OR" +
-				"\t--rdbexpt/--rdbctrl <signal/control ReadDB experiment identifier>\n" +
-				"\t\tNote that if you use --expt/--ctrl or --rdbexpt/--rdbctrl, you can specify the names of the experiment & replicate\n" +
+				"\t--expt/--ctrl <signal/control experiment file name> AND --format <SAM/BAM/BED>\n" +
+				"\t\tNote that if you use --expt/--ctrl, you can specify the names of the experiment & replicate\n" +
 				"\t\tdirectly in the argument. Here's an example: --exptConditionA-Rep1 somefile.bam\n" +
 				"Scaling control vs signal counts:\n" +
 				"\t--noscaling [flag to turn off auto estimation of signal vs control scaling factor]\n" +
@@ -399,7 +380,6 @@ public class ExptConfig {
 				"\t--noread2 [flag to ignore second reads in paired-end]\n" +
 				"\t--sortMid [flag to decide if sort read pairs by midpoint or 5' end (default: 5' end)]\n" +
 				"\t--loadpairs [flag to load pair-end reads]\n" + 
-				"\t--keepHDF5Cache" +
 				""));
 	}
 }

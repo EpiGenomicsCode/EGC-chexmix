@@ -10,10 +10,10 @@ import org.egc.core.deepseq.ReadHit;
 
 
 /**
- * HitLoaders load alignment hits & pairs from various sources, including ReadDB and various files.
+ * HitLoaders load alignment hits &amp; pairs from various file formats.
  * Five-prime positions and associated weight sums are loaded into ArrayLists. 
  * Pairing information is loaded if requested and if it exits. 
- * Where/how those hits & pairs are sourced is implementation-specific. 
+ * Where/how those hits &amp; pairs are sourced is implementation-specific. 
  * 
  * Five prime positions and weights are loaded into two collections of ArrayLists, where the collections are indexed by chromosome name. 
  * Within each chromosome's set, a 2D array of ArrayLists collects data for each strand.
@@ -82,7 +82,7 @@ public abstract class HitLoader {
 	 * Get all hits from the appropriate source (implementation-specific).
 	 * Loads single end data to the fivePrimePosList and fivePrimeCountsList.
 	 * Enforcing which reads to load (Type1 and/or Type2) is also implementation-specific. 
-	 * Loads pairs to hitPairsList (if requested & if they exist).
+	 * Loads pairs to hitPairsList (if requested &amp; if they exist).
 	 * 
 	 */
 	public abstract void sourceAllHits();
@@ -162,7 +162,9 @@ public abstract class HitLoader {
 	
 	/**
 	 * Add paired hit information to the list data structure
-	 * @param HitPair collection
+	 * @param chrom chromosome name
+	 * @param strand strand character
+	 * @param pairs HitPair collection
 	 */
 	protected void addPairs(String chrom, char strand, Collection<HitPair> pairs){
 		if(!hasPairs){
@@ -176,7 +178,9 @@ public abstract class HitLoader {
 	}
 	/**
 	 * Add paired hit information to the list data structure
-	 * @param HitPair
+	 * @param chrom chromosome name
+	 * @param strand strand character
+	 * @param pair HitPair
 	 */
 	protected void addPair(String chrom, char strand, HitPair pair){
 		if(!hasPairs){
@@ -211,7 +215,7 @@ public abstract class HitLoader {
 	}
 	
 	/**
-	 * Perform any necessary cleanup. For ReadDB, this means close the clients.
+	 * Perform any necessary cleanup.
 	 */
 	public abstract void cleanup();
 	

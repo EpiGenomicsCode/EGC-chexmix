@@ -11,7 +11,8 @@ import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Region;
 
 /**
- * This interface is intended to integrate the HDF5HitLoader and HDF5HitCache into the whole project
+ * Interface for hit caching implementations.
+ * Provides region-based access to alignment hits, pairs, and aggregate counts.
  * 
  * @author Jianyu Yang
  *
