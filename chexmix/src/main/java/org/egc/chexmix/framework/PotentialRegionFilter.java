@@ -23,7 +23,7 @@ import org.egc.core.genome.Genome;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.location.ChromosomeGenerator;
+import org.egc.core.genome.location.ChromosomeGenerator;
 import org.egc.core.gseutils.RealValuedHistogram;
 import org.egc.chexmix.events.BindingManager;
 import org.egc.chexmix.events.BindingModel;

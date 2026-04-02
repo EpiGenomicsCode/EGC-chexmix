@@ -29,7 +29,7 @@ import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.gsebricks.verbs.location.ChromosomeGenerator;
+import org.egc.core.genome.location.ChromosomeGenerator;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.gseutils.RealValuedHistogram;
 import org.egc.core.math.stats.StatUtil;
