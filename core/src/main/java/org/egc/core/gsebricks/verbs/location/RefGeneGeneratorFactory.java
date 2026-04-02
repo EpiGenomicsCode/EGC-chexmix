@@ -1,22 +1,15 @@
-/*
- * Created on Sep 28, 2006
- */
 package org.egc.core.gsebricks.verbs.location;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Gene;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.GeneFactory;
-import org.egc.core.gsebricks.RegionExpanderFactory;
 import org.egc.core.gsebricks.verbs.Expander;
 
 /**
- * @author tdanford
- * 
- * Note: Gene annotation loading from database tables has been removed.
- * This stub remains to satisfy AnnotationLoader's factory registration.
+ * Stub: Gene annotation loading from database tables has been removed.
+ * This class remains to satisfy AnnotationLoader's factory registration.
  */
-public class RefGeneGeneratorFactory implements RegionExpanderFactory<Gene>, GeneFactory {
+public class RefGeneGeneratorFactory {
     private String type;
 
     public RefGeneGeneratorFactory() {
