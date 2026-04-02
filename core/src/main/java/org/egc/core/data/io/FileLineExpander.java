@@ -1,7 +1,9 @@
 /*
  * Created on Mar 9, 2006
  */
-package org.egc.core.gsebricks.verbs;
+package org.egc.core.data.io;
+
+import org.egc.core.gseutils.Expander;
 
 import java.util.*;
 import java.io.*;
@@ -15,7 +17,7 @@ public class FileLineExpander implements Expander<File,String> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gsebricks.verbs.Expander#execute(null)
+     * @see org.egc.core.gseutils.Expander#execute(null)
      */
     public Iterator<String> execute(File f) {
         try {

@@ -1,7 +1,7 @@
 /*
  * Created on Mar 3, 2006
  */
-package org.egc.core.gsebricks.verbs.location;
+package org.egc.core.genome.location;
 
 import java.util.*;
 

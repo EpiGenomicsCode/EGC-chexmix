@@ -22,7 +22,7 @@ import org.egc.core.deepseq.stats.PoissonBackgroundModel;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.location.ChromosomeGenerator;
+import org.egc.core.genome.location.ChromosomeGenerator;
 import org.egc.core.math.probability.NormalDistribution;
 import org.egc.core.projects.seed.features.EnrichedFeature;
 import org.egc.core.projects.seed.features.Feature;

@@ -11,7 +11,7 @@ import java.util.List;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Gene;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.Expander;
+import org.egc.core.gseutils.Expander;
 
 //TODO: Add GTF loader
 public class TranscriptFileExpander <X extends Region> 

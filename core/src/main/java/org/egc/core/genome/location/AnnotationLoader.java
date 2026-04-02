@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import org.egc.core.data.io.parsing.TranscriptFileExpander;
 import org.egc.core.genome.Genome;
-import org.egc.core.gsebricks.verbs.Expander;
-import org.egc.core.gsebricks.verbs.location.RefGeneGeneratorFactory;
+import org.egc.core.gseutils.Expander;
+import org.egc.core.genome.location.RefGeneGeneratorFactory;
 
 
 public class AnnotationLoader {

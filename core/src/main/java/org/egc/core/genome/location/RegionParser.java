@@ -1,14 +1,14 @@
 /*
  * Created on Mar 9, 2006
  */
-package org.egc.core.gsebricks.verbs.location;
+package org.egc.core.genome.location;
 
 import java.util.regex.*;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.NamedRegion;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.Mapper;
+import org.egc.core.gseutils.Mapper;
 
 
 /**
@@ -37,7 +37,7 @@ public class RegionParser implements Mapper<String,Region> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gsebricks.verbs.Filter#execute(null)
+     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public Region execute(String input) {
         String[] array = input.split("\\s+");

@@ -7,7 +7,7 @@ import java.io.*;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.Species;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.location.ChromRegionIterator;
+import org.egc.core.genome.location.ChromRegionIterator;
 
 
 /**

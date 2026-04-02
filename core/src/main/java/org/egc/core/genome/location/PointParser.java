@@ -1,10 +1,10 @@
-package org.egc.core.gsebricks.verbs.location;
+package org.egc.core.genome.location;
 
 import java.util.regex.*;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Point;
-import org.egc.core.gsebricks.verbs.Mapper;
+import org.egc.core.gseutils.Mapper;
 
 
 public class PointParser implements Mapper<String,Point> {
@@ -26,7 +26,7 @@ public class PointParser implements Mapper<String,Point> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gsebricks.verbs.Filter#execute(null)
+     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public Point execute(String input) {
         String[] array = input.split("\\s+");

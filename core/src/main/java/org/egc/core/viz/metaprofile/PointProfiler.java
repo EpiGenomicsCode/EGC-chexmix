@@ -5,7 +5,7 @@
 package org.egc.core.viz.metaprofile;
 
 import org.egc.core.genome.location.Point;
-import org.egc.core.gsebricks.verbs.Filter;
+import org.egc.core.gseutils.Filter;
 
 public interface PointProfiler<PointClass extends Point, ProfileClass extends Profile> extends Filter<PointClass,ProfileClass> { 
 	public BinningParameters getBinningParameters();

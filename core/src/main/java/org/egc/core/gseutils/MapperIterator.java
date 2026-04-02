@@ -1,4 +1,4 @@
-package org.egc.core.gsebricks.verbs;
+package org.egc.core.gseutils;
 
 import java.util.*;
 

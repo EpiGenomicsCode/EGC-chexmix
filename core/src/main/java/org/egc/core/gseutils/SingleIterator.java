@@ -1,4 +1,4 @@
-package org.egc.core.gsebricks.iterators;
+package org.egc.core.gseutils;
 import java.util.*;
 
 public class SingleIterator<A> implements Iterator<A> {

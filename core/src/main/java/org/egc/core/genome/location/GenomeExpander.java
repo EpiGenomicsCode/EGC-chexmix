@@ -1,11 +1,11 @@
-package org.egc.core.gsebricks.verbs.location;
+package org.egc.core.genome.location;
 
 import java.util.*;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.NamedRegion;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.Expander;
+import org.egc.core.gseutils.Expander;
 
 
 /**

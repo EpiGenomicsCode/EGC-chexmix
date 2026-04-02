@@ -8,8 +8,8 @@ import org.egc.core.data.motifdb.CountsBackgroundModel;
 import org.egc.core.data.motifdb.MarkovBackgroundModel;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.genome.sequence.RandomSequenceGenerator;
-import org.egc.core.gsebricks.verbs.motifs.WeightMatrixScoreProfile;
-import org.egc.core.gsebricks.verbs.motifs.WeightMatrixScorer;
+import org.egc.core.data.motifdb.WeightMatrixScoreProfile;
+import org.egc.core.data.motifdb.WeightMatrixScorer;
 import org.egc.core.gseutils.Pair;
 
 

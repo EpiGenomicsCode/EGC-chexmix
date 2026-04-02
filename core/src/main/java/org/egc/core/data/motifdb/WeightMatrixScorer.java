@@ -1,4 +1,4 @@
-package org.egc.core.gsebricks.verbs.motifs;
+package org.egc.core.data.motifdb;
 
 import java.util.*;
 
@@ -6,8 +6,8 @@ import org.egc.core.data.motifdb.*;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gsebricks.verbs.Expander;
-import org.egc.core.gsebricks.verbs.Mapper;
+import org.egc.core.gseutils.Expander;
+import org.egc.core.gseutils.Mapper;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.math.stats.StatUtil;
 

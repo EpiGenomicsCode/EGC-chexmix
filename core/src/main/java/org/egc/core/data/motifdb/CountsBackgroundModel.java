@@ -17,7 +17,7 @@ import org.egc.core.genome.location.NamedRegion;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gsebricks.verbs.location.ChromRegionIterator;
+import org.egc.core.genome.location.ChromRegionIterator;
 import org.egc.core.gseutils.NotFoundException;
 import org.egc.core.gseutils.Pair;
 

@@ -2,7 +2,7 @@
  * Author: tdanford
  * Date: May 22, 2008
  */
-package org.egc.core.gsebricks.verbs.motifs;
+package org.egc.core.data.motifdb;
 
 import org.egc.core.data.motifdb.WeightMatrix;
 

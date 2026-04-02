@@ -1,9 +1,9 @@
-package org.egc.core.gsebricks.verbs.location;
+package org.egc.core.genome.location;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Gene;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gsebricks.verbs.Expander;
+import org.egc.core.gseutils.Expander;
 
 /**
  * Stub: Gene annotation loading from database tables has been removed.

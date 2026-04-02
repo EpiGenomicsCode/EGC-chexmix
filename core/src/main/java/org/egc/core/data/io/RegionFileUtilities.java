@@ -23,11 +23,11 @@ import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gsebricks.verbs.location.ChromRegionIterator;
-import org.egc.core.gsebricks.verbs.location.PointParser;
-import org.egc.core.gsebricks.verbs.location.RegionParser;
-import org.egc.core.gsebricks.verbs.location.StrandedPointParser;
-import org.egc.core.gsebricks.verbs.location.StrandedRegionParser;
+import org.egc.core.genome.location.ChromRegionIterator;
+import org.egc.core.genome.location.PointParser;
+import org.egc.core.genome.location.RegionParser;
+import org.egc.core.genome.location.StrandedPointParser;
+import org.egc.core.genome.location.StrandedRegionParser;
 import org.egc.core.gseutils.Pair;
 
 

@@ -1,4 +1,4 @@
-package org.egc.core.gsebricks.verbs;
+package org.egc.core.gseutils;
 
 /** a filter maps an object of type A to an object of type
  * B or to null
@@ -29,7 +29,7 @@ public interface Filter<A,B> {
         public Identity() {}
 
         /* (non-Javadoc)
-         * @see org.egc.core.gsebricks.verbs.Filter#execute(java.lang.Object)
+         * @see org.egc.core.gseutils.Filter#execute(java.lang.Object)
          */
         public X execute(X a) {
             return a;

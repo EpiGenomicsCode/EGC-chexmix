@@ -1,4 +1,4 @@
-package org.egc.core.gsebricks.verbs;
+package org.egc.core.gseutils;
 
 /** a Mapper is a filter whose output cannot be null, eg it
  *  maps an object of type A to an object of type B
@@ -28,7 +28,7 @@ public interface Mapper<A,B> extends Filter<A,B> {
         public Identity() {}
 
         /* (non-Javadoc)
-         * @see org.egc.core.gsebricks.verbs.Mapper#execute(java.lang.Object)
+         * @see org.egc.core.gseutils.Mapper#execute(java.lang.Object)
          */
         public X execute(X a) {
             return a;

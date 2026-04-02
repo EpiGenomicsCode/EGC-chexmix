@@ -6,9 +6,13 @@ package org.egc.core.data.io;
 import java.io.*;
 import java.util.*;
 
-import org.egc.core.gsebricks.iterators.SingleIterator;
-import org.egc.core.gsebricks.verbs.*;
-import org.egc.core.gseutils.*;
+import org.egc.core.gseutils.SingleIterator;
+import org.egc.core.gseutils.Expander;
+import org.egc.core.gseutils.ExpanderIterator;
+import org.egc.core.gseutils.Filter;
+import org.egc.core.gseutils.Mapper;
+import org.egc.core.gseutils.MapperIterator;
+import org.egc.core.gseutils.Pair;
 
 
 /**
@@ -20,7 +24,7 @@ public class FASTALoader implements Expander<File,Pair<String,String>> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gsebricks.verbs.Expander#execute(java.lang.Object)
+     * @see org.egc.core.gseutils.Expander#execute(java.lang.Object)
      */
     public Iterator<Pair<String, String>> execute(File a) {
         SingleIterator<File> fitr = new SingleIterator<File>(a);
