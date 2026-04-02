@@ -37,7 +37,7 @@ Command to test that Gradle works
 
 #### Dependencies:
 1. ChExMix requires Java 11+.
-2. You need [MEME](http://meme-suite.org/) installed and being available in $PATH if you want to find subtypes using motif (tested with MEME version 4.11.3).
+2. You need [MEME](http://meme-suite.org/) installed and being available in $PATH if you want to find subtypes using motif (tested with MEME version 5.5.8).
 2. ChExMix loads all data to memory, so you will need a lot of available memory if you are running analysis over many conditions or large datasets.
 
 Running ChExMix
@@ -46,15 +46,11 @@ Note that ChExMix performs a lot of EM optimization of binding events along the 
 
 Running from a jar file:
 
-```{r, engine='sh', count_lines}
+```
 java -Xmx20G -jar chexmix.jar <options - see below>
 ```
 
-In the above, the “-Xmx20G” argument tells java to use up to 20GB of memory. If you have installed source code from github, and if all classes are in your CLASSPATH, you can run ChExMix as follows:
-
-```{r, engine='sh', count_lines}
-java -Xmx20G org.seqcode.projects.chexmix.ChExMix <options - see below>
-```
+In the above, the “-Xmx20G” argument tells java to use up to 20GB of memory.
 
 Options (Required/important options are in __bold__)
 
