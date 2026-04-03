@@ -1,11 +1,11 @@
-package org.egc.core.math.diff;
+package org.egc.chexmix.math.diff;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.egc.core.deepseq.events.BindingEvent;
-import org.egc.core.deepseq.events.BindingManager;
+import org.egc.chexmix.events.BindingEvent;
+import org.egc.chexmix.events.BindingManager;
 import org.egc.core.deepseq.experiments.ControlledExperiment;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
@@ -266,7 +266,7 @@ public class CountsDataset {
 		if(s.length==scaling.length)
 			scaling = s;
 		else{
-			System.err.println("Error: scaling array has incompatible length."); System.exit(1);
+			throw new IllegalArgumentException("Error: scaling array has incompatible length.");
 		}
 	}
 	/**

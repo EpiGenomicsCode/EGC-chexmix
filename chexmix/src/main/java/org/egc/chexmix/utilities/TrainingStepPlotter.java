@@ -14,7 +14,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.egc.core.deepseq.composite.CompositeTagDistribution;
+import org.egc.chexmix.composite.CompositeTagDistribution;
 import org.egc.chexmix.composite.CompositeModelComponent;
 import org.egc.chexmix.composite.ProteinDNAInteractionModel;
 

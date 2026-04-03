@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.egc.core.math.diff.Normalization;
+import org.egc.chexmix.math.diff.Normalization;
 
 import org.egc.chexmix.composite.CompositeTagDistribution;
 import org.egc.chexmix.composite.ProteinDNAInteractionModel;

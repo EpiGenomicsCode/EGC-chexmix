@@ -1,4 +1,4 @@
-package org.egc.core.math.diff;
+package org.egc.chexmix.math.diff;
 
 import java.io.FileWriter;
 import java.io.IOException;

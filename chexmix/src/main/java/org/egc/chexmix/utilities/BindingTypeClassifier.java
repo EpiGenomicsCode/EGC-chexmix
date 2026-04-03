@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.egc.core.data.io.RegionFileUtilities;
-import org.egc.core.deepseq.composite.CompositeTagDistribution;
+import org.egc.chexmix.composite.CompositeTagDistribution;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.deepseq.experiments.ExptConfig;
@@ -48,19 +48,20 @@ public class BindingTypeClassifier {
 	
 	public void execute(){
 		
-		CompositeTagDistribution maker = new CompositeTagDistribution(points, exptMan, win, true);		
 		for(ExperimentCondition cond : exptMan.getConditions()){
+			CompositeTagDistribution maker = new CompositeTagDistribution(points, cond, win, true);
 			String compositeFileName = "out_composite."+cond.getName()+".txt";
-			maker.printProbsToFile(cond, compositeFileName);
+			maker.printProbsToFile(compositeFileName);
 		}
 		
-		for(ExperimentCondition cond : exptMan.getConditions()){			
+		for(ExperimentCondition cond : exptMan.getConditions()){
+			CompositeTagDistribution maker = new CompositeTagDistribution(points, cond, win, true);
 			String KLFileName = "out_kl."+cond.getName()+".txt";
 			try {
 				FileWriter fout = new FileWriter(KLFileName);
 				for (StrandedPoint p : points){
-					double[] watsonTags = maker.getPointWatson(p, cond);
-					double[] crickTags = maker.getPointCrick(p,  cond);
+					double[] watsonTags = maker.getPointWatson(p);
+					double[] crickTags = maker.getPointCrick(p);
 					if (smoothWin >0){	// Smooth tags
 						watsonTags = StatUtil.gaussianSmoother(watsonTags, smoothWin);
 						crickTags = StatUtil.gaussianSmoother(crickTags, smoothWin);
@@ -100,7 +101,7 @@ public class BindingTypeClassifier {
         						rcurrW[i]=currW[modelWidth-i-1];
         						rcurrC[i]=currC[modelWidth-i-1];
         					}
-					
+				
         					//Calc KL
         					currLogKL += StatUtil.log_KL_Divergence(modelW, rcurrW) + StatUtil.log_KL_Divergence(rcurrW, modelW);
         					currLogKL += StatUtil.log_KL_Divergence(modelC, rcurrC) + StatUtil.log_KL_Divergence(rcurrC, modelC);

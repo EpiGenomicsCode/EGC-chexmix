@@ -173,8 +173,6 @@ public class ChExMixConfig {
 		this.args=arguments; 
 		this.isGPS=isGPS;
 		ArgParser ap = new ArgParser(args);
-		System.out.println(ap.getKeys());
-		System.out.println(gconfig.getSequenceGenerator().usingLocalFiles());
 		if(args.length==0 || ap.hasKey("h")){
 			printHelp=true;			
 		}else{

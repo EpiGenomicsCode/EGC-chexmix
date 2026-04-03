@@ -1,4 +1,4 @@
-package org.egc.core.math.diff;
+package org.egc.chexmix.math.diff;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +29,9 @@ public class CountsDatasetLoader {
 		
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name");System.exit(1);}
+			if(!pFile.isFile()){
+				throw new IllegalArgumentException("Invalid file name: "+filename);
+			}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        
 	        //First line should have experiment labels (condition:replicate)

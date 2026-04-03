@@ -13,7 +13,7 @@ import java.util.Random;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.egc.core.data.io.RegionFileUtilities;
 import org.egc.core.deepseq.ReadHit;
-import org.egc.core.deepseq.events.BindingModel;
+import org.egc.chexmix.events.BindingModel;
 import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.deepseq.experiments.ExptConfig;
 import org.egc.core.deepseq.experiments.Sample;
