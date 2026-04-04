@@ -7,17 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.NumberAxis;
-import org.egc.core.genome.Genome;
-import org.egc.core.genome.location.Region;
-import org.egc.core.gseutils.models.Model;
-import org.egc.core.ml.regression.DataFrame;
-import org.egc.core.ml.regression.DataRegression;
 import org.egc.core.viz.scatter.ScatterPlot;
 
 import Jama.Matrix;
@@ -36,7 +29,9 @@ public class ExperimentScaler {
 	
 	/**
 	 * Calculate a scaling ratio by fitting a line through the hit count pairs.
-	 * Using a 10Kbp window, this is the same as PeakSeq with Pf=0
+	 * Using a 10Kbp window, this is the same as PeakSeq with Pf=0.
+	 *
+	 * Fits the no-intercept OLS model x = beta * y, i.e. beta = sum(x*y) / sum(y^2).
 	 * @return double 
 	 */
 	public double scalingRatioByRegression(List<Float> setA, List<Float> setB){
@@ -45,18 +40,21 @@ public class ExperimentScaler {
 			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
 			System.exit(1);
 		}
-			
-		List<PairedCounts> scalingData = new ArrayList<PairedCounts>();
-		for(int x=0; x<setA.size(); x++)
-			scalingData.add(new PairedCounts(setA.get(x), setB.get(x)));                
 
-		//Scaling ratio via Tim's regression                                                                                                                               
-        DataFrame df = new DataFrame(PairedCounts.class, scalingData.iterator());                                                                      
-        DataRegression r = new DataRegression(df, "x~y - 1");                                                                                                               
-        r.calculate();                                                                                                                                                      
-        Map<String, Double> map = r.collectCoefficients();                                                                                                                  
-        scalingRatio = map.get("y");                                                                                                                                        
-        return(scalingRatio);
+		double sumXY = 0, sumYY = 0;
+		for(int i=0; i<setA.size(); i++){
+			double x = setA.get(i);
+			double y = setB.get(i);
+			sumXY += x * y;
+			sumYY += y * y;
+		}
+		if (sumYY == 0) {
+		    throw new IllegalArgumentException("setB contains only zeros; cannot compute scaling ratio");
+		}
+		else {
+			scalingRatio = sumXY / sumYY;
+		}
+		return(scalingRatio);
 	}
 	
 	/**
@@ -393,7 +391,7 @@ public class ExperimentScaler {
 	 * @author mahony
 	 *
 	 */
-	public class PairedCounts extends Model implements Comparable<PairedCounts>{
+	public class PairedCounts implements Comparable<PairedCounts>{
 		public Double x,y;
 		public PairedCounts(double a, double b){
 			x=a;
