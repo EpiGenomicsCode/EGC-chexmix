@@ -80,24 +80,4 @@ public class SimpleMotifAligner {
 		return (numer/denom);
 	}
 	
-	// Load frequency matrix
-	public static void main(String[] args) throws NumberFormatException, IOException{		
-		ArgParser ap = new ArgParser(args);	
-		String filename = ap.getKeyValue("motfile");
-		FreqMatrixImport motifImport = new FreqMatrixImport();
-		List<WeightMatrix> motifsets = new ArrayList<WeightMatrix>();
-		motifsets.addAll(motifImport.readTransfacMatricesAsFreqMatrices(filename));
-		
-		int mlength=6;
-		SimpleMotifAligner aligner = new SimpleMotifAligner(mlength);
-		// Do pair wise-alignment
-		for (int i=0; i < motifsets.size(); i++){
-			for (int j=i+1; j< motifsets.size(); j++){
-				Pair<Integer,Double> forAlignment = aligner.align(motifsets.get(i),motifsets.get(j));
-				Pair<Integer,Double> revAlignment = aligner.align(motifsets.get(i),WeightMatrix.reverseComplement(motifsets.get(j)));
-				System.out.println(motifsets.get(i).getName()+"\t"+motifsets.get(j).getName()+"\tforward: offset= "+forAlignment.car()+"\tmaxscore= "+forAlignment.cdr()/mlength);
-				System.out.println(motifsets.get(i).getName()+"\t"+motifsets.get(j).getName()+"\treverse: offset= "+revAlignment.car()+"\tmaxscore= "+revAlignment.cdr()/mlength);
-			}
-		}
-	}
 }

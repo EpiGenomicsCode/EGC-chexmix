@@ -11,53 +11,6 @@ public class UShuffle {
 
 	public static String title = "uShuffle: a useful tool for shuffling biological sequences while preserving the k-let counts";
 
-	public static void main(String[] argv) {
-		String string = null;
-		int n = 1, k = 2;
-		long seed = new Date().getTime();
-
-		try {
-			for (int i = 0; i < argv.length; i++) {
-				if (argv[i].compareTo("-s") == 0) {
-					if (i + 1 < argv.length && argv[i + 1].charAt(0) != '-')
-						string = argv[++i];
-					else
-						print_help_and_exit();
-				} else if (argv[i].compareTo("-n") == 0) {
-					if (i + 1 < argv.length && argv[i + 1].charAt(0) != '-')
-						n = Integer.parseInt(argv[++i]);
-					else
-						print_help_and_exit();
-				} else if (argv[i].compareTo("-k") == 0) {
-					if (i + 1 < argv.length && argv[i + 1].charAt(0) != '-')
-						k = Integer.parseInt(argv[++i]);
-					else
-						print_help_and_exit(); 
-				} else if (argv[i].compareTo("-seed") == 0) {
-					if (i + 1 < argv.length && argv[i + 1].charAt(0) != '-')
-						seed = Integer.parseInt(argv[++i]);
-					else
-						print_help_and_exit();
-				}
-			}
-		} catch (NumberFormatException nfe) {
-			print_help_and_exit();
-		}
-		if (n <= 0 || string == null)
-			print_help_and_exit();
-
-		UShuffle us = new UShuffle();
-		us.set_randfunc(new Random(seed));
-		char[] s = string.toCharArray();
-		char[] t = new char[s.length];
-
-		us.shuffle1(s, s.length, k);
-		for (int i = 0; i < n; i++) {
-			us.shuffle2(t);
-			System.out.println(new String(t));
-		}
-	}
-
 	private static void print_help_and_exit() {
 		System.out.println(title + "\nOptions:\n" +
 				"  -s <string>     specifies the sequence\n" +

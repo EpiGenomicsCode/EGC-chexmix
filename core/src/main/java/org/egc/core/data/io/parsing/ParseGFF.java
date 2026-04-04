@@ -7,15 +7,6 @@ import java.net.URLEncoder;
 
 public class ParseGFF implements Iterator { 
     
-    public static void main(String[] args) { 
-        try { 
-            ParseGFF parser = new ParseGFF(new File(args[0]));
-            parser.printLines(System.out);
-        } catch(IOException ie) { 
-            ie.printStackTrace();
-        }
-    }
-    
     private BufferedReader br;    
     private int lineNum;
     private String line, filename;

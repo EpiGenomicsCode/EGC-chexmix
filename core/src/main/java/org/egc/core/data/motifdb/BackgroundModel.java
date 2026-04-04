@@ -445,18 +445,4 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
     return matcher.matches();
   }
 
-  /**
-   ***********************************************************************
-   */
-
-  public static void main(String[] args) {
-    for (int i = 1; i <= 3; i++) {
-      for (int j = 0; j < Math.pow(4, i); j++) {
-        String seq = BackgroundModel.int2seq(j, i);
-        System.out.println(j + "\t" + seq + "\t" + BackgroundModel.seq2int(seq) + " " + isKmerValid(seq));
-        assert (j == BackgroundModel.seq2int(seq));
-      }
-    }
-    System.out.println(isKmerValid("GN"));
-  }
 }

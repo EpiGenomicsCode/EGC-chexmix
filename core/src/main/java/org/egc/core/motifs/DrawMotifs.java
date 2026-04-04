@@ -25,10 +25,6 @@ import org.egc.core.gseutils.*;
 
 public class DrawMotifs {
 
-    public static void main(String args[]) throws Exception {
-
-    }
-    
 	/**
 	 * Print a motif logo
 	 * @param wm

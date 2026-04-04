@@ -540,21 +540,6 @@ public class TagProbabilityDensity {
 		return tpd;
 	}
 	
-	//Main
-	public static void main(String[] args){
-		int win = 200;
-		TagProbabilityDensity td = new TagProbabilityDensity(win);
-		td.loadGaussianDistrib(-6, 1, 6, 1);
-		
-		double[] watson = td.getWatsonProbabilities();
-		double[] crick = td.getCrickProbabilities();
-		for(int w=0; w<win; w++){
-			int pos = (w+td.getLeft());
-			System.out.println(pos+"\t"+watson[w]+"\t"+crick[w]);
-		}
-	}
-	
-	
 	@SuppressWarnings("unchecked")
 	public static final List<Pair<Integer, Double>> defaultChipSeqEmpiricalDistribution =
 	        Arrays.asList(new Pair<Integer,Double>(-250, 2.1453194893774935E-4),

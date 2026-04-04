@@ -1656,26 +1656,4 @@ public class StatUtil {
 		return sum;		
 	}// end of normalize method
 
-	 public static void main(String[] args){
-//		 System.out.println( Math.log10(binomialPValue(0.0, 11.0+0.0)));
-//		 System.out.println( Math.log10(binomialPValue(3.3, 24.0+3.3)));
-//		 Poisson poisson = new Poisson(0/0.0, new DRand());
-//		 System.out.println(poisson.pdf(1));
-		System.out.println(hyperGeometricCDF_cache(2,1000,900,2));
-//		System.out.println(hyperGeometricCDF_cache(2405,41690+40506,41690,2405+2));
-//		System.out.println(hyperGeometricCDF(3298,41690+40506,41690,3298+2));
-//		System.out.println(hyperGeometricCDF(2405,41690+40506,41690,2405+2));
-//		System.out.println(hyperGeometricCDF_cache(2,41690+40506,40506,3298+2));
-//		System.out.println(hyperGeometricCDF_cache(2,41690+40506,40506,2405+2));
-//		System.out.println(hyperGeometricCDF_cache(3,8+7,8,3+2));
-//		System.out.println(hyperGeometricCDF_cache(2,8+7,7,3+2));
-//		 System.out.println(log10_hyperGeometricCDF_cache_appr(1,41690+40506,1,5000));
-//		for (int i=10700;i<=10800;i=i+10){
-////			System.out.println(Math.log10(hyperGeometricPDF_cache_BIG(99,41690+40506,40506,i+100).doubleValue()));
-////			System.out.println(log10_hyperGeometricPDF_cache(i,41690+40506,40506,i+100));
-//			System.out.println(i+"\t"+log10_hyperGeometricCDF_cache_appr(i,40876+40873,40873,i+31761));
-////			System.out.println(log10_hyperGeometricCDF_cache(99,41690+40506,40506,i+5000));
-//			System.out.println("-----------");
-//		}
-	}
 }//end of StatUtil class 41690 / 40506

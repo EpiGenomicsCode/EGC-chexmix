@@ -249,35 +249,6 @@ public class BindingModel {
 		}
 	}
 	
-	
-	/**
-	 * Command-line interface to load a BindingModel from a file
-	 * Example running: <br>
-	 * <tt>
-	 * --in oct4.shear.ext.txt --out out_oct4.txt --out_smooth out_oct4_smooth.txt
-	 * </tt>
-	 */
-	public static void main(String[] args){
-		if(Args.parseArgs(args).contains("in")){
-			String infile = Args.parseString(args, "in", null);
-			String outfile = Args.parseString(args, "out", "out.model");
-			String outfile_smooth = Args.parseString(args, "out_smooth", "out_smooth.model");
-			File pFile = new File(infile);
-			if(!pFile.isFile()){
-				System.err.println("Invalid file name");
-				System.exit(1);
-			}
-	        //File loaded, make a BindingModel
-	        BindingModel model = new BindingModel(pFile);
-	        model.printToFile(outfile);
-	        
-	        model.smooth(SMOOTHING_STEPSIZE, SMOOTHING_AVG_PTS);
-	        model.printToFile(outfile_smooth);
-		}else{
-			System.out.println("Usage: BindingModel --in GPSfileName --out outfile");
-		}
-	}
-	
 	public List<Pair<Integer, Double>> getEmpiricalDistribution() {
 		List<Pair<Integer, Double>> newDist = new ArrayList<Pair<Integer, Double>> ();
 		for (Pair<Integer, Double> p: empiricalDistribution)

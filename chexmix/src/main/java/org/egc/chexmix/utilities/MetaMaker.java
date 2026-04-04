@@ -129,17 +129,4 @@ public class MetaMaker {
 		}
 	}
 	
-	
-	public static void main(String[] args) {
-		GenomeConfig gconfig = new GenomeConfig(args);
-		ChExMixConfig cconfig = new ChExMixConfig(gconfig, args);
-		ExptConfig econfig = new ExptConfig(gconfig.getGenome(), args);
-		ExperimentManager manager = new ExperimentManager(econfig);
-		MetaConfig mconfig = new MetaConfig(args);
-		
-		MetaMaker maker = new MetaMaker(cconfig, gconfig, mconfig, manager);
-		
-		maker.run();
-	}
-	
 }

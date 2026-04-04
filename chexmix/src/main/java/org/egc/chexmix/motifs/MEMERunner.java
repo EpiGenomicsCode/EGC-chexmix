@@ -238,49 +238,5 @@ public class MEMERunner {
 		return parsed;
 	}
 	
-	/**
-	 * This main method is only for testing the PotentialRegionFilter
-	 * @param args
-	 */
-	public static void main(String[] args){
-		ArgParser ap = new ArgParser(args);
-		GenomeConfig gcon = new GenomeConfig(args);
-		ExptConfig econ = new ExptConfig(gcon.getGenome(), args);
-		ChExMixConfig config = new ChExMixConfig(gcon, args);
-		List<Region> analysisRegs;
-		List<String> analysisSeqs=new ArrayList<String>();
-		
-		if(config.helpWanted() || !ap.hasKey("peaks")){
-			System.err.println("MEMERunner:");
-			System.err.println(config.getArgsList());
-			System.err.println("\t--peaks <regions to analyze with MEME\n");
-		}else{
-			ExperimentManager manager = new ExperimentManager(econ);
-			
-			if(ap.hasKey("peaks")){
-				analysisRegs = RegionFileUtilities.loadRegionsFromFile(Args.parseString(args, "peaks", null), config.getGenome(), 100);
-				
-				SequenceGenerator seqgen = new SequenceGenerator();
-				for(Region r : analysisRegs){
-					String seq = seqgen.execute(r);
-					seq = seq.toLowerCase();
-					//System.out.println(">"+r.toString()+"\n"+seq);
-					analysisSeqs.add(seq);
-				}
-				
-				MEMERunner runner = new MEMERunner(config, manager);
-				Pair<List<WeightMatrix>,List<WeightMatrix>> matrices = runner.execute(analysisSeqs, "TEST", false);
-				
-				//Test alignment
-				SimpleMotifAligner aligner = new SimpleMotifAligner(6);
-				//for(int i=1; i<matrices.size(); i++){
-					//Pair<Integer,Double> alignment = aligner.align(matrices.cdr().get(0), matrices.cdr().get(1));
-					//System.out.println("0 vs 1\t"+alignment.car()+"\t"+alignment.cdr());
-					//System.out.println("0 vs "+i+"\t"+alignment.car()+"\t"+alignment.cdr());
-				//}
-			}
-			manager.close();
-		}
-	}
 }
 	

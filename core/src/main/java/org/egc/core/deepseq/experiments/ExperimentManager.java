@@ -251,8 +251,6 @@ public class ExperimentManager {
 	public ExperimentCondition getNamedCondition(String name){return namedCondition.get(name);}
 	public int getNumConditions(){return conditions.size();}
 	
-	
-
 	/**
 	 * Call any cleanup methods
 	 */
@@ -262,32 +260,6 @@ public class ExperimentManager {
 		}
 		for(Sample s : samples){
 			s.close();
-		}
-	}
-	
-	/**
-	 * This main method is only for testing the ExperimentManager system
-	 * @param args
-	 */
-	public static void main(String[] args){
-		GenomeConfig gconfig = new GenomeConfig(args);
-		ExptConfig econfig = new ExptConfig(gconfig.getGenome(), args);
-		if(econfig.helpWanted()){
-			System.err.println("ExperimentManager debugging:");
-			System.err.println(econfig.getArgsList());
-		}else{
-			ExperimentManager manager = new ExperimentManager(econfig);
-			
-			System.err.println("ExptTypes:\t"+manager.getExptTypes().size());
-			for(ExperimentType t : manager.getExptTypes()){
-				System.err.println("ExptType "+t.getName()+":\t#Experiments:\t"+t.getExptTypeExperiments().size());
-			}
-			System.err.println("ExptTargets:\t"+manager.getTargets().size());
-			for(ExperimentTarget t : manager.getTargets()){
-				System.err.println("Target "+t.getName()+":\t#Experiments:\t"+t.getTargetExperiments().size());
-			}
-			
-			manager.close();
 		}
 	}
 }

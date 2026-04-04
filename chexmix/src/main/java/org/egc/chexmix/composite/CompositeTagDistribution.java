@@ -165,36 +165,5 @@ public class CompositeTagDistribution {
 		}
 	}
 
-	
-	//Main method to make new composite distributions
-	public static void main(String[] args){
-		GenomeConfig gcon = new GenomeConfig(args);
-		ExptConfig econ = new ExptConfig(gcon.getGenome(), args);
-		if(args.length==0){
-			System.err.println("CompositeTagDistribution:"+
-					"\t--cpoints <stranded point file>"+
-					"\t--cwin <window around points>"+
-					"Genome:" +
-					"\t--species <Species;Genome>\n" +
-					"\tOR\n" +
-					"\t--geninfo <genome info file> AND --seq <fasta seq directory>\n" +
-					"Experiment Design File:\n" +
-					"\t--design <file name>\n");			
-		}else{
-			ExperimentManager manager = new ExperimentManager(econ);
-			
-			int w = Args.parseInteger(args, "cwin", 400);
-			String pFile = Args.parseString(args, "cpoints", null);
-			List<StrandedPoint> pts = RegionFileUtilities.loadStrandedPointsFromFile(gcon.getGenome(), pFile);
-						
-			for(ExperimentCondition cond : manager.getConditions()){
-				CompositeTagDistribution maker = new CompositeTagDistribution(pts, cond, w, true);
-				String compositeFileName = "out_composite."+cond.getName()+".txt";
-				maker.printProbsToFile(compositeFileName);
-			}
-			manager.close();
-		}
-	}
-	
 }
 

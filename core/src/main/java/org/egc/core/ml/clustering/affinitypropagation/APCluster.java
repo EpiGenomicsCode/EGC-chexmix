@@ -263,25 +263,4 @@ public class APCluster {
 		}
 	}
 	
-	/**
-	 * argv[0] = similarities file
-	 * argv[1] = preference value
-	 * argv[2] = results file
-	 * argv[3] = indices file
-	 * @param argv
-	 * @throws Exception
-	 */
-	public static void main(String[] argv) throws Exception {
-		FileSimilarityMeasure<Clusterable> fsm = new FileSimilarityMeasure<Clusterable>(argv[0],
-				"\t", Double.valueOf(argv[1]).doubleValue());
-		double netsim = cluster(fsm.objects(), fsm, 0.5, 50, 500);
-		PrintStream outstream = new PrintStream(argv[2]);
-		fsm.printExemplars(outstream);
-		outstream.println();
-		fsm.printAssignments(outstream);
-		outstream.println();
-		outstream.println("Net Similarity: "+netsim);
-		fsm.printClusterCenterIndices(new PrintStream(argv[3]));
-	}
-
 }

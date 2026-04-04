@@ -325,30 +325,4 @@ public class IOUtil {
 		}
 	}//end of write2stream method
 
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		String f = "/Users/gio_fou/Desktop/skatotest.txt";
-		
-		String[][] rr = readFile(f, ",", -1);
-		
-		int[][][] a = {
-		             { {3, 2, 1, 5, 3, 6, 2, 7}, 
-				       {1, 6, 3, 7, 2, 1} },
-			           { {-2, -4, 2, 1, 5}, 
-					     {0, 4, 2, -1} },				       
-		            };
-		String delim = ",";
-		
-		int[][] b = { {3, 1, 2, 5}, {4, -1, 4} };
-		
-		write2file(f, Utils.prim2ref(a), delim);
-		write2stream(System.out, Utils.prim2ref(b));
-		
-	}
-
 }

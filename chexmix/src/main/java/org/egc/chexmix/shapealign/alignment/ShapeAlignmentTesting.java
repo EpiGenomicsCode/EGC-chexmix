@@ -616,18 +616,4 @@ public class ShapeAlignmentTesting {
 		return aligned;
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException{
-		
-		ShapeAlignConfig shapeAlignConf = new ShapeAlignConfig(args);	
-		GenomeConfig gconf = new GenomeConfig(args);
-		ExptConfig econf = new ExptConfig(gconf.getGenome(), args);	
-		econf.setPerBaseReadFiltering(false);
-		ExperimentManager manager = new ExperimentManager(econf);
-
-		ShapeAlignmentTesting profile = new ShapeAlignmentTesting(shapeAlignConf, gconf, manager); 	
-		profile.execute();
-		//profile.printErrorRate();
-		
-		manager.close();		
-	}
 }

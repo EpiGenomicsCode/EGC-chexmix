@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.egc.core.data.io.LineByLineFileReader;
-import org.egc.core.data.io.Points2RegionsConverter;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.data.motifdb.WeightMatrixImport;
 import org.egc.core.genome.Species;
@@ -747,42 +746,4 @@ public class PWMParser {
         return m;
     }
 
-  public static void main(String[] args) {
-//    int length = 6;
-//    String aLine = " a  1.0000 0.9487 0.5641 0.0000 0.0000 0.7949"; 
-//    String cLine = " c  0.0000 0.0513 0.2051 0.3590 1.0000 0.0000"; 
-//    String gLine = " g  0.0000 0.0000 0.1538 0.2436 0.0000 0.0641";
-//    String tLine = " t  0.0000 0.0000 0.0769 0.3974 0.0000 0.1410"; 
-
-    String[] rows = new String[] {
-        "01    17    22    17    43",
-        "02    12    41    35    12",
-        "03    34     9    56     0",
-        "04    11    48    33     9",
-        "05     6    80     8     6",
-        "06     4    39    57     0",
-        "07    91     0     3     6",
-        "08     0     0     0   100",
-        "09     0     0     0   100",
-        "10    85     0     6     8",
-        "11    45    13    16    26",
-        "12     7    37    49     6",
-        "13    18    24    35    24",
-        "14    33    33    33     0",
-        "15    25    25    25    25",
-        "16    17    17    22    43"
-    };
-    
-    try {
-//      PWMParser.parsePWM(length, aLine, cLine, gLine, tLine);
-      DoubleMatrix2D rawPWM = PWMParser.parsePWM(rows);
-      System.out.println(rawPWM.toString());
-    }
-    catch (IOException ioex) {
-      logger.fatal(ioex);
-    }
-    catch (ParseException pex) {
-      logger.fatal(pex); 
-    }
-  }
 }

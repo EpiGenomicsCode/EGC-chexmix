@@ -30,23 +30,6 @@ public class BackgroundModelIO {
   public static final Pattern BG_LINE_COUNTS_PATTERN = Pattern.compile(BG_LINE_COUNTS_REG_EX);
   public static final Pattern BG_LINE_PROBS_PATTERN = Pattern.compile(BG_LINE_PROBS_REG_EX);
 
-  public static void main(String[] args) {
-  	try {
-  		MarkovBackgroundModel mbg = BackgroundModelIO.parseMarkovBackgroundModel("mm8.back", Genome.findGenome("mm8"));
-  		BackgroundModelIO.printProbsToFile(mbg, "foo.back");
-  	}
-  	catch (NotFoundException nfex) {
-  	  nfex.printStackTrace();
-  	}
-  	catch (ParseException pex) {
-  		pex.printStackTrace();
-  	}
-  	catch (IOException ioex) {
-  		ioex.printStackTrace();
-  	}
-  	System.exit(0);
-  }
-  
   /**
    * Parse the lines of the background model file and initialize the frequency
    * based model
