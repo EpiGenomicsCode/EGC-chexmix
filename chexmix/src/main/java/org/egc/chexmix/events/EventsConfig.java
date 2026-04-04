@@ -123,8 +123,11 @@ public class EventsConfig {
 				//Gene Annotations
 				Collection<String> tfiles = Args.parseStrings(args,"transcripts");
 				Collection<String> dbgenes = Args.parseStrings(args,"dbgenes");
-				for(String s:dbgenes)
-		        	geneAnnotations.add(new AnnotationLoader(gen, s, "refGene", maxAnnotDistance, annotOverlapOnly));
+				if(!dbgenes.isEmpty()){
+					System.err.println("\nError: --dbgenes is no longer supported (database-backed gene annotation has been removed).");
+					System.err.println("Use --transcripts <file> to provide gene annotations from a local transcript file (GFF/GTF/BED) instead.");
+					System.exit(1);
+				}
 		        for(String s:tfiles)
 		        	geneAnnotations.add(new AnnotationLoader(gen, s, "file", maxAnnotDistance, annotOverlapOnly));
 				if(geneAnnotations.size()>0)
@@ -222,8 +225,7 @@ public class EventsConfig {
 				"\t--eventsaretxt [add .txt to events file extension]\n"+
 				"\t--nobed [do not print BED files]" +				
 				"Annotations:\n" +
-				"\t--transcripts <transcripts file>\n" +
-				"\t--dbgenes refGene\n" +
+				"\t--transcripts <transcripts file (GFF/GTF/BED)>\n" +
 				""));
 	}
 }

@@ -15,7 +15,6 @@ import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Point;
 import org.egc.core.gseutils.Mapper;
 import org.egc.core.gseutils.MapperIterator;
-import org.egc.core.genome.location.GenomeExpander;
 import org.egc.core.viz.metaprofile.*;
 import org.egc.core.viz.paintable.PaintableChangedEvent;
 import org.egc.core.viz.paintable.PaintableChangedListener;

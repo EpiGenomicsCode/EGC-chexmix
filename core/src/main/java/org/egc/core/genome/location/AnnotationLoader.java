@@ -7,8 +7,6 @@ import java.util.Iterator;
 import org.egc.core.data.io.parsing.TranscriptFileExpander;
 import org.egc.core.genome.Genome;
 import org.egc.core.gseutils.Expander;
-import org.egc.core.genome.location.RefGeneGeneratorFactory;
-
 
 public class AnnotationLoader {
 
@@ -16,18 +14,16 @@ public class AnnotationLoader {
 	protected String sourceName;
 	protected int maxAnnotDist=50000;
 	protected boolean overlapOnly=false;
-	
+
 	public AnnotationLoader(Genome gen, String name, String type, int maxAnnotDist, boolean overlapOnly){
-		sourceName = name;
-		this.maxAnnotDist=maxAnnotDist;
-		this.overlapOnly=overlapOnly;
-		
-		if(type.equals("refGene")){
-			annotExpander = (new RefGeneGeneratorFactory()).getExpander(gen);
-		}else if (type.equals("file")){
-			annotExpander = new TranscriptFileExpander(gen, name);
-		}
-	}
+	    sourceName = name;
+	    this.maxAnnotDist=maxAnnotDist;
+	    this.overlapOnly=overlapOnly;
+	
+	    if (type.equals("file")){
+	        annotExpander = new TranscriptFileExpander(gen, name);
+	    }
+	}	
 
 	public Collection<Region> getAnnotations(Region coords){
 		ArrayList<Region> results = new ArrayList<Region>();

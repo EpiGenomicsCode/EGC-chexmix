@@ -14,14 +14,10 @@ import java.util.Map;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.NumberAxis;
 import org.egc.core.genome.Genome;
-import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Region;
 import org.egc.core.gseutils.models.Model;
 import org.egc.core.ml.regression.DataFrame;
 import org.egc.core.ml.regression.DataRegression;
-import org.egc.core.projects.seed.DomainFinder;
-import org.egc.core.projects.seed.SEEDConfig;
-import org.egc.core.projects.seed.features.Feature;
 import org.egc.core.viz.scatter.ScatterPlot;
 
 import Jama.Matrix;
@@ -389,152 +385,6 @@ public class ExperimentScaler {
 			return(-1.0); //scaling not yet performed
 		double ctrlCount = expt.getControl()==null ? expt.getSignal().getHitCount() : expt.getControl().getHitCount();
 		return(expt.getControlScaling() / (expt.getSignal().getHitCount()/ctrlCount));
-	}
-	
-	
-	
-	/**
-	 * Main for testing
-	 * @param args
-	 */
-	public static void main(String[] args){
-		
-		GenomeConfig gconfig = new GenomeConfig(args);
-		ExptConfig econfig = new ExptConfig(gconfig.getGenome(), args);	
-		SEEDConfig sconfig = new SEEDConfig(gconfig, args);
-		
-		if(gconfig.helpWanted()){
-			System.err.println("ExperimentScaler:");
-			System.err.println(gconfig.getArgsList()+"\n"+econfig.getArgsList());
-		}else{
-			ExperimentManager exptMan = new ExperimentManager(econfig);
-			
-			
-			//Test
-			System.err.println("Conditions:\t"+exptMan.getConditions().size());
-			for(ExperimentCondition c : exptMan.getConditions()){
-				System.err.println("Condition "+c.getName()+":\t#Replicates:\t"+c.getReplicates().size());
-			}
-			for(ExperimentCondition c : exptMan.getConditions()){
-				for(ControlledExperiment r : c.getReplicates()){
-					System.err.println("Condition "+c.getName()+":\tRep "+r.getName());
-					if(r.getControl()==null)
-						System.err.println("\tSignal:\t"+r.getSignal().getHitCount());
-					else
-						System.err.println("\tSignal:\t"+r.getSignal().getHitCount()+"\tControl:\t"+r.getControl().getHitCount());
-				}
-			}
-			
-			ExperimentScaler scaler = new ExperimentScaler();
-			
-			//Potential regions reqd by PeakSeq method
-			DomainFinder potentialFilter = new DomainFinder(gconfig, econfig, sconfig, exptMan);
-			Map<ExperimentCondition, List<Feature>> featuresByCond = potentialFilter.execute();
-			List<Feature> potentials = new ArrayList<Feature>();
-			for(ExperimentCondition ec : exptMan.getConditions())
-				potentials.addAll(featuresByCond.get(ec));
-			System.out.println("\t"+potentials.size()+" potential regions.\n");
-			
-			//Generate the data structures for calculating scaling factors
-			//Window size loaded by ExptConfig option --scalewin
-			Genome genome = econfig.getGenome();
-			Map<Sample, List<Float>> sampleWindowCounts = new HashMap<Sample, List<Float>>();
-			Map<Sample, List<Float>> noPotSampleWindowCounts = new HashMap<Sample, List<Float>>();
-			for(Sample samp : exptMan.getSamples()){
-				List<Float> currSampCounts = new ArrayList<Float>();
-				List<Float> noPotCurrSampCounts = new ArrayList<Float>();
-				for(String chrom:genome.getChromList()) {
-		            int chrlen = genome.getChromLength(chrom);
-		            for (int start = 1; start  < chrlen - econfig.getScalingSlidingWindow(); start += econfig.getScalingSlidingWindow()) {
-		                Region r = new Region(genome, chrom, start, start + econfig.getScalingSlidingWindow());
-		                currSampCounts.add(samp.countHits(r));
-		                
-		                boolean overlapsPotentials=false;
-		                for(Feature f : potentials){
-		                	Region p = f.getCoords();
-		                	if(r.overlaps(p)){
-		                		overlapsPotentials=true; break;
-		                	}
-		                }
-		                if(!overlapsPotentials)
-		                	noPotCurrSampCounts.add(samp.countHits(r));
-		            }
-		        }
-				sampleWindowCounts.put(samp, currSampCounts);
-				noPotSampleWindowCounts.put(samp, noPotCurrSampCounts);
-			}
-			System.out.println("Sliding window size for scaling methods: "+econfig.getScalingSlidingWindow());
-			System.out.println("\tNumbers of windows:\tAll="+sampleWindowCounts.get(exptMan.getSamples().get(0)).size()+"\tnoPotenials="+noPotSampleWindowCounts.get(exptMan.getSamples().get(0)).size()+"\n");
-			
-			
-			//Hit ratios
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex()){
-							double hitRatio = sampA.getHitCount()/sampB.getHitCount();
-							System.out.println("HitRatio\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+hitRatio);
-						}
-				}
-			}
-			
-			//Median
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("Median\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioByMedian(sampleWindowCounts.get(sampA), sampleWindowCounts.get(sampB)));
-				}
-			}
-			
-			//Regression on full dataset (i.e. PeakSeq using Pf=0)
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("Regression\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioByRegression(sampleWindowCounts.get(sampA), sampleWindowCounts.get(sampB)));
-				}
-			}
-			
-			//SES
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("SES\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioBySES(sampleWindowCounts.get(sampA), sampleWindowCounts.get(sampB)));
-				}
-			}
-			
-			//NCIS
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("NCIS\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioByNCIS(sampleWindowCounts.get(sampA), sampleWindowCounts.get(sampB), null,econfig.getNCISMinBinFrac()));
-				}
-			}
-			
-			//Regression after filtering out potential regions (i.e. PeakSeq using Pf=1)
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("PeakSeq\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioByRegression(noPotSampleWindowCounts.get(sampA), noPotSampleWindowCounts.get(sampB)));
-				}
-			}
-			
-			//Total tag normalization followed by NCIS
-			for(Sample sampA : exptMan.getSamples()){ 
-				if(sampA.isSignal()){
-					for(Sample sampB : exptMan.getSamples())
-						if(sampA!=null && sampB!=null && sampA.getIndex() != sampB.getIndex())
-							System.out.println("HitRatioAndNCIS\t"+sampA.getName()+" vs "+sampB.getName()+"\t"+scaler.scalingRatioByHitRatioAndNCIS(sampleWindowCounts.get(sampA), sampleWindowCounts.get(sampB),
-									sampA.getHitCount(), sampB.getHitCount(), null,econfig.getNCISMinBinFrac()));
-				}
-			}
-			
-			exptMan.close();
-		}
 	}
 	
 	
