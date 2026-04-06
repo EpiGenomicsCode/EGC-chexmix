@@ -95,16 +95,14 @@ public class ChExMix {
 		}else if (chexconfig.getDistribA()!=null){
 			File pFile = new File(chexconfig.getDistribA());
 			if(!pFile.isFile()){
-				System.err.println("\nCannot find read distribution file: "+chexconfig.getDistribA());
-				System.exit(1);
+				throw new RuntimeException("\nCannot find read distribution file: "+chexconfig.getDistribA());
 			}
 			tagProbDensities.add(new TagProbabilityDensity(pFile));
 			
 			if (chexconfig.getDistribB()!=null){
 				File pbFile = new File(chexconfig.getDistribB());
-				if(!pFile.isFile()){
-					System.err.println("\nCannot find read distribution file: "+chexconfig.getDistribB());
-					System.exit(1);
+				if(!pbFile.isFile()){
+					throw new RuntimeException("\nCannot find read distribution file: "+chexconfig.getDistribB());
 				}
 				tagProbDensities.add(new TagProbabilityDensity(pbFile));				
 			}		
@@ -345,7 +343,7 @@ public class ChExMix {
 			
 			//Just a test to see if we've loaded all conditions
 			if(manager.getConditions().size()==0){
-				System.err.println("No experiments specified. Use --expt or --design options."); System.exit(1);
+				System.err.println("No experiments specified. Use --expt or --design options."); throw new RuntimeException("No experiments specified. Use --expt or --design options.");
 			}
 			
 			ChExMix chex = new ChExMix(gcon, econ, evconfig, config, xlconfig,sc, manager);
