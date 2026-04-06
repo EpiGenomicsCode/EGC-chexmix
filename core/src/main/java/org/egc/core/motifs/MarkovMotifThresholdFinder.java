@@ -31,7 +31,7 @@ public class MarkovMotifThresholdFinder {
 	public MarkovMotifThresholdFinder(WeightMatrix wm, MarkovBackgroundModel markov, int numSim){
 		numTest=numSim;
 		motif=wm;
-		if(wm==null){System.err.println("No motif specified");System.exit(1);}
+		if(wm==null){throw new IllegalArgumentException("No motif specified");}
 		back=markov;		
 	}
 	
@@ -42,7 +42,7 @@ public class MarkovMotifThresholdFinder {
 	
 	//Find the motif-scoring threshold for the given specificity rate
 	public double execute(double Sp){
-		if(Sp<0 || Sp>1){System.err.println("Invalid Sp value in MarkovMotifThreshold");System.exit(1);}
+		if(Sp<0 || Sp>1){throw new IllegalArgumentException("Invalid Sp value in MarkovMotifThreshold: " + Sp);}
 
 		WeightMatrixScorer scorer = new WeightMatrixScorer(motif);
 		double bestThres=0.0;

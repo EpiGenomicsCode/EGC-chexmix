@@ -270,8 +270,7 @@ public class HitCache implements HitCacheInterface{
 				currLoader.resetLoader();
 			}catch(OutOfMemoryError e){
 				e.printStackTrace();
-				System.err.println("Ran out of memory during hit loading; try re-running with increased -Xmx option.");
-				System.exit(1);
+				throw new RuntimeException("Ran out of memory during hit loading; try re-running with increased -Xmx option.", e);
 			}
 		}
 		
@@ -385,8 +384,7 @@ public class HitCache implements HitCacheInterface{
 			if(cacheInLocalFiles){
 				loadCachedChrom(r.getChrom());
 			}else{
-				System.err.println("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-				System.exit(1);
+				throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
 			}
 		}
 		
@@ -445,8 +443,7 @@ public class HitCache implements HitCacheInterface{
 				if(cacheInLocalFiles){
 					loadCachedChrom(r.getChrom());
 				}else{
-					System.err.println("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-					System.exit(1);
+					throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
 				}
 			}
 			String chr = r.getChrom();
@@ -488,8 +485,7 @@ public class HitCache implements HitCacheInterface{
 				if(cacheInLocalFiles) {
 					loadCachedChrom(r.getChrom());
 				}else {
-					System.err.println("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-					System.exit(1);
+					throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
 				}
 			}
 			String chr = r.getChrom();
@@ -548,8 +544,7 @@ public class HitCache implements HitCacheInterface{
 			if(cacheInLocalFiles){
 				loadCachedChrom(r.getChrom());
 			}else{
-				System.err.println("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-				System.exit(1);
+				throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
 			}
 		}
 		
@@ -949,8 +944,7 @@ public class HitCache implements HitCacheInterface{
 		//Generate local cache directories
 		localCacheDir =  new File(econfig.getFileCacheDirName()+File.separator+localCacheFileBase);
 		if(!localCacheDir.mkdirs()){
-			System.err.println("Unable to make local cache directories");
-			System.exit(1);
+			throw new RuntimeException("Unable to make local cache directories: " + localCacheDir.getAbsolutePath());
 		}
 		
 		//Save arrays to binary files
@@ -1443,8 +1437,7 @@ public class HitCache implements HitCacheInterface{
 	private void initializeBackground(){
 		perBaseBack=new BackgroundCollection();
 		if(econfig.getGenome()==null){
-			System.err.println("Genome chromosome lengths not specified. Please define using --geninfo.");
-			System.exit(1);
+			throw new RuntimeException("Genome chromosome lengths not specified. Please define using --geninfo.");
 		}
 		perBaseBack.addBackgroundModel(
 				new PoissonBackgroundModel(-1, econfig.getPerBaseLogConf(), getHitCount(), econfig.getGenome().getGenomeLength(), econfig.getMappableGenomeProp(), 1, '.', 1, true));

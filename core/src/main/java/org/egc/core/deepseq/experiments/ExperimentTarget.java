@@ -42,8 +42,7 @@ public class ExperimentTarget {
 			
 			rep.setTarget(this);
 			if(rep.getCondition()==null){
-				System.err.println("Null condition for replicate: "+rep.getName()+"\nExperimentManager should initialize conditions before targets!");
-				System.exit(1);
+				throw new RuntimeException("Null condition for replicate: "+rep.getName()+"\nExperimentManager should initialize conditions before targets!");
 			}else{
 				if(!conditions.contains(rep.getCondition()))
 					conditions.add(rep.getCondition());

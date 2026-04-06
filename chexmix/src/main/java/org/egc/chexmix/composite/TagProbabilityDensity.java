@@ -77,8 +77,7 @@ public class TagProbabilityDensity {
 		              if (p.cdr().doubleValue()>=0)	// should be non-negative value
 		            	  empiricalDistribution.add(p);
 		              else {
-		            	  System.err.println("\nTag distribution file contains negative probability(count) values!"); 
-		            	  System.exit(1);
+		            	  throw new RuntimeException("\nTag distribution file contains negative probability(count) values!"); 
 		              }
 	            }
 	        }
@@ -497,16 +496,14 @@ public class TagProbabilityDensity {
 	public static TagProbabilityDensity load(List<String> lines){
 		TagProbabilityDensity tpd=null;
 		if(lines.size()!=3){
-			System.err.println("TagProbabilityDensity.load(): Unexpected format");
-			System.exit(1);
+			throw new RuntimeException("TagProbabilityDensity.load(): Unexpected format");
 		}else{
 			Integer index, l, r, w;
 			String[] bits = lines.get(0).split(",");
 			String[] bits2 = lines.get(1).split(",");
 			String[] bits3 = lines.get(2).split(",");
 			if(!bits[0].equals("#TagProbabilityDensity") || bits.length!=5){
-				System.err.println("TagProbabilityDensity.load(): Unexpected format");
-				System.exit(1);
+				throw new RuntimeException("TagProbabilityDensity.load(): Unexpected format");
 			}
 			index = Integer.valueOf(bits[1]);
 			l = Integer.valueOf(bits[2]);
@@ -533,8 +530,7 @@ public class TagProbabilityDensity {
 					e.printStackTrace();
 				}
 			}else{
-				System.err.println("TagProbabilityDensity.load(): Unexpected format");
-				System.exit(1);
+				throw new RuntimeException("TagProbabilityDensity.load(): Unexpected format");
 			}
 		}
 		return tpd;

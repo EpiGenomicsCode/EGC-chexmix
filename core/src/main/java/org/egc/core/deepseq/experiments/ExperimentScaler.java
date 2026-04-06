@@ -37,8 +37,7 @@ public class ExperimentScaler {
 	public double scalingRatioByRegression(List<Float> setA, List<Float> setB){
 		double scalingRatio=1;
 		if(setA.size()!=setB.size()){
-			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
-			System.exit(1);
+			throw new IllegalArgumentException("ExperimentScaler is trying to scale lists of two different lengths");
 		}
 
 		double sumXY = 0, sumYY = 0;
@@ -64,8 +63,7 @@ public class ExperimentScaler {
 	public double scalingRatioByMedian(List<Float> setA, List<Float> setB){
 		double scalingRatio=1;
 		if(setA.size()!=setB.size()){
-			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
-			System.exit(1);
+			throw new IllegalArgumentException("ExperimentScaler is trying to scale lists of two different lengths");
 		}
 			
 		ArrayList<Float> ratios = new ArrayList<Float>();
@@ -86,8 +84,7 @@ public class ExperimentScaler {
 	public double scalingRatioBySES(List<Float> setA, List<Float> setB){
 		double scalingRatio=1;
 		if(setA.size()!=setB.size()){
-			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
-			System.exit(1);
+			throw new IllegalArgumentException("ExperimentScaler is trying to scale lists of two different lengths");
 		}
 		
 		float totalA=0, totalB=0;
@@ -132,8 +129,7 @@ public class ExperimentScaler {
 		double scalingRatio=1;
 		double totalAtScaling=0;
 		if(setA.size()!=setB.size()){
-			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
-			System.exit(1);
+			throw new IllegalArgumentException("ExperimentScaler is trying to scale lists of two different lengths");
 		}
 		
 		float numPairs = (float)setA.size();
@@ -255,8 +251,7 @@ public class ExperimentScaler {
 		double scalingRatio=1;
 		double totalAtScaling=0;
 		if(setA.size()!=setB.size()){
-			System.err.println("ExperimentScaler is trying to scale lists of two different lengths");
-			System.exit(1);
+			throw new IllegalArgumentException("ExperimentScaler is trying to scale lists of two different lengths");
 		}
 		
 		//First normalize using total reads

@@ -926,7 +926,7 @@ public class BindingMixture {
         		} catch(Exception e){
                     System.err.println("ERROR: Exception when analyzing region "+rr.toString());
                     e.printStackTrace(System.err);
-                    System.exit(-1);
+                    throw new RuntimeException("Exception when analyzing region "+rr.toString(), e);
                 }
             }
 		}

@@ -215,8 +215,7 @@ public class ProteinDNAInteractionModel {
 		ProteinDNAInteractionModel mod = null;
 		String[] bits = lines.get(0).split(",");
 		if(bits.length!=4 || !bits[0].equals("#ProteinDNAInteractionModel")){
-			System.err.println("ProteinDNAInteractionModel.load(): Unexpected format");
-			System.exit(1);
+			throw new RuntimeException("ProteinDNAInteractionModel.load(): Unexpected format");
 		}else{
 			Integer modWidth = Integer.valueOf(bits[1]);
 			Integer centerOff = Integer.valueOf(bits[2]);
@@ -269,8 +268,7 @@ public class ProteinDNAInteractionModel {
 			}
 			//Make the model
 			if(cs==null || back==null){
-				System.err.println("ProteinDNAInteractionModel.load(): CS or Back components cannot be empty");
-				System.exit(1);
+				throw new RuntimeException("ProteinDNAInteractionModel.load(): CS or Back components cannot be empty");
 			}
 			mod = new ProteinDNAInteractionModel(con, modWidth, centerOff, compWatson, compCrick, cs, back, xls);
 		}

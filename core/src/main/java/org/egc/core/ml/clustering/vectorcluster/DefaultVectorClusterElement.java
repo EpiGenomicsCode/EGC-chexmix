@@ -48,42 +48,42 @@ public class DefaultVectorClusterElement implements VectorClusterElement {
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#dimension()
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#dimension()
      */
     public int dimension() {
         return array.length;
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#getTag(java.lang.String)
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#getTag(java.lang.String)
      */
     public String getTag(String k) {
         return tags.get(k);
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#getValue(int)
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#getValue(int)
      */
     public double getValue(int i) {
         return array[i];
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#hasTag(java.lang.String)
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#hasTag(java.lang.String)
      */
     public boolean hasTag(String k) {
         return tags.containsKey(k);
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#isMissingValue(int)
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#isMissingValue(int)
      */
     public boolean isMissingValue(int i) {
         return array[i] == null;
     }
 
     /* (non-Javadoc)
-     * @see org.seqcode.gse.clustering.ClusterElement#numMissingValues()
+     * @see org.egc.core.ml.clustering.vectorcluster.VectorClusterElement#numMissingValues()
      */
     public int numMissingValues() {
         int c = 0;

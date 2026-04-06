@@ -42,7 +42,7 @@ public class NoiseComponent {
 				uniformDistrib=false;
 				distrib[h] = noiseDistrib[h];
 				if(distrib[h].length!=regionWidth){
-					System.err.println("Noise distribution in "+reg+" is not appropriate width."); System.exit(1);
+					throw new RuntimeException("Noise distribution in "+reg+" is not appropriate width.");
 				}
 			}
 		}

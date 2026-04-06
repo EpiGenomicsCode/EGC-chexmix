@@ -43,7 +43,7 @@ public class Genome{
     	dbid = -1;
     	chromsByName = new HashMap<String,ChromosomeInfo>();
     	chromsByID = new HashMap<Integer,ChromosomeInfo>();
-    	if(!chrLengths.isFile()){System.err.println("Invalid genome info file name");System.exit(1);}
+    	if(!chrLengths.isFile()){throw new RuntimeException("Invalid genome info file: " + chrLengths.getAbsolutePath());}
         BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(chrLengths));

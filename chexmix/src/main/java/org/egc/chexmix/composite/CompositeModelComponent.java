@@ -95,8 +95,7 @@ public class CompositeModelComponent  implements Comparable<CompositeModelCompon
 		CompositeModelComponent cmc = null;
 		String[] bits = line.split(",");
 		if(bits.length!=10 || !bits[0].equals("#CompositeModelComponent")){
-			System.err.println("CompositeModelComponent.load(): Unexpected format");
-			System.exit(1);
+			throw new RuntimeException("CompositeModelComponent.load(): Unexpected format");
 		}else{
 			Integer index = Integer.valueOf(bits[1]);
 			String label = bits[2];
@@ -108,8 +107,7 @@ public class CompositeModelComponent  implements Comparable<CompositeModelCompon
 			Double sumRW = Double.valueOf(bits[8]);
 			Double sumRC = Double.valueOf(bits[9]);
 			if(!tagDensities.containsKey(tagDistIndex)){
-				System.err.println("CompositeModelComponent.load(): TagProbabilityDensity not defined");
-				System.exit(1);
+				throw new RuntimeException("CompositeModelComponent.load(): TagProbabilityDensity not defined");
 			}else{
 				TagProbabilityDensity tagDist = tagDensities.get(tagDistIndex);
 				cmc = new CompositeModelComponent(tagDist, pos, index, label, upPos, upPi);

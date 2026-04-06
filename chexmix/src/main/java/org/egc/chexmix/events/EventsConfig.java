@@ -112,8 +112,7 @@ public class EventsConfig {
 				if (modelFile != null){
 					File pFile = new File(modelFile);
 					if(!pFile.isFile()){
-						System.err.println("\nCannot find read distribution file: "+modelFile);
-						System.exit(1);
+						throw new RuntimeException("\nCannot find read distribution file: "+modelFile);
 					}
 					defaultModel = new BindingModel(pFile);
 				}
@@ -125,8 +124,7 @@ public class EventsConfig {
 				Collection<String> dbgenes = Args.parseStrings(args,"dbgenes");
 				if(!dbgenes.isEmpty()){
 					System.err.println("\nError: --dbgenes is no longer supported (database-backed gene annotation has been removed).");
-					System.err.println("Use --transcripts <file> to provide gene annotations from a local transcript file (GFF/GTF/BED) instead.");
-					System.exit(1);
+					throw new RuntimeException("--dbgenes is no longer supported. Use --transcripts <file> to provide gene annotations from a local transcript file (GFF/GTF/BED) instead.");
 				}
 		        for(String s:tfiles)
 		        	geneAnnotations.add(new AnnotationLoader(gen, s, "file", maxAnnotDistance, annotOverlapOnly));

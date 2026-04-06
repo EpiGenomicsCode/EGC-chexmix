@@ -145,8 +145,7 @@ public class XLAnalysisConfig {
 				if (modelFile != null){
 					File pFile = new File(modelFile);
 					if(!pFile.isFile()){
-						System.err.println("\nCannot find read distribution file: "+modelFile);
-						System.exit(1);
+						throw new RuntimeException("\nCannot find read distribution file: "+modelFile);
 					}
 					defaultCSModel = new TagProbabilityDensity(pFile); 
 				}

@@ -61,8 +61,7 @@ public class BindingModel {
 	                if (p.cdr().doubleValue()>=0)	// should be non-negative value
 	                	empiricalDistribution.add(p);
 	                else {
-	                	System.err.println("\nRead distribution file contains negative probability(count) value!"); 
-	                	System.exit(1);
+	                	throw new RuntimeException("\nRead distribution file contains negative probability(count) value!"); 
 	                }
 	              }
 	            }
@@ -155,8 +154,7 @@ public class BindingModel {
 			double val = p.cdr();
 			//if list is not properly sorted (need to make this into an exception)
 			if(index-last<0){
-				System.err.println("Incorrectly sorted binding read distribution data!"); 
-				System.exit(1);
+				throw new RuntimeException("Incorrectly sorted binding read distribution data!"); 
 			}
 			//if unevenly spaced, smooth linearly between values
 			if(index-last>1){

@@ -46,7 +46,7 @@ public class RegionFileUtilities {
 
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 			BufferedReader reader = new BufferedReader(new FileReader(pFile));
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -150,7 +150,7 @@ public class RegionFileUtilities {
     	
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 			BufferedReader reader = new BufferedReader(new FileReader(pFile));
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -197,7 +197,7 @@ public class RegionFileUtilities {
     	
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -239,7 +239,7 @@ public class RegionFileUtilities {
         RegionParser rparser = new RegionParser(gen);
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -289,7 +289,7 @@ public class RegionFileUtilities {
 		
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 			BufferedReader reader = new BufferedReader(new FileReader(pFile));
 			String line;
 			while((line = reader.readLine()) != null){
@@ -326,7 +326,7 @@ public class RegionFileUtilities {
     	
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -453,7 +453,7 @@ public class RegionFileUtilities {
 		
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid file name: "+filename);System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid file name: "+filename);}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -516,7 +516,7 @@ public class RegionFileUtilities {
     	
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid positive file name");System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid positive file name");}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -554,7 +554,7 @@ public class RegionFileUtilities {
     	
 		try{
 			File pFile = new File(filename);
-			if(!pFile.isFile()){System.err.println("Invalid positive file name");System.exit(1);}
+			if(!pFile.isFile()){throw new RuntimeException("Invalid positive file name");}
 	        BufferedReader reader = new BufferedReader(new FileReader(pFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {
@@ -592,7 +592,7 @@ public class RegionFileUtilities {
 		List<String> lines = new ArrayList<String>();
 		try{
 			File inFile = new File(filename);
-			if(!inFile.isFile()){System.err.println("Invalid file name");System.exit(1);}
+			if(!inFile.isFile()){throw new RuntimeException("Invalid file name");}
 	        BufferedReader reader = new BufferedReader(new FileReader(inFile));
 	        String line;
 	        while ((line = reader.readLine()) != null) {

@@ -21,11 +21,6 @@ import org.egc.core.gseutils.*;
  * 1-based genome
  */
 public class SequenceGenerator<X extends Region> {
-    // CHANGE: removed "implements Mapper<X,String>, SelfDescribingVerb"
-    // These are gsebricks interfaces. Nothing in ChExMix calls SequenceGenerator
-    // through the Mapper interface — it's always called directly via execute().
-    // Removing them breaks the gsebricks dependency. If this causes a compile
-    // error elsewhere, that caller should be updated to call execute() directly.
 
     private Genome genome;
     private static Map<Integer,String> cache;
@@ -66,8 +61,8 @@ public class SequenceGenerator<X extends Region> {
         this.genomePath = genomePath;
         File test = new File(genomePath);
         if(!test.exists()){
-            System.err.println("Genome sequence directory/file does not exist!");
-            System.exit(1);
+            throw new RuntimeException(
+                "Genome sequence directory/file does not exist: " + genomePath);
         }else{
             if(test.isFile())
                 genomePathIsFullGenomeFile=true;

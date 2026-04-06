@@ -29,14 +29,14 @@ public class DefaultCluster<X> implements Cluster<X> {
 	public void clear() { elmts.clear(); }
 
 	/* (non-Javadoc)
-	 * @see org.seqcode.gse.clustering.Cluster#getElements()
+	 * @see org.egc.core.ml.clustering.Cluster#getElements()
 	 */
 	public Set<X> getElements() {
 		return new HashSet<X>(elmts);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.seqcode.gse.clustering.Cluster#size()
+	 * @see org.egc.core.ml.clustering.Cluster#size()
 	 */
 	public int size() {
 		return elmts.size();
