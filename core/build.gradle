@@ -1,8 +1,8 @@
 // core/build.gradle
-plugins { id 'java' }
+plugins { id 'java-library' }
 group = 'org.egc'
 version = '1.0'
 dependencies {
-    // vendor JARs from seqcode-core/lib/ that survive the audit
-    implementation fileTree(dir: 'libs', include: ['**/*.jar'])
+    // vendor JARs — exposed via api so chexmix can use them directly
+    api fileTree(dir: 'libs', include: ['**/*.jar'])
 }
