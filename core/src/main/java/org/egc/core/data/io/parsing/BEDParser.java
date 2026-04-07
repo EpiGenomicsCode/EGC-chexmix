@@ -90,7 +90,6 @@ public class BEDParser implements Iterator<BEDLine> {
 			try {
 				br.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	}

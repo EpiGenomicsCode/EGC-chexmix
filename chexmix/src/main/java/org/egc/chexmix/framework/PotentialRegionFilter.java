@@ -156,7 +156,7 @@ public class PotentialRegionFilter {
             anyrunning = false;
             try {
                 Thread.sleep(5000);
-            } catch (InterruptedException e) { }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             for (i = 0; i < threads.length; i++) {
                 if (threads[i].isAlive()) {
                     anyrunning = true;

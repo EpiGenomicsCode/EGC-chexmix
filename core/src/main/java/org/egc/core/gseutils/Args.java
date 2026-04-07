@@ -22,8 +22,6 @@ import org.egc.core.genome.location.ChromRegionIterator;
  * @version 1.0
  */
 public class Args {
-    private static Map<String[], Species> orgs = new HashMap<String[], Species>();
-    private static Map<String[], Genome> genomes = new HashMap<String[], Genome>();
     private static Map<String[], Set<String>> flags = new HashMap<String[],Set<String>>();
     private static Map<String[], Set<String>> arguments = new HashMap<String[],Set<String>>();
     
@@ -265,45 +263,12 @@ public class Args {
         return output;
     }
 
-    /** Parses <tt>--species "Mus musculus;mm8"</tt> into a Species and Genome
-     *  Also parses <tt>--genome mm8</tt> or <tt>--gen mm8</tt> into a Genome and inferred Species
-     *  @see org.egc.core.genome.Species
-     *  @see org.egc.core.genome.Genome
+    /** Parses <tt>--species "Mus musculus;mm8"</tt> or <tt>--genome mm8</tt>.
+     *  NOTE: This was a database-backed lookup that is no longer functional
+     *  in local-only mode. Use --geninfo instead. Always returns null.
      */
     public static Pair<Species,Genome> parseGenome(String args[]) throws NotFoundException {
-        if (orgs.containsKey(args) && genomes.containsKey(args)) {
-            return new Pair<Species,Genome>(orgs.get(args),
-                                             genomes.get(args));
-        }
-
-        String speciesname = null, genomename = null;
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("--species")) {
-                String[] pieces = args[++i].split(";");
-                speciesname = pieces[0];
-                genomename = pieces[1];
-            }
-        }
-        Species org=null;
-        Genome genome=null;
-        if(speciesname==null && genomename==null){
-        	for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("--gen") || args[i].equals("--genome")) 
-                    genomename = args[++i];
-            }
-        	if(genomename==null)
-        		return null;
-        	else{
-        		genome =Genome.findGenome(genomename);
-        		org = new Species(genome.getSpeciesName());
-        	}
-        }else{
-        	org = new Species(speciesname);
-        	genome =Genome.findGenome(genomename);
-        }
-        orgs.put(args,org);
-        genomes.put(args,genome);
-        return new Pair<Species,Genome>(org,genome);
+        return null;
     }
 
     /** Takes a <tt>key</tt> that specifies the name of the command line option.  

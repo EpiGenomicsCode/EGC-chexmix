@@ -1,8 +1,5 @@
 package org.egc.core.genome.location;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +13,6 @@ import java.util.regex.Pattern;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.ChromosomeInfo;
-import org.egc.core.gseutils.Saveable;
 import org.egc.core.math.stats.StatUtil;
 
 
@@ -25,7 +21,7 @@ import org.egc.core.math.stats.StatUtil;
  * <i>Note</i>: We assume 1-based, inclusive coordinate.
  */
 
-public class Region implements Comparable<Region>, Saveable {
+public class Region implements Comparable<Region> {
 
   /**
    * regex for matching a region: newline-whitespace-one or more word chars or
@@ -139,21 +135,6 @@ public class Region implements Comparable<Region>, Saveable {
     chrom = c;
     this.start = start;
     this.end = end;
-  }
-
-
-  public Region(Genome g, DataInputStream dis) throws IOException {
-    this.g = g;
-    chrom = dis.readUTF();
-    start = dis.readInt();
-    end = dis.readInt();
-  }
-
-
-  public void save(DataOutputStream dos) throws IOException {
-    dos.writeUTF(chrom);
-    dos.writeInt(start);
-    dos.writeInt(end);
   }
 
 

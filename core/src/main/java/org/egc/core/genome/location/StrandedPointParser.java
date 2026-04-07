@@ -5,13 +5,12 @@ import java.util.regex.*;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gseutils.Mapper;
 
 
 /**
  * @author shaun
  */
-public class StrandedPointParser implements Mapper<String,Point> {
+public class StrandedPointParser {
     
     private static Pattern regPatt;
     
@@ -29,7 +28,6 @@ public class StrandedPointParser implements Mapper<String,Point> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public StrandedPoint execute(String input) {
         String[] array = input.split("\\s+");

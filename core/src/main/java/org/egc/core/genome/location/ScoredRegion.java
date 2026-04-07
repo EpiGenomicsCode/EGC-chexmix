@@ -1,14 +1,9 @@
 package org.egc.core.genome.location;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Saveable;
 
 
-public class ScoredRegion extends Region implements Saveable, Scored {
+public class ScoredRegion extends Region implements Scored {
     protected double score;
     
     public ScoredRegion(ScoredRegion copied) { 
@@ -19,16 +14,6 @@ public class ScoredRegion extends Region implements Saveable, Scored {
     public ScoredRegion (Genome g, String c, int start, int end, double score) {
         super(g,c,start,end);
         this.score = score;
-    }
-    
-    public ScoredRegion(Genome g, DataInputStream dis) throws IOException { 
-        super(g,dis);
-        score = dis.readDouble();
-    }
-    
-    public void save(DataOutputStream dos) throws IOException { 
-        super.save(dos);
-        dos.writeDouble(score);
     }
 
     public double getScore() {return score;}

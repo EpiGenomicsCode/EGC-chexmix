@@ -1,13 +1,9 @@
-/*
- * Author: tdanford
- * Date: Aug 12, 2008
- */
 package org.egc.core.viz.metaprofile;
 
 import org.egc.core.genome.location.Point;
-import org.egc.core.gseutils.Filter;
 
-public interface PointProfiler<PointClass extends Point, ProfileClass extends Profile> extends Filter<PointClass,ProfileClass> { 
+public interface PointProfiler<PointClass extends Point, ProfileClass extends Profile> { 
+	public ProfileClass execute(PointClass a);
 	public BinningParameters getBinningParameters();
 	public void cleanup();
 }

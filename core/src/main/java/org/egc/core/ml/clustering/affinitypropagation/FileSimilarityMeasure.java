@@ -42,7 +42,6 @@ public class FileSimilarityMeasure<X extends Clusterable> extends SimilarityMeas
 			}
 			System.err.println("Measures: "+valuemap.size());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

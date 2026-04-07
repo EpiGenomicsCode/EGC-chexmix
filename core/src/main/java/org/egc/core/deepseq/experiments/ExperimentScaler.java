@@ -229,7 +229,6 @@ public class ExperimentScaler {
 					fout2.write(bintot.get(d)+"\t"+mratios.get(d)+"\n");
 				fout2.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }
@@ -358,7 +357,6 @@ public class ExperimentScaler {
 					fout2.write(bintot.get(d)+"\t"+mratios.get(d)+"\n");
 				fout2.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }

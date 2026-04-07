@@ -1,12 +1,8 @@
 package org.egc.core.genome.location;
 
-
-import java.io.*;
-
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Saveable;
 
-public class NamedRegion extends Region implements Saveable, Named {
+public class NamedRegion extends Region implements Named {
     private String name;
     
     public NamedRegion(NamedRegion nr) { 
@@ -22,11 +18,6 @@ public class NamedRegion extends Region implements Saveable, Named {
         }
     }
     
-    public NamedRegion(Genome g, DataInputStream dis) throws IOException { 
-        super(g, dis);
-        name = dis.readUTF();
-    }
-    
     public NamedRegion(Region r, String n) {
         super(r);
         name = n;
@@ -35,11 +26,6 @@ public class NamedRegion extends Region implements Saveable, Named {
     public NamedRegion(Genome g, String c, int start, int end, String name) {
         super(g,c,start,end);
         this.name = name;
-    }
-    
-    public void save(DataOutputStream dos) throws IOException { 
-        super.save(dos);
-        dos.writeUTF(name);
     }
     
     public void setName(String n) { name = n; }

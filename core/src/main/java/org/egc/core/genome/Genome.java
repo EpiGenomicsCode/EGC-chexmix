@@ -5,16 +5,12 @@ import java.util.*;
 import java.io.*;
 
 import org.egc.core.genome.location.ChromosomeInfo;
-import org.egc.core.gseutils.*;
 
 /**
  * Genome represents one version (or genome build) of some species.
  * <i>Note</i>: We assume 1-based, inclusive coordinate.
  */
 public class Genome{
-	//static cache of all Genomes
-	private static Map<String,Genome> staticGenomes = new HashMap<String,Genome>();
-    private static Map<Integer, Genome> genomeids = new HashMap<Integer,Genome>();
     
     private Species species;
     private String version;
@@ -23,14 +19,6 @@ public class Genome{
     private Map<Integer,ChromosomeInfo> chromsByID;
     
     
-    /**
-     * Constructs a new Genome from a Species and a genome version.
-     */
-    public Genome(Species species, String version) throws NotFoundException {
-        this.species = species;
-        this.version = version;
-    }
-       
     /**
      * Construct a Genome from a file of chromosome lengths
      * @param tempName
@@ -242,83 +230,6 @@ public class Genome{
         } else {
             throw new NumberFormatException("Can't fix chrom name " + chrom + "," + chr);
         }
-    }
-
-    
-    
-    /**
-	 * Load all Genomes from database 
-	 * @return
-	 */
-    public static Collection<Genome> getAllGenomes(boolean forceRefreshFromDB){
-    	List<Genome> gens = new ArrayList<Genome>();
-    	
-    	if(staticGenomes.isEmpty() || forceRefreshFromDB){
-    		staticGenomes.clear(); genomeids.clear();
-    	}else{
-    		gens.addAll(staticGenomes.values());
-    	}
-    	return gens;
-    }
-    
-    /**
-     * Return all Genomes for a given Species
-	 * @param genomeName
-	 * @return
-	 * @throws NotFoundException
-	 */
-	public static Collection<Genome> getAllGenomesBySpecies(Species s) throws NotFoundException {
-		if(staticGenomes.isEmpty()){
-        	getAllGenomes(true);
-        }
-		List<Genome> sGens = new ArrayList<Genome>();
-		for(Genome g : staticGenomes.values()){
-			if(g.getSpeciesName().equals(s.getName()))
-				sGens.add(g);
-		}
-		return sGens;
-	}
-    
-    
-    /**
-	 * @param gid
-	 * @return
-	 * @throws NotFoundException
-	 */
-	public static Genome findGenome(int gid) throws NotFoundException {
-		if(staticGenomes.isEmpty()){
-        	getAllGenomes(false);
-        }
-		if (genomeids.containsKey(gid)) {
-	        return genomeids.get(gid);
-	    }
-		return null;    
-	}
-
-	/**
-	 * @param genomeName
-	 * @return
-	 * @throws NotFoundException
-	 */
-	public static Genome findGenome(String genomeName) throws NotFoundException {
-		if(staticGenomes.isEmpty()){
-        	getAllGenomes(false);
-        }
-		if (staticGenomes.containsKey(genomeName)) {
-	        return staticGenomes.get(genomeName);
-	    }
-		return null;    
-	}
-	
-	/**
-     * Returns all of the versions/builds for this species.
-     * @return
-     */
-    public static Collection<String> getAllGenomeNames(boolean forceRefreshFromDB) {
-    	if(staticGenomes.isEmpty() || forceRefreshFromDB){
-        	getAllGenomes(forceRefreshFromDB);
-        }
-    	return staticGenomes.keySet();
     }
 
 	public int hashCode() {

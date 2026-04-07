@@ -43,11 +43,6 @@ public class BackgroundModelMetadata {
     this(md.getMapID(), md.getGenomeID(), md.getModelID(), md.getName(), md.getMaxKmerLen(), md.getDBModelType(), md.hasCounts());
   }
   
-  //FIXME when is this used?
-  public BackgroundModelMetadata(int modelID, String name, int kmerlen, String modelType) {
-    this(-1, -1, modelID, name, kmerlen, modelType, false);
-  }
-  
   public BackgroundModelMetadata(int mapID, int genomeID, int modelID, String name, int kmerlen, String modelType, boolean hasCounts) {
     this.modelID = modelID;
     this.name = name;

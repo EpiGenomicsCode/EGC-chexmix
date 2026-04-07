@@ -13,7 +13,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.egc.core.data.io.FASTALoader;
 import org.egc.core.data.io.RegionFileUtilities;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.Species;

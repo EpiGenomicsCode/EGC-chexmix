@@ -7,12 +7,11 @@ import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
 import org.egc.core.gseutils.Expander;
-import org.egc.core.gseutils.Mapper;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.math.stats.StatUtil;
 
 
-public class WeightMatrixScorer implements Mapper<Region,WeightMatrixScoreProfile> {
+public class WeightMatrixScorer {
 
     private WeightMatrix matrix;
     private SequenceGenerator seqgen;

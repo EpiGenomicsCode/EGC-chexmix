@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gseutils.NotFoundException;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.math.stats.Fmath;
 
@@ -50,23 +49,6 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
 
 
   /**
-   * Construct a background model from the specified metadata object
-   * @param md the metadata describing this model
-   * @throws NotFoundException if a Genome can't be found for the metadata's
-   * genome ID
-   */
-  public BackgroundModel(BackgroundModelMetadata md) throws NotFoundException {
-    super(md);
-    this.gen = Genome.findGenome(this.genomeID);
-    modelProbs = new HashMap[maxKmerLen + 1];
-    for (int i = 1; i <= maxKmerLen; i++) {
-      modelProbs[i] = new HashMap<String, Double>();
-    }
-    this.init();
-  }
-
-
-  /**
    * Construct a model with the specified name, genome, and model type, and a
    * default max kmer len
    * @param name
@@ -84,7 +66,7 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
    * @param maxKmerLen
    */
   public BackgroundModel(String name, Genome gen, int maxKmerLen, String modelType) {
-    super(gen==null ? 0 : gen.getDBID(), name, maxKmerLen, modelType);
+    super(-1, -1, gen==null ? 0 : gen.getDBID(), name, maxKmerLen, modelType, false);
     this.gen = gen;
     modelProbs = new HashMap[maxKmerLen + 1];
     for (int i = 1; i <= maxKmerLen; i++) {

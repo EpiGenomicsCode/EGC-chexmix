@@ -9,7 +9,6 @@ public class SimpleClusterable implements Clusterable {
 	}
 	
 	public String name() {
-		// TODO Auto-generated method stub
 		return name;
 	}
 	

@@ -8,13 +8,12 @@ import java.util.regex.*;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.NamedRegion;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gseutils.Mapper;
 
 
 /**
  * @author tdanford
  */
-public class RegionParser implements Mapper<String,Region> {
+public class RegionParser {
     
     private static Pattern regPatt;  //Region pattern
     private static Pattern sregPatt;  //StrandedRegion pattern
@@ -37,7 +36,6 @@ public class RegionParser implements Mapper<String,Region> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public Region execute(String input) {
         String[] array = input.split("\\s+");

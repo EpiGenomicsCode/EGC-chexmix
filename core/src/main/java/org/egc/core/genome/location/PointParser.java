@@ -4,10 +4,9 @@ import java.util.regex.*;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Point;
-import org.egc.core.gseutils.Mapper;
 
 
-public class PointParser implements Mapper<String,Point> {
+public class PointParser {
     
     private static Pattern pPatt;
     
@@ -26,7 +25,6 @@ public class PointParser implements Mapper<String,Point> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public Point execute(String input) {
         String[] array = input.split("\\s+");

@@ -67,7 +67,6 @@ public class ScatterPlotConfigured extends ScatterPlot{
     	try {
 			this.saveImage(new File(outFilename), width, height, rasterImage);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -112,7 +111,6 @@ public class ScatterPlotConfigured extends ScatterPlot{
     	try {
 			this.saveImage(new File(outFilename), width, height, rasterImage);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

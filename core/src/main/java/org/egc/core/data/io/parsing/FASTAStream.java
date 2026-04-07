@@ -17,7 +17,7 @@ import java.io.*;
  * Each sequence is returned as a Pair of Strings: the first String is the
  * name of the sequence and the second String is the sequence itself.
  */
-public class FASTAStream implements Iterator<Pair<String,String>>, org.egc.core.gseutils.Closeable {
+public class FASTAStream implements Iterator<Pair<String,String>>, java.io.Closeable {
     
     private String label;
     private BufferedReader br;
@@ -98,7 +98,7 @@ public class FASTAStream implements Iterator<Pair<String,String>>, org.egc.core.
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Closeable#close()
+     * @see java.io.Closeable#close()
      */
     public void close() {
         if (isClosed()) {return;}
@@ -112,7 +112,6 @@ public class FASTAStream implements Iterator<Pair<String,String>>, org.egc.core.
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Closeable#isClosed()
      */
     public boolean isClosed() {
         return br == null;

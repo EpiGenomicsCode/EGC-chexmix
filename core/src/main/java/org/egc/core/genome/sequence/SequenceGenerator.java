@@ -23,7 +23,7 @@ import org.egc.core.gseutils.*;
 public class SequenceGenerator<X extends Region> {
 
     private Genome genome;
-    private static Map<Integer,String> cache;
+    private static Map<Integer,String> cache = new HashMap<Integer,String>();
     private boolean useCache = false;
     private boolean useLocalFiles = false;
     private String genomePath = null;
@@ -49,9 +49,6 @@ public class SequenceGenerator<X extends Region> {
     }
     public SequenceGenerator() {}
     public void useCache(boolean b) {
-        if (b && cache == null) {
-            cache = new HashMap<Integer,String>();
-        }
         useCache = b;
     }
     public void useLocalFiles(boolean b) {
@@ -282,7 +279,7 @@ public class SequenceGenerator<X extends Region> {
                     System.gc();
                 }
             }
-            cache=null;
+            cache.clear();
             System.gc();
         }
 

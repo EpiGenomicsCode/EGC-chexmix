@@ -9,13 +9,12 @@ import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.NamedRegion;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.gseutils.Mapper;
 
 
 /**
  * @author shaun
  */
-public class StrandedRegionParser implements Mapper<String,Region> {
+public class StrandedRegionParser {
     
     private static Pattern regPatt;
     
@@ -35,7 +34,6 @@ public class StrandedRegionParser implements Mapper<String,Region> {
     }
 
     /* (non-Javadoc)
-     * @see org.egc.core.gseutils.Filter#execute(null)
      */
     public StrandedRegion execute(String input) {
         String[] array = input.split("\\s+");

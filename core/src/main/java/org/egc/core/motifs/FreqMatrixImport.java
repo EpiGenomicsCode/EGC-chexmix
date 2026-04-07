@@ -162,7 +162,6 @@ public class FreqMatrixImport {
     	try {
 			matrices = readTransfacMatrices(wmfile, version);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}return(matrices);
     }
@@ -171,7 +170,6 @@ public class FreqMatrixImport {
     	try {
 			matrices = readTransfacMatrices(wmfile, "");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}return(matrices);
     }
@@ -187,7 +185,6 @@ public class FreqMatrixImport {
             try {
 				matrices = readAlignedSequenceMatrices(fmfile);
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         } else {

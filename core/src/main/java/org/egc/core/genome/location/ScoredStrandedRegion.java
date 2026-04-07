@@ -1,9 +1,5 @@
 package org.egc.core.genome.location;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import org.egc.core.genome.Genome;
 
 
@@ -23,16 +19,6 @@ public class ScoredStrandedRegion extends ScoredRegion implements Stranded {
     public ScoredStrandedRegion(Region r, double score, char strand) {
         super(r.getGenome(), r.getChrom(),r.getStart(), r.getEnd(),score);
         this.strand = strand;
-    }
-    
-    public ScoredStrandedRegion(Genome g, DataInputStream dis) throws IOException { 
-        super(g,dis);
-        strand = dis.readChar();
-    }
-    
-    public void save(DataOutputStream dos) throws IOException { 
-        super.save(dos);
-        dos.writeChar(strand);
     }
 
     public char getStrand() {return strand;}

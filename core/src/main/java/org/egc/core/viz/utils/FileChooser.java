@@ -8,12 +8,10 @@ import java.io.File;
 
 import javax.swing.*;
 
-import org.egc.core.gseutils.ObjectChooser;
-
 /**
  * @author tdanford
  */
-public class FileChooser implements ObjectChooser<File> {
+public class FileChooser {
 
     private JFrame parent;
     private String name;
