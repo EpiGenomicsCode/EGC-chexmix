@@ -17,7 +17,6 @@ import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.math.probability.NormalDistribution;
 import org.egc.core.math.stats.StatUtil;
 import org.egc.chexmix.shapealign.alignment.ShapeAlignConfig;
 import org.egc.chexmix.stats.DistributionPercentile;
@@ -135,9 +134,10 @@ public class ShapeAlignmentTesting {
 	//pre-calculate and store the Guassian kernel prob., for efficiency
 	private void initGaussianKernel(double var){
 		gaussian = new double[250]; 
-		NormalDistribution gaussianDist = new NormalDistribution(0, var*var);
+		double variance = var*var;
+		double gaussCoeff = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
 		for (int i=0;i<gaussian.length;i++)
-			gaussian[i]=gaussianDist.calcProbability((double)i);
+			gaussian[i]=gaussCoeff * Math.exp(-((double)i*(double)i) / (2.0 * variance));
 	}
 		
 	/**printing methods  **/

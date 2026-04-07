@@ -16,7 +16,6 @@ import org.egc.core.viz.metaprofile.BinningParameters;
 import org.egc.core.viz.metaprofile.MetaConfig;
 import org.egc.core.viz.metaprofile.MetaProfileHandler;
 import org.egc.core.viz.metaprofile.PointProfiler;
-import org.egc.core.viz.metaprofile.swing.MetaFrame;
 import org.egc.core.viz.metaprofile.swing.MetaNonFrame;
 import org.egc.core.viz.metaprofile.swing.MetaNonFrameMultiSet;
 
@@ -102,22 +101,7 @@ public class MetaMaker {
 						if(profiler!=null)
 							profiler.cleanup();
 					}else{
-						System.out.println("Initializing Meta-point frame...");
-						MetaFrame frame = new MetaFrame(gen, params, profiler, normalizeProfile);
-						frame.setColor(mconfig.color);
-						frame.setLineMax(mconfig.lineMax);
-						frame.setLineMin(mconfig.lineMin);
-						frame.setLineThick(mconfig.lineThick);
-						frame.startup();
-						if(mconfig.peakFiles.size() > 0){
-							MetaProfileHandler handler = frame.getHandler();
-							for(String pf : mconfig.peakFiles){
-								Vector<Point> points = frame.getUtils().loadPoints(new File(pf));
-								handler.addPoints(points);
-							}
-						}
-						frame.setLineMax(mconfig.lineMax);
-						frame.setLineMin(mconfig.lineMin);
+						System.err.println("Interactive MetaFrame mode is not supported. Use --batch.");
 					}
 					
 				}

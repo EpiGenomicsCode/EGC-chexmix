@@ -353,25 +353,12 @@ public class PWMParser {
       if (matcher.find()) {
         int taxospecid = Integer.parseInt(matcher.group(1));
         String specname = speciesmap.get(taxospecid);
-        try {
-          matrix.speciesid = (new Species(specname)).getDBID();
-          matrix.species = specname;
-        }
-        catch (NotFoundException e) {
-          System.err.println("Couldn't find species " + specname + " from " + taxospecid + " in " + line);
-          continue;
-          // ignore it and move on
-        }
+        matrix.species = specname;
       }
       else {
         matcher = grouppatt.matcher(pieces[4]);
         if (matcher.find() && matcher.group(1).equals("mammals")) {
-          try {
-            matrix.speciesid = (new Species("Mus musculus")).getDBID();
-          }
-          catch (NotFoundException e) {
-            continue; // shouldn't happen unless I typoed the name above
-          }
+          // mammals group — accept without specific species
         }
         else {
           System.err.println("No species in " + line);
@@ -531,7 +518,6 @@ public class PWMParser {
 
             // System.err.println("read version " + matrix.version);
             if (currentSpecies != null) {
-              matrix.speciesid = currentSpecies.getDBID();
               matrix.species = currentSpecies.getName();
             }
             matrix.type = "TRANSFAC";

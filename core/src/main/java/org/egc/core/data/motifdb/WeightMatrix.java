@@ -3,7 +3,6 @@ package org.egc.core.data.motifdb;
 import java.util.*;
 import java.text.DecimalFormat;
 
-import org.egc.core.gseutils.NotFoundException;
 
 
 /* weight matrix representation as float[][]:
@@ -28,16 +27,10 @@ public class WeightMatrix {
     public float[][] matrix;
     public String consensus;
     public String name, version, type, species;
-    public int dbid, speciesid;
-    public boolean hasdbid, hasspeciesid; // set to true iff dbid is valid
     public boolean islogodds;
     public int zeroOffset=0;
-    public int bgMapID = -1;
     
     public WeightMatrix (int length) {
-        dbid = -1;
-        hasdbid = false;
-        hasspeciesid = false;
         matrix = new float[length][MAXLETTERVAL];                
     }
     
@@ -45,9 +38,6 @@ public class WeightMatrix {
      ** the input matrix must follow the definition of WeightMatrix (see comments at the beginning of the java class)
      **/
     public WeightMatrix (float[][] pwm) {
-        dbid = -1;
-        hasdbid = false;
-        hasspeciesid = false;
         matrix = pwm; 
         islogodds = true;
     }
@@ -139,27 +129,19 @@ public class WeightMatrix {
     public boolean equals(Object other) {
         if (other instanceof WeightMatrix) {
             WeightMatrix o = (WeightMatrix)other;
-            if (o.hasdbid && this.hasdbid) {
-                return o.dbid == this.dbid;
-            } else {
-                return (o.name != null &&
-                        this.name != null &&
-                        this.name.equals(o.name)
-                        && o.version != null
-                        && this.version != null
-                        && this.version.equals(o.version));
-            }
+            return (o.name != null &&
+                    this.name != null &&
+                    this.name.equals(o.name)
+                    && o.version != null
+                    && this.version != null
+                    && this.version.equals(o.version));
         } else {
             return false;
         }
     }
     public int hashCode() {
-        if (hasdbid) {
-            return dbid;
-        }
         return (name.hashCode() + version.hashCode());
     }
-    public int getDBID() {return dbid;}
     public String toString() {
         return name + ", " + version + ", " + type;
     }
@@ -286,18 +268,6 @@ public class WeightMatrix {
                 matrix[position][letters[j]] = (float)(matrix[position][letters[j]] / sum);
             }
         }
-    }
-
-    /* looks up the database id for the specified weight matrix */
-    public static int getWeightMatrixID(int speciesid,
-                                        String wmname,
-                                        String wmversion) throws NotFoundException {
-	return 0;
-    }
-    /* looks up the database id for the specified weight matrix */
-    public static int getWeightMatrixID(String wmname,
-                                        String wmversion) throws NotFoundException {
-	return 0;
     }
     
     /* returns a string showing the full matrx in all its numeric glory */

@@ -25,7 +25,6 @@ import cern.jet.random.engine.DRand;
 import java.util.Arrays;
 
 import org.egc.core.gseutils.Pair;
-import org.egc.core.math.probability.NormalDistribution;
 
 
 public class StatUtil {
@@ -1372,13 +1371,15 @@ public class StatUtil {
 		double[] yy = new double[length];
 		double[] yy_weight = new double[length];
 		// width --> stdev, width*width --> variance
-		NormalDistribution gaussian = new NormalDistribution(0, width*width);
+		double variance = (double)(width*width);
+		double gaussCoeff = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
 		double total=0;
 		for (int i=0;i<length;i++){
 			yy[i]=2.0E-300;		// init with very small number
 			yy_weight[i]=2.0E-300;	
 			for (int j=0;j<length;j++){
-				double gaussianProb = gaussian.calcProbability((double)j-i);
+				double diff = (double)(j-i);
+				double gaussianProb = gaussCoeff * Math.exp(-(diff*diff) / (2.0 * variance));
 				yy[i] += Y[j]*gaussianProb;
 				yy_weight[i] += gaussianProb;
 			}

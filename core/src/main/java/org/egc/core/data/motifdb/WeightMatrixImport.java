@@ -124,7 +124,6 @@ public class WeightMatrixImport {
             
             // System.err.println("read version " + matrix.version);
             if (currentSpecies != null) {
-              matrix.speciesid = currentSpecies.getDBID();
               matrix.species = currentSpecies.getName();
             }
             matrix.type = "TRANSFAC";
@@ -166,10 +165,8 @@ public class WeightMatrixImport {
         List<WeightMatrix> matrices = null;
         System.err.println("type is " + wmtype+ " and file is " + wmfile + " and version is " + wmversion);
         if(wmtype.matches(".*TAMO.*")) { 
-            int speciesid = (new Species(species)).getDBID();
             matrices = PWMParser.readTamoMatrices(wmfile);
             for(WeightMatrix matrix : matrices) { 
-                matrix.speciesid = speciesid;
             }
         } else if (wmtype.matches(".*TRANSFAC.*")) {
             matrices = PWMParser.readTRANSFACFreqMatrices(wmfile, wmversion);
@@ -219,7 +216,6 @@ public class WeightMatrixImport {
         matrix.name = wmname;
         matrix.version = wmversion;
         matrix.type = wmtype;
-        matrix.speciesid = (new Species(species)).getDBID();
         return insertMatrixIntoDB(matrix);
     }
     
@@ -251,7 +247,6 @@ public class WeightMatrixImport {
     matrix.name = wmname;
     matrix.version = wmversion;
     matrix.type = wmtype;
-    matrix.speciesid = (new Species(species)).getDBID();
     return insertMatrixIntoDB(matrix);
  }
     /**

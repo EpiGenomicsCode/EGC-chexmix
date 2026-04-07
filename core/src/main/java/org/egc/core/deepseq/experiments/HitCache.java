@@ -31,7 +31,6 @@ import org.egc.core.deepseq.stats.BackgroundCollection;
 import org.egc.core.deepseq.stats.PoissonBackgroundModel;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Region;
-import org.egc.core.math.probability.NormalDistribution;
 import org.egc.core.math.stats.StatUtil;
 
 
@@ -1316,9 +1315,10 @@ public class HitCache implements HitCacheInterface{
 	 */
 	private void capPerBaseCountWithPoissonGaussianFilter(double threshold, int width){
         double g[] = new double[width*4+1];
-		NormalDistribution gaussianDist = new NormalDistribution(0, width*width);
+		double variance = (double)(width*width);
+		double gaussCoeff = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
 		for (int i=0;i<g.length;i++)
-			g[i]=gaussianDist.calcProbability((double)i);
+			g[i]=gaussCoeff * Math.exp(-((double)i*(double)i) / (2.0 * variance));
 		
 		DRand re = new DRand();
 		Poisson P = new Poisson(0, re);

@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
 
-import org.egc.core.tools.sequence.UShuffle;
-
 /**
  * <code>SequenceUtils</code> provides a number of static methods for manipulating
  * DNA sequences stores as strings or char[].
@@ -139,34 +137,10 @@ public class SequenceUtils {
         return -1;
     }
 
-    /** maps a DNA sequence (ie [actgACTG]*) to 
-     * a Long representing that sequence in 2-bit per
-     * base representation
-     *
-     *
-     * we should time this and compare performance to the version
-     * where you have 
-     * int charToInt[256]
-     * charToInt['a'] = 0
-     * etc
-     * and do lookups from that...
-     */
     public static long StringToLong(String a) {
         return StringToLong(a,0,a.length());
     }
 
-    /** convert k characters of String to a long, starting at position offset
-     * 
-     * Throws a StringIndexOutOfBoundsException (or something) if there aren't
-     * enough characters in the string
-     *
-     * Apparently Tim and Alex did this conversion in opposite order- Tim's had
-     * string[0] as the lowest bits in the long and Alex had them as the highest.  
-     * I like my way better so that
-     *  1) when you write out the long and the string, the letters are in the same order
-     *  2) the strings and the longs sort the same order
-     *
-     */
     public static long StringToLong(String a, int offset, int k) {
         long sum = (long)0;
         for(int i = 0; i < k; i++) { 
@@ -232,22 +206,5 @@ public class SequenceUtils {
 		    return temp1 + temp2;
 		else 
 		    return temp2 + temp1;
-	}
-	/**
-	 * Di-nucleotide shuffle
-	 * @param str
-	 * @param randObj
-	 * @return
-	 */
-	public static String dinu_shuffle(String str, Random randObj){
-		if (str.length()<=1)
-		    return str;
-
-		char[] result = new char[str.length()];
-		UShuffle sf = new UShuffle();
-		sf.set_randfunc(randObj);
-		sf.shuffle(str.toCharArray(), result, str.length(), 2);
-		
-		return new String(result);
 	}
 }

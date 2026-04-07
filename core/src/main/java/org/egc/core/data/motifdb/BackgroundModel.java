@@ -26,7 +26,7 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
 
   public static final int DEFAULT_MAX_KMER_LEN = 3;
 
-  // a reference to a genome object in addition to the metadata genomeID
+  // reference to the genome this model is associated with
   protected Genome gen;
 
   /**
@@ -66,7 +66,7 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
    * @param maxKmerLen
    */
   public BackgroundModel(String name, Genome gen, int maxKmerLen, String modelType) {
-    super(-1, -1, gen==null ? 0 : gen.getDBID(), name, maxKmerLen, modelType, false);
+    super(name, maxKmerLen, modelType, false);
     this.gen = gen;
     modelProbs = new HashMap[maxKmerLen + 1];
     for (int i = 1; i <= maxKmerLen; i++) {
@@ -79,21 +79,13 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
   /**
    * Construct a Background Model from an existing Background Model. Set the
    * instance variables of this class to match the source model. Subclasses
-   * should only set the dbid if the type of the subclass model matches the type
-   * of the source model. 
+   * sets instance variables to match the source model. The model type
    * 
    * @param source
    *          the Background Model on which to base the one being constructed
    */
-  public BackgroundModel(BackgroundModel source, String dbModelType) {
-    this(source.name, source.gen, source.getMaxKmerLen(), dbModelType);
-    
-    //Check this class's type and set the dbids if they match
-    if (this.getClass() == source.getClass()) {
-      this.mapID = source.mapID;
-      this.modelID = source.modelID;
-    }
-    
+  public BackgroundModel(BackgroundModel source, String modelType) {
+    this(source.name, source.gen, source.getMaxKmerLen(), modelType);
     this.isStranded = source.isStranded;
     this.init();
   }

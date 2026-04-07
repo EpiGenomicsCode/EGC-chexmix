@@ -14,7 +14,6 @@ public class Genome{
     
     private Species species;
     private String version;
-    private int dbid;
     private Map<String,ChromosomeInfo> chromsByName;
     private Map<Integer,ChromosomeInfo> chromsByID;
     
@@ -28,7 +27,6 @@ public class Genome{
     public Genome(String tempName, File chrLengths, boolean inventids) {
     	species = new Species(-1, "FakeOrganism");
     	version = tempName;
-    	dbid = -1;
     	chromsByName = new HashMap<String,ChromosomeInfo>();
     	chromsByID = new HashMap<Integer,ChromosomeInfo>();
     	if(!chrLengths.isFile()){throw new RuntimeException("Invalid genome info file: " + chrLengths.getAbsolutePath());}
@@ -72,7 +70,6 @@ public class Genome{
     public Genome(String tempName, Map<String, Integer> chrLengthMap) {
     	species = new Species(-1, "FakeOrganism");
     	version = tempName;
-    	dbid = -1;
     	chromsByName = new HashMap<String,ChromosomeInfo>();
     	chromsByID = new HashMap<Integer,ChromosomeInfo>();
     	int id=0;
@@ -85,10 +82,8 @@ public class Genome{
     
     //Accessors
     public String getVersion() {return version;}
-    public int getDBID() {return dbid;}
     public Species getSpecies(){return species;}
     public String getSpeciesName() {return species.getName();}    
-    public int getSpeciesDBID() { return species.getDBID(); }
     public String toString() { return getSpeciesName() +","+getVersion(); }
 
     //Chromosome-related accessors
