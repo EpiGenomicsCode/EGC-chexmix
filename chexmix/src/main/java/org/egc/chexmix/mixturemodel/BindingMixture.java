@@ -174,18 +174,10 @@ public class BindingMixture {
 		            t.start();
 		            threads[i] = t;
 		        }
-		        boolean anyrunning = true;
-		        while (anyrunning) {
-		            anyrunning = false;
+		        for (i = 0 ; i < threads.length; i++) {
 		            try {
-		                Thread.sleep(5000);
+		                threads[i].join();
 		            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-		            for (i = 0; i < threads.length; i++) {
-		                if (threads[i].isAlive()) {
-		                    anyrunning = true;
-		                    break;
-		                }
-		            }
 		        }
 			}
 		}

@@ -151,18 +151,10 @@ public class PotentialRegionFilter {
             t.start();
             threads[i] = t;
         }
-        boolean anyrunning = true;
-        while (anyrunning) {
-            anyrunning = false;
+        for (i = 0 ; i < threads.length; i++) {
             try {
-                Thread.sleep(5000);
+                threads[i].join();
             } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-            for (i = 0; i < threads.length; i++) {
-                if (threads[i].isAlive()) {
-                    anyrunning = true;
-                    break;
-                }
-            }
         }
         
         // For galaxy support, ChExMix always need to produce output files in absence of potential regions, hence commenting out this section. 
