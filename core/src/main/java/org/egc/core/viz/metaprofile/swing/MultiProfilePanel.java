@@ -24,12 +24,10 @@ import javax.swing.JPanel;
 import org.egc.core.viz.metaprofile.BinningParameters;
 import org.egc.core.viz.metaprofile.Profile;
 import org.egc.core.viz.metaprofile.ProfilePaintable;
-import org.egc.core.viz.paintable.PaintableChangedEvent;
-import org.egc.core.viz.paintable.PaintableChangedListener;
 import org.egc.core.viz.paintable.PaintableScale;
 
 
-public class MultiProfilePanel extends JPanel implements PaintableChangedListener {
+public class MultiProfilePanel extends JPanel {
 	
 	private List<Profile> profiles;
 	private List<ProfilePaintable> profilePainters = new ArrayList<ProfilePaintable>();
@@ -46,7 +44,6 @@ public class MultiProfilePanel extends JPanel implements PaintableChangedListene
 		scale = sc;
 		for(Profile profile : profiles){
 			ProfilePaintable profilePainter = new ProfilePaintable(scale, profile);
-			profilePainter.addPaintableChangedListener(this);
 			profilePainters.add(profilePainter);
 		}
 		
@@ -196,9 +193,6 @@ public class MultiProfilePanel extends JPanel implements PaintableChangedListene
 		}
 	}
 
-	public void paintableChanged(PaintableChangedEvent pce) {
-		repaint();
-	}
 	
 	private void arrangeArrow(int[] a, int[] b, int height, int gx1, int gx2, int my) { 
         double arrowHt =0.1 *height;

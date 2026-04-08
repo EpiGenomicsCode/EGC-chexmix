@@ -2,7 +2,8 @@ package org.egc.core.viz.metaprofile;
 
 import java.awt.*;
 
-import org.egc.core.viz.paintable.*;
+import org.egc.core.viz.paintable.AbstractPaintable;
+import org.egc.core.viz.paintable.PaintableScale;
 
 
 /**

@@ -28,14 +28,12 @@ import org.apache.batik.svggen.SVGGraphics2D;
 import org.egc.core.viz.metaprofile.BinningParameters;
 import org.egc.core.viz.metaprofile.Profile;
 import org.egc.core.viz.metaprofile.ProfilePaintable;
-import org.egc.core.viz.paintable.PaintableChangedEvent;
-import org.egc.core.viz.paintable.PaintableChangedListener;
 import org.egc.core.viz.paintable.PaintableScale;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 
-public class ProfilePanel extends JPanel implements PaintableChangedListener {
+public class ProfilePanel extends JPanel {
 	
 	private Profile profile;
 	private ProfilePaintable profilePainter;
@@ -52,7 +50,6 @@ public class ProfilePanel extends JPanel implements PaintableChangedListener {
 		profile = p;
 		scale = sc;
 		profilePainter = new ProfilePaintable(scale, profile);
-		profilePainter.addPaintableChangedListener(this);
 		
 		setPreferredSize(new Dimension(500, 300));
 	}
@@ -209,9 +206,6 @@ public class ProfilePanel extends JPanel implements PaintableChangedListener {
 		}
 	}
 
-	public void paintableChanged(PaintableChangedEvent pce) {
-		repaint();
-	}
 	
 	private void arrangeArrow(int[] a, int[] b, int height, int gx1, int gx2, int my) { 
         double arrowHt =0.1 *height;

@@ -12,7 +12,6 @@ import java.io.Writer;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
-import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
 
@@ -22,10 +21,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DOMImplementation;
 
 
-public abstract class AbstractPaintable 
-implements Paintable, PaintableChangedListener { 
+public abstract class AbstractPaintable {
     
-	private boolean disableEventPassthrough=false;
     public static int sImageWidth, sImageHeight;
 
     static { 
@@ -33,17 +30,14 @@ implements Paintable, PaintableChangedListener {
         sImageHeight = 750;
     }
     
-    protected LinkedList<PaintableChangedListener> fListeners;
     protected int siw, sih;
     
     public AbstractPaintable() {
-        fListeners = new LinkedList<PaintableChangedListener>();
         sih = sImageHeight;
         siw = sImageWidth;
     }
 
     public AbstractPaintable(int h, int w) {
-        fListeners = new LinkedList<PaintableChangedListener>();
         sih = h;
         siw = w;
     }
@@ -52,24 +46,6 @@ implements Paintable, PaintableChangedListener {
     public void setImageHeight(int ih) { sih = ih; }
 
     public abstract void paintItem(Graphics g, int x1, int y1, int x2, int y2);
-    
-    protected void setEventPassthrough(boolean v) { 
-    	disableEventPassthrough = !v;
-    }
-    
-    public void paintableChanged(PaintableChangedEvent evt) {
-    	if(!disableEventPassthrough) { 
-    		dispatchChangedEvent();
-    	}
-    }
-    
-    public void addPaintableChangedListener(PaintableChangedListener l) { 
-        fListeners.addLast(l);
-    }
-    
-    public void removePaintableChangedListener(PaintableChangedListener l) { 
-        fListeners.remove(l);
-    }
     
     public Image createImage(int w, int h) { 
         BufferedImage im = 
@@ -107,11 +83,4 @@ implements Paintable, PaintableChangedListener {
             svgGenerator.stream(out, useCSS);
         }
     }
-    
-    protected void dispatchChangedEvent() { 
-        PaintableChangedEvent evt = new PaintableChangedEvent(this);
-        for(PaintableChangedListener l : fListeners) { 
-            l.paintableChanged(evt);
-        }
-    }    
 }

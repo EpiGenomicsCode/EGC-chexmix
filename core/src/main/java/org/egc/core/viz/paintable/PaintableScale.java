@@ -4,30 +4,17 @@
  */
 package org.egc.core.viz.paintable;
 
-import java.util.*;
-import java.awt.*;
-
 public class PaintableScale {
 	
 	private double min, max;
-	private LinkedList<PaintableScaleListener> listeners; 
 	
 	public PaintableScale(double m1, double m2) { 
 		min = m1; 
 		max = m2;
-		listeners = new LinkedList<PaintableScaleListener>();
 	}
 	
 	public String toString() { 
 		return String.format("Scale: %.3f-%.3f", min, max);
-	}
-	
-	public void addPaintableScaleListener(PaintableScaleListener psl) { 
-		listeners.addLast(psl);
-	}
-	
-	public void removePaintableScaleListener(PaintableScaleListener psl) { 
-		listeners.remove(psl);
 	}
 
 	public double getMin() { return min; }
@@ -40,23 +27,13 @@ public class PaintableScale {
 		if(m1 > m2) { throw new IllegalArgumentException(); }
 		min = m1; 
 		max = m2; 
-		dispatchPaintableChangedEvent();
 	}
 	
 	public void updateScale(double newPoint) { 
 		if(newPoint < min){ 
 			min = newPoint;
-			dispatchPaintableChangedEvent();
 		}else if(newPoint>max){
 			max = Math.max(newPoint, max);
-			dispatchPaintableChangedEvent();
-		}
-	}
-	
-	private void dispatchPaintableChangedEvent() { 
-		PaintableScaleChangedEvent evt = new PaintableScaleChangedEvent(this);
-		for(PaintableScaleListener list : listeners) { 
-			list.paintableScaleChanged(evt);
 		}
 	}
 	
