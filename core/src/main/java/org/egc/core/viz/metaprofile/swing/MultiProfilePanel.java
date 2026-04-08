@@ -8,7 +8,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import org.egc.core.viz.metaprofile.BinningParameters;
@@ -60,37 +56,6 @@ public class MultiProfilePanel extends JPanel {
 		repaint();
 	}
 	
-	public Action createSaveImageAction() { 
-	    return new AbstractAction("Save Meta-Point Image...") { 
-            /**
-             * Comment for <code>serialVersionUID</code>
-             */
-            private static final long serialVersionUID = 1L;
-
-            public void actionPerformed(ActionEvent e) { 
-                String pwdName = System.getProperty("user.dir");
-                JFileChooser chooser;
-                if(pwdName != null) { 
-                    chooser = new JFileChooser(new File(pwdName));
-                } else {
-                    chooser = new JFileChooser();
-                }
-                
-                int v = 
-                    chooser.showSaveDialog(null);
-                if(v == JFileChooser.APPROVE_OPTION) { 
-                    File f = chooser.getSelectedFile();
-                    try {
-                        saveImage(f, getWidth(), getHeight());
-                        //System.out.println("Saved Image [" + sImageWidth + " by " + sImageHeight +  "]");
-                    } catch(IOException ie) {
-                        ie.printStackTrace(System.err);
-                    }
-                }
-                
-            }
-        };
-	}
 	public void saveImage(File f, int w, int h) 
     throws IOException { 
 		this.setSize(new Dimension(w, h));

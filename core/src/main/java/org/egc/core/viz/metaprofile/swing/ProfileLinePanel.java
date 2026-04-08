@@ -7,11 +7,10 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.JPanel;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -21,7 +20,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 
-public class ProfileLinePanel extends JPanel implements ProfileListener{ 
+public class ProfileLinePanel extends JPanel { 
 	
 	private BinningParameters params;
 	private PaintableScale scale;
@@ -82,14 +81,23 @@ public class ProfileLinePanel extends JPanel implements ProfileListener{
 		if(colorQuantized)
 			plp.setQuanta(colorQuantaLimits);
 		linePainters.add(plp);
-		if(linePainters.size() % 10 == 0) { 
-			SwingUtilities.invokeLater(new Runnable() { 
-				public void run() { 
-					updateSize();
-				}
-			});
-			repaint();
+	}
+	
+	/**
+	 * Build line paintables from all profiles in a MetaProfile.
+	 * Call after all points have been added and processing is complete.
+	 * Idempotent — safe to call multiple times, only builds once.
+	 * Note: does not modify the scale — scale bounds are managed externally
+	 * via setMinColorVal/setMaxColorVal (called from MetaNonFrame.setLineMin/setLineMax).
+	 */
+	public synchronized void buildFromProfiles(MetaProfile mp) {
+		if(!linePainters.isEmpty()) return;
+		for(int i = 0; i < mp.size(); i++) {
+			Profile p = mp.profile(i);
+			ProfileLinePaintable plp = new ProfileLinePaintable(scale, p);
+			addProfileLinePaintable(plp);
 		}
+		updateSize();
 	}
 	
 	public int getPanelWidth(){
@@ -196,47 +204,6 @@ public class ProfileLinePanel extends JPanel implements ProfileListener{
 		}
 	}
 	
-	public void profileChanged(ProfileEvent p) {
-		if(p.getType().equals(ProfileEvent.EventType.ADDED)) { 
-			Profile added = p.addedProfile();
-			ProfileLinePaintable plp = new ProfileLinePaintable(scale, added);
-			scale.updateScale(added.max());
-			scale.updateScale(added.min());
-					
-			addProfileLinePaintable(plp);
-		}
-	}
-	public Action createSaveImageAction() { 
-	    return new AbstractAction("Save Profile Image...") { 
-            /**
-             * Comment for <code>serialVersionUID</code>
-             */
-            private static final long serialVersionUID = 1L;
-
-            public void actionPerformed(ActionEvent e) { 
-                String pwdName = System.getProperty("user.dir");
-                JFileChooser chooser;
-                if(pwdName != null) { 
-                    chooser = new JFileChooser(new File(pwdName));
-                } else {
-                    chooser = new JFileChooser();
-                }
-                
-                int v = 
-                    chooser.showSaveDialog(null);
-                if(v == JFileChooser.APPROVE_OPTION) { 
-                    File f = chooser.getSelectedFile();
-                    try {
-                        saveImage(f, getWidth(), colorbarHeight+(linePainters.size()*lineWeight)+lineWeight+1, true);
-                        //System.out.println("Saved Image [" + sImageWidth + " by " + sImageHeight +  "]");
-                    } catch(IOException ie) {
-                        ie.printStackTrace(System.err);
-                    }
-                }
-                
-            }
-        };
-	}
 	public void saveImage(File f, int w, int h, boolean raster) 
     throws IOException { 
 		if(raster){

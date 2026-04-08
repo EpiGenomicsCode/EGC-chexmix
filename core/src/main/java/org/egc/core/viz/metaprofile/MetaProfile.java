@@ -9,7 +9,7 @@ import java.util.*;
  * @author: tdanford
  * Date: Aug 12, 2008
  */
-public class MetaProfile implements Profile, ProfileListener{
+public class MetaProfile implements Profile {
 
 	protected String name; 
 	protected BinningParameters params;
@@ -18,7 +18,6 @@ public class MetaProfile implements Profile, ProfileListener{
 	protected Vector<Profile> profiles;
 	protected double max, min;
 	protected boolean stranded=false;
-	private LinkedList<ProfileListener> listeners;
 
 		
 
@@ -29,7 +28,6 @@ public class MetaProfile implements Profile, ProfileListener{
 		max = min = 0.0;
 		profiles = new Vector<Profile>();
 		normalization = null;
-		listeners = new LinkedList<ProfileListener>();
 	}
 	public void saveToFile(String fileName){
 		if(profiles.size()>0){
@@ -158,8 +156,7 @@ public class MetaProfile implements Profile, ProfileListener{
 				values[i] += p.value(i);
 				max = Math.max(max, values[i]);
 				min = Math.min(min, values[i]);
-			}			
-			dispatchChange(new ProfileEvent(this, p));
+			}
 		}
 	}
 	
@@ -178,21 +175,4 @@ public class MetaProfile implements Profile, ProfileListener{
 		return profiles.size();
 	}
 	
-	public void addProfileListener(ProfileListener pl) { 
-		listeners.add(pl);
-	}
-	
-	public void removeProfileListener(ProfileListener pl) {  
-		listeners.remove(pl);
-	}
-	
-	protected void dispatchChange(ProfileEvent e) { 
-		for(ProfileListener pl : listeners) { 
-			pl.profileChanged(e);
-		}
-	}
-	
-	public synchronized void profileChanged(ProfileEvent p) {
-		recalculate();
-	}
 }

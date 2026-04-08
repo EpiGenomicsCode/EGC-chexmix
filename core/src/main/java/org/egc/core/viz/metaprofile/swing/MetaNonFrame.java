@@ -33,7 +33,6 @@ public class MetaNonFrame{
 		handler = new MetaProfileHandler("MetaProfile", params, pp, normalizedMeta);
 		profile = handler.getProfile();
 		linePanel = new ProfileLinePanel(params, lineScale);
-		profile.addProfileListener(linePanel);
 		utils = new MetaUtils(genome);
 		saveSVG = svg;
 		panel = new ProfilePanel(profile, peakScale);
@@ -60,6 +59,7 @@ public class MetaNonFrame{
 	}
 	public void saveImages(String root){
 		try {
+			linePanel.buildFromProfiles(profile);
 			System.err.println("Saving images with root name: "+root);
 			panel.saveImage(saveSVG ? new File(root+"_profile.svg") : new File(root+"_profile.png"), 1200, 700, !saveSVG);
 			linePanel.saveImage(saveSVG ? new File(root+"_lines.svg") : new File(root+"_lines.png"), linePanel.getPanelWidth(), linePanel.getPanelLength(), !saveSVG);
@@ -75,7 +75,10 @@ public class MetaNonFrame{
 	}
 	public MetaProfileHandler getHandler() { return handler; }
 	public MetaUtils getUtils(){return utils;}
-	public void clusterLinePanel(){linePanel.cluster();}
+	public void clusterLinePanel(){
+		linePanel.buildFromProfiles(profile);
+		linePanel.cluster();
+	}
 	public void setLineMin(double m){linePanel.setMinColorVal(m);}
 	public void setLineMax(double m){linePanel.setMaxColorVal(m);}
 	public void setLineThick(int t){linePanel.updateLineWeight(t);}

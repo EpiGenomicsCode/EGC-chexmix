@@ -5,23 +5,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-
-import org.egc.core.data.io.RegionFileUtilities;
-import org.egc.core.genome.Genome;
-import org.egc.core.genome.Species;
-import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
-import org.egc.core.gseutils.NotFoundException;
-import org.egc.core.gseutils.Pair;
 
 
 public class SequenceAlignmentFigure {
@@ -110,21 +97,5 @@ public class SequenceAlignmentFigure {
         }  catch (IOException ex) {
             ex.printStackTrace();
         }
-	}
-	
-	public static void printHelp(){
-		System.err.println("Usage:\n " +
-                "SequenceAlignmentFigure \n" +
-                " Required: \n" +
-                "  --species <species;version> AND --gen <sequence directory>\n AND" +
-                "  (--peaks <file containing stranded coordinates> OR --bed <bed file>)\n\tOR\n" +
-                "  --seq <FASTA file>\n" +
-                " Optional:\n" +
-                "  --win <window of sequence around peaks> \n"+
-                "  --out <output filename>\n" +
-                "  --seqout <sequence output filename>\n" +
-                "  --wscolor [color bases according to Weak & Strong]" +
-                "");
-		return;
 	}
 }
