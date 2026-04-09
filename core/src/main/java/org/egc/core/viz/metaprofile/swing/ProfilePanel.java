@@ -16,7 +16,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -28,7 +27,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 
-public class ProfilePanel extends JPanel {
+public class ProfilePanel {
 	
 	private Profile profile;
 	private ProfilePaintable profilePainter;
@@ -39,65 +38,44 @@ public class ProfilePanel extends JPanel {
 	private Color peakColor=Color.blue;
 	private String style = "line";
 	private boolean transparent = false;
+	private int width=500, height=300;
 	
 	public ProfilePanel(Profile p, PaintableScale sc) { 
 		profile = p;
 		scale = sc;
 		profilePainter = new ProfilePaintable(scale, profile);
-		
-		setPreferredSize(new Dimension(500, 300));
 	}
 	
-	public void updateFontSize(int size) {
-		fontSize = size;
-		repaint();
-	}
-
-	public void updateColor(Color c) {
-		peakColor=c;
-		repaint();
-	}
-
-	public void setStyle(String s) {
-		style = s; 
-		repaint();
-	}
-	public void setTransparent(boolean c){
-		transparent = c;
-	}
+	public void updateFontSize(int size) { fontSize = size; }
+	public void updateColor(Color c) { peakColor=c; }
+	public void setStyle(String s) { style = s; }
+	public void setTransparent(boolean c) { transparent = c; }
+	public Color getPeakColor() { return peakColor; }
 	
 	public void saveImage(File f, int w, int h, boolean raster) 
     throws IOException { 
+		this.width = w;
+		this.height = h;
 		if(raster){
-			if(transparent)
-				this.setOpaque(false);
-			this.setSize(new Dimension(w, h));
-			repaint();
 	        BufferedImage im = 
 	            new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 	        Graphics2D graphics = im.createGraphics();
 	        graphics.setRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-	        this.print(graphics);
+	        paintComponent(graphics);
 	        graphics.dispose();
 	        ImageIO.write(im, "png", f);
 		}else{
 	        DOMImplementation domImpl =
 	            GenericDOMImplementation.getDOMImplementation();
-	        // Create an instance of org.w3c.dom.Document
 	        Document document = domImpl.createDocument(null, "svg", null);
-	        // Create an instance of the SVG Generator
 	        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 	        svgGenerator.setSVGCanvasSize(new Dimension(w,h));
-	        // Ask the test to render into the SVG Graphics2D implementation
 	        if(!transparent){
 	        	svgGenerator.setColor(Color.white);        
 	        	svgGenerator.fillRect(0,0,w,h);
 	        }
-	        this.paintComponent(svgGenerator);
-	
-	        // Finally, stream out SVG to the standard output using UTF-8
-	        // character to byte encoding
-	        boolean useCSS = true; // we want to use CSS style attribute
+	        paintComponent(svgGenerator);
+	        boolean useCSS = true;
 	        FileOutputStream outStream = new FileOutputStream(f);
 	        Writer out = new OutputStreamWriter(outStream, "UTF-8");
 	        svgGenerator.stream(out, useCSS);
@@ -106,11 +84,8 @@ public class ProfilePanel extends JPanel {
 		}
 	}
 	
-	public Color getPeakColor(){return peakColor;}
-	
-	protected void paintComponent(Graphics g) {
-		int w = getWidth(), h = getHeight();
-		super.paintComponent(g);
+	private void paintComponent(Graphics g) {
+		int w = width, h = height;
 		Graphics2D g2 = (Graphics2D)g;
 		if(!transparent){
 			g2.setColor(Color.white);
@@ -153,8 +128,6 @@ public class ProfilePanel extends JPanel {
 		String maxVal = String.format("%d", (bps.getWindowSize()/2));
 		g2.drawString(maxVal, border+(binPix*profile.length())-metrics.stringWidth(maxVal), h);
 		g2.drawString(minVal, border, h);
-		
-		//Title 
 		
 		//Draw marker line
 		g2.setColor(Color.black);

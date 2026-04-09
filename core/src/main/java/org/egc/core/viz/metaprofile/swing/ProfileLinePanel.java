@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -20,13 +19,13 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 
-public class ProfileLinePanel extends JPanel { 
+public class ProfileLinePanel { 
 	
 	private BinningParameters params;
 	private PaintableScale scale;
 	private int width = 500;
+	private int height = 300;
 	private int lineWeight=1;
-	private boolean lineImageRaster=true;
 	private ProfileClusteringHandler clusteringHandler;
 	private int numAxisTicks=5;
 	private int fontSize=20;
@@ -45,9 +44,7 @@ public class ProfileLinePanel extends JPanel {
 		scale = s;
 		linePainters = new Vector<ProfileLinePaintable>();
 		clusteringHandler = new ProfileClusteringHandler(params);
-		
 		width = params.getNumBins();
-		setPreferredSize(new Dimension(width, 300));
 	}
 	
 	public void cluster() { 
@@ -74,7 +71,6 @@ public class ProfileLinePanel extends JPanel {
 			newLinePainters.add(linePainters.get(idx));
 		}
 		linePainters = newLinePainters;
-		repaint();
 	}
 
 	public synchronized void addProfileLinePaintable(ProfileLinePaintable plp) { 
@@ -107,33 +103,16 @@ public class ProfileLinePanel extends JPanel {
 		return(colorbarHeight+(linePainters.size()*lineWeight)+lineWeight+1);
 	}
 	private void updateSize() { 
-		setPreferredSize(new Dimension(width, colorbarHeight+(linePainters.size()*lineWeight)+lineWeight+1));
-		setSize(new Dimension(width, colorbarHeight+(linePainters.size()*lineWeight)+lineWeight+1));
+		height = colorbarHeight+(linePainters.size()*lineWeight)+lineWeight+1;
 	}
 	
-	public void updateFontSize(int size) {
-		fontSize = size;
-		repaint();
-	}
-	public void updateLineWeight(int w) {
-		lineWeight = w;
-		updateSize();
-		repaint();
-	}
-	public void updateColor(Color c) {
-		lineColor=c;
-		repaint();
-	}
+	public void updateFontSize(int size) { fontSize = size; }
+	public void updateLineWeight(int w) { lineWeight = w; updateSize(); }
+	public void updateColor(Color c) { lineColor=c; }
 	public double getMaxColorVal(){return scale.getMax();}
-	public void setMaxColorVal(double v){
-		scale.setScale(scale.getMin(), v);
-		repaint();
-	}
+	public void setMaxColorVal(double v){ scale.setScale(scale.getMin(), v); }
 	public double getMinColorVal(){return scale.getMin();}
-	public void setMinColorVal(double v){
-		scale.setScale(v, scale.getMax());
-		repaint();
-	}
+	public void setMinColorVal(double v){ scale.setScale(v, scale.getMax()); }
 	public void setDrawColorBar(boolean c){
 		drawColorBar = c;
 		if(!c)
@@ -141,22 +120,17 @@ public class ProfileLinePanel extends JPanel {
 		else
 			colorbarHeight=50;
 	}
-	public void setTransparent(boolean c){
-		transparent = c;
-	}
+	public void setTransparent(boolean c){ transparent = c; }
 	public void setLineColorQuanta(double[] q){
 		if(q!=null){
 			colorQuantaLimits=q;
 			colorQuantized=true;
 		}
 	}
-	public void setDrawBorder(boolean b){
-		drawBorder=b;
-	}
+	public void setDrawBorder(boolean b){ drawBorder=b; }
 	
-	protected void paintComponent(Graphics g) { 
-		super.paintComponent(g);
-		int w = getWidth(), h = getHeight();
+	private void paintComponent(Graphics g) { 
+		int w = width, h = height;
 		
 		if(!transparent){
 			g.setColor(Color.white);
@@ -168,11 +142,9 @@ public class ProfileLinePanel extends JPanel {
 			drawSiteColorBar((Graphics2D)g, 0, 0);
 		
 		//Lines
-		synchronized(this) { 
-			for(int i = 0; i < linePainters.size(); i++) { 
-				linePainters.get(i).setColor(lineColor);
-				linePainters.get(i).paintItem(g, 0, colorbarHeight+i*lineWeight, w, colorbarHeight+(i*lineWeight)+lineWeight+1);
-			}
+		for(int i = 0; i < linePainters.size(); i++) { 
+			linePainters.get(i).setColor(lineColor);
+			linePainters.get(i).paintItem(g, 0, colorbarHeight+i*lineWeight, w, colorbarHeight+(i*lineWeight)+lineWeight+1);
 		}
 		
 		//Labels, axes, etc 
@@ -206,34 +178,28 @@ public class ProfileLinePanel extends JPanel {
 	
 	public void saveImage(File f, int w, int h, boolean raster) 
     throws IOException { 
+		this.width = w;
+		this.height = h;
 		if(raster){
-			if(transparent)
-				this.setOpaque(false);
 	        BufferedImage im = 
 	            new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 	        Graphics2D graphics = im.createGraphics();
 	        graphics.setRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-	        this.print(graphics);
+	        paintComponent(graphics);
 	        graphics.dispose();
 	        ImageIO.write(im, "png", f);
 		}else{
 	        DOMImplementation domImpl =
 	            GenericDOMImplementation.getDOMImplementation();
-	        // Create an instance of org.w3c.dom.Document
 	        Document document = domImpl.createDocument(null, "svg", null);
-	        // Create an instance of the SVG Generator
 	        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 	        svgGenerator.setSVGCanvasSize(new Dimension(w,h));
-	        // Ask the test to render into the SVG Graphics2D implementation
 	        if(!transparent){
 	        	svgGenerator.setColor(Color.white);
 	        	svgGenerator.fillRect(0,0,w,h);
 	        }
-	        this.paintComponent(svgGenerator);
-	
-	        // Finally, stream out SVG to the standard output using UTF-8
-	        // character to byte encoding
-	        boolean useCSS = true; // we want to use CSS style attribute
+	        paintComponent(svgGenerator);
+	        boolean useCSS = true;
 	        FileOutputStream outStream = new FileOutputStream(f);
 	        Writer out = new OutputStreamWriter(outStream, "UTF-8");
 	        svgGenerator.stream(out, useCSS);
@@ -243,7 +209,7 @@ public class ProfileLinePanel extends JPanel {
 	}
    
 	private void drawSiteColorBar(Graphics2D g2d, int x, int y){
-		int cWidth = getWidth();
+		int cWidth = width;
 		int cHeight = colorbarHeight-5;
 		
 		//Draw colors 

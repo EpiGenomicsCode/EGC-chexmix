@@ -2,7 +2,6 @@ package org.egc.core.viz.metaprofile.swing;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 
 import org.egc.core.viz.metaprofile.BinningParameters;
 import org.egc.core.viz.metaprofile.Profile;
@@ -23,7 +21,7 @@ import org.egc.core.viz.metaprofile.ProfilePaintable;
 import org.egc.core.viz.paintable.PaintableScale;
 
 
-public class MultiProfilePanel extends JPanel {
+public class MultiProfilePanel {
 	
 	private List<Profile> profiles;
 	private List<ProfilePaintable> profilePainters = new ArrayList<ProfilePaintable>();
@@ -33,6 +31,7 @@ public class MultiProfilePanel extends JPanel {
 	private int lineHeight=20, lineWidth=4;
 	private Color[] peakColors={Color.blue, Color.red, Color.gray, Color.green, Color.cyan, Color.orange, Color.magenta};
 	private String style = "line";
+	private int width=500, height=300;
 	
 	public MultiProfilePanel(List<Profile> p, PaintableScale sc) { 
 		profiles = p;
@@ -41,36 +40,25 @@ public class MultiProfilePanel extends JPanel {
 			ProfilePaintable profilePainter = new ProfilePaintable(scale, profile);
 			profilePainters.add(profilePainter);
 		}
-		
-		setPreferredSize(new Dimension(500, 300));
 	}
 	
-	public void updateFontSize(int size) {
-		fontSize = size;
-		repaint();
-	}
-
-	public void setStyle(String s) {
-		style = s; 
-		repaint();
-	}
+	public void updateFontSize(int size) { fontSize = size; }
+	public void setStyle(String s) { style = s; }
 	
 	public void saveImage(File f, int w, int h) 
     throws IOException { 
-		this.setSize(new Dimension(w, h));
-		repaint();
+		this.width = w;
+		this.height = h;
         BufferedImage im = 
             new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        Graphics g = im.getGraphics();
-        Graphics2D g2 = (Graphics2D)g;
+        Graphics2D g2 = im.createGraphics();
         g2.setRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-        this.paint(g);
+        paintComponent(g2);
         ImageIO.write(im, "png", f);
 	}
 	
-	protected void paintComponent(Graphics g) {
-		int w = getWidth(), h = getHeight();
-		super.paintComponent(g);
+	private void paintComponent(Graphics g) {
+		int w = width, h = height;
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setColor(Color.white);
 		g2.fillRect(0, 0, w, h);
