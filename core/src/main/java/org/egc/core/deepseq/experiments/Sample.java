@@ -128,6 +128,13 @@ public class Sample {
 		return cache.getStrandedBases(r, strand);
 	}
 	
+	/** Get index range [start, end) into position/count arrays for a region and strand. */
+	public int[] getBaseRange(Region r, int strand) { return cache.getBaseRange(r, strand); }
+	/** Direct access to position array for a chromosome and strand. */
+	public int[] getPositionArray(String chrom, int strand) { return cache.getPositionArray(chrom, strand); }
+	/** Direct access to count array for a chromosome and strand. */
+	public float[] getCountArray(String chrom, int strand) { return cache.getCountArray(chrom, strand); }
+	
 	/**
 	 * Load all paired hits that have an R1 read in a region.
 	 * If caching in local files, group calls to this method by same chromosome. 

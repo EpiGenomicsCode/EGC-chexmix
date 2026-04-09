@@ -351,6 +351,61 @@ public class HitCache implements HitCacheInterface{
 	}//end of getStrandedBases method
 	
 	/**
+	 * Get the index range [start, end) of hits in a region on a given strand.
+	 * Returns {0, 0} if no hits found. Indices are into the arrays returned by
+	 * getPositionArray/getCountArray for the same chromosome and strand.
+	 * This method allocates nothing — it returns indices into existing arrays.
+	 * @param r Region
+	 * @param strand 0 for '+', 1 for '-'
+	 * @return int[2] = {startIndex, endIndex}
+	 */
+	public int[] getBaseRange(Region r, int strand) {
+		String chr = r.getChrom();
+		if(chrom2ID.containsKey(chr)){
+			int chrID = chrom2ID.get(chr);
+			if(fivePrimePos[chrID][strand] != null){
+				int[] tempStarts = fivePrimePos[chrID][strand];
+				if(tempStarts.length != 0) {
+					int start_ind = Arrays.binarySearch(tempStarts, r.getStart());
+					int end_ind   = Arrays.binarySearch(tempStarts, r.getEnd());
+					if( start_ind < 0 ) { start_ind = -start_ind - 1; }
+					if( end_ind < 0 )   { end_ind   = -end_ind - 1; }
+					while (start_ind > 0 && tempStarts[start_ind - 1] >= r.getStart())
+						start_ind--;
+					while (end_ind < tempStarts.length && tempStarts[end_ind] <= r.getEnd())
+						end_ind++;
+					return new int[]{start_ind, end_ind};
+				}
+			}
+		}
+		return new int[]{0, 0};
+	}
+	
+	/**
+	 * Direct access to position array for a chromosome and strand.
+	 * @param chrom chromosome name
+	 * @param strand 0 for '+', 1 for '-'
+	 * @return position array, or null
+	 */
+	public int[] getPositionArray(String chrom, int strand) {
+		if(chrom2ID.containsKey(chrom))
+			return fivePrimePos[chrom2ID.get(chrom)][strand];
+		return null;
+	}
+	
+	/**
+	 * Direct access to count array for a chromosome and strand.
+	 * @param chrom chromosome name
+	 * @param strand 0 for '+', 1 for '-'
+	 * @return count array, or null
+	 */
+	public float[] getCountArray(String chrom, int strand) {
+		if(chrom2ID.containsKey(chrom))
+			return fivePrimeCounts[chrom2ID.get(chrom)][strand];
+		return null;
+	}
+	
+	/**
 	 * Load all paired hits that have an R1 read in a region.
 	 * If file caching is being used, it's more efficient to group calls to this method by chromosome.  
 	 * @param r Region

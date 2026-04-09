@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.egc.core.deepseq.StrandedBaseCount;
+import org.egc.core.deepseq.RegionCounts;
 import org.egc.core.deepseq.experiments.ControlledExperiment;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
@@ -102,7 +102,7 @@ public class BindingEM {
      * Almost purely matrix/array operations.
 	 * @throws FileNotFoundException 
      */
-    public List<List<BindingSubComponents>>  train(List<List<StrandedBaseCount>> signals, 
+    public List<List<BindingSubComponents>>  train(RegionCounts signals, 
     											  Region w, 
     											  List<NoiseComponent> noise,
     											  List<List<BindingSubComponents>> comps, 
@@ -163,33 +163,32 @@ public class BindingEM {
         	//Set maximum alphas
         	alphaMax[c] =  calcAlpha(cond); 
         	        	
-        	//Load Reads (merge from all replicates)
-        	List<StrandedBaseCount> bases = new ArrayList<StrandedBaseCount>();
+        	//Load Reads (merge from all replicates using primitive arrays)
+        	int numBases = 0;
         	for(ControlledExperiment rep : cond.getReplicates())
-        		bases.addAll(signals.get(rep.getIndex()));
-        	int numBases = bases.size();
+        		numBases += signals.getHitCount(rep.getIndex());
         	hitNum[c]=numBases;
         	
-        	//Load replicate index for each read
-        	repIndices[c] = new int[numBases]; 
-        	int y=0, z=0;
-        	for(ControlledExperiment rep : cond.getReplicates()){
-        		z=0;
-        		while(z<signals.get(rep.getIndex()).size()){
-        			repIndices[c][y] = rep.getIndex();
-        			z++; y++;
-        		}
-        	}
-        	
-            //Load read info
+        	//Build merged arrays directly from RegionCounts
+        	repIndices[c] = new int[numBases];
             double[] countc= new double[numBases];
             int[] posc= new int[numBases];
             boolean[] plusc= new boolean[numBases];
-            for(int i=0;i<numBases;i++){
-            	posc[i] = bases.get(i).getCoordinate();
-            	plusc[i] = bases.get(i).getStrand() == '+';
-                countc[i]=bases.get(i).getCount();
-            }
+            int offset = 0;
+        	for(ControlledExperiment rep : cond.getReplicates()){
+        		int ri = rep.getIndex();
+        		int repSize = signals.getHitCount(ri);
+        		int[] repPos = signals.getPositions(ri);
+        		boolean[] repPlus = signals.getPlusStrand(ri);
+        		float[] repCounts = signals.getCounts(ri);
+        		for(int i=0; i<repSize; i++){
+        			posc[offset] = repPos[i];
+        			plusc[offset] = repPlus[i];
+        			countc[offset] = repCounts[i];
+        			repIndices[c][offset] = ri;
+        			offset++;
+        		}
+        	}
             hitPos[c] = posc;
             hitCounts[c]=countc;
             hitPlusStr[c] = plusc;       	
@@ -927,7 +926,7 @@ public class BindingEM {
      * @param responsibilities
      * @param c2b
      */
-    private void setComponentResponsibilityProfiles(List<List<BindingSubComponents>> bindComponents, List<List<StrandedBaseCount>> signals, 
+    private void setComponentResponsibilityProfiles(List<List<BindingSubComponents>> bindComponents, RegionCounts signals, 
             									double[][][][][] responsibilities) {
 		for(ExperimentCondition cond : manager.getConditions()){
 			int c = cond.getIndex();			
@@ -936,30 +935,29 @@ public class BindingEM {
 				BindingSubComponents comp = bindComponents.get(c).get(j);
 				int jr = comp.getIndex();		
 		    	for(ControlledExperiment rep : cond.getReplicates()){
-		    		List<StrandedBaseCount> bases = signals.get(rep.getIndex());		
+		    		int ri = rep.getIndex();
+		    		int repSize = signals.getHitCount(ri);
+		    		int[] repPos = signals.getPositions(ri);
+		    		boolean[] repPlus = signals.getPlusStrand(ri);
+		    		float[] repCounts = signals.getCounts(ri);
 			    	double[][][][] rc = responsibilities[c];		   
 			    	int center = config.MAX_BINDINGMODEL_WIDTH/2;
 			   		// store binding profile (read responsibilities in c condition) of this component
 					double[][][] sub_profile_plus = new double[numBindingType[c]][2][config.MAX_BINDINGMODEL_WIDTH];
 					double[][][] sub_profile_minus = new double[numBindingType[c]][2][config.MAX_BINDINGMODEL_WIDTH];
-					for(int i=0;i<bases.size();i++){
-						StrandedBaseCount base = bases.get(i);	
-						int offset = base.getCoordinate()-comp.getPosition()+center;
+					for(int i=0;i<repSize;i++){
+						int offset = repPos[i]-comp.getPosition()+center;
 						if(offset>=0 && offset<config.MAX_BINDINGMODEL_WIDTH){
-							// Do not flip arrays for now to assign responsibilities for each sub component
 							for (int bt=0; bt< numBindingType[c]; bt++){
 								for (int s=0; s< 2; s++){							
-									if (base.getStrand()=='+')
-										sub_profile_plus[bt][s][offset]=rc[jr][i][bt][s]*base.getCount();
-									else // if components at negative strand
-										sub_profile_minus[bt][s][offset]=rc[jr][i][bt][s]*base.getCount();
+									if (repPlus[i])
+										sub_profile_plus[bt][s][offset]=rc[jr][i][bt][s]*repCounts[i];
+									else
+										sub_profile_minus[bt][s][offset]=rc[jr][i][bt][s]*repCounts[i];
 								}
 							}
 						}
 					}
-					// Set subcomponents profiles : This step is consuming a lot of memory and not even used later
-//					comp.setSubReadProfile(rep.getIndex(), sub_profile_plus, '+');
-//					comp.setSubReadProfile(rep.getIndex(), sub_profile_minus, '-');
 					
 					double[] profile_plus = new double[config.MAX_BINDINGMODEL_WIDTH];
 					double[] profile_minus = new double[config.MAX_BINDINGMODEL_WIDTH];

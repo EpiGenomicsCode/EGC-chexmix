@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.egc.core.data.motifdb.WeightMatrix;
+import org.egc.core.deepseq.RegionCounts;
 import org.egc.core.deepseq.StrandedBaseCount;
 import org.egc.core.deepseq.experiments.ControlledExperiment;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
@@ -946,11 +947,11 @@ public class BindingMixture {
 					plotSubReg = p;
 			
 			//Load signal data
-			List<List<StrandedBaseCount>> signals = loadSignalData(w);
-            if (signals==null)
+			RegionCounts signals = loadSignalData(w);
+            if (signals==null || signals.getTotalHitCount()==0)
                 return new Pair<List<NoiseComponent>, List<List<BindingSubComponents>>>(noiseComponents, nonZeroComponents);
             //Load control data
-            List<List<StrandedBaseCount>> controls = loadControlData(w);
+            RegionCounts controls = loadControlData(w);
             
             //Initialize noise components
             noiseComponents = initializeNoiseComponents(w, signals, controls);
@@ -968,7 +969,7 @@ public class BindingMixture {
                         
             //EM learning: resulting binding components list will only contain non-zero components   
             if (uniformBindingComponents && mixconfig.getModelFilename()== null)
-            	nonZeroComponents = multiGPSEM.train(signals, w, noiseComponents, bindingComponents, numBindingComponents, trainingRound, plotSubReg);
+            	nonZeroComponents = multiGPSEM.train(signals.toLegacyFormat(), w, noiseComponents, bindingComponents, numBindingComponents, trainingRound, plotSubReg);
             else
             	nonZeroComponents = EM.train(signals, w, noiseComponents, bindingComponents, numBindingComponents, forMotifPrior, revMotifPrior, trainingRound, plotSubReg);
            
@@ -990,11 +991,11 @@ public class BindingMixture {
 			List<BindingEvent> currEvents = new ArrayList<BindingEvent>(); 
 			
 			//Load signal data
-			List<List<StrandedBaseCount>> signals = loadSignalData(w);
-            if (signals==null)
+			RegionCounts signals = loadSignalData(w);
+            if (signals==null || signals.getTotalHitCount()==0)
                 return currEvents;
             //Load control data
-            List<List<StrandedBaseCount>> controls = loadControlData(w);
+            RegionCounts controls = loadControlData(w);
             
             //Initialize noise components
             noiseComponents = initializeNoiseComponents(w, signals, controls);
@@ -1034,10 +1035,10 @@ public class BindingMixture {
     				//ML assignment
     				List<BindingEvent> condEvents = null;
     				if (runMultiGPSML){
-    					condEvents = GPSML.assign(signals, controls, w, noiseComponents, bindingComponents, numComp, cond);  					
+    					condEvents = GPSML.assign(signals.toLegacyFormat(), controls.toLegacyFormat(), w, noiseComponents, bindingComponents, numComp, cond);  					
     				}else{
     					//Make ML assignment condition specific or hack to get some read assignment
-        				condEvents = ML.assign(signals, controls, w, noiseComponents, bindingComponents, numComp, cond);
+        				condEvents = ML.assign(signals.toLegacyFormat(), controls.toLegacyFormat(), w, noiseComponents, bindingComponents, numComp, cond);
     				}
     				
     				for(BindingEvent be : condEvents)
@@ -1104,44 +1105,54 @@ public class BindingMixture {
 		}
 		
 		/**
-		 * Load all signal read hits in a region by condition. 
-		 * 
-		 * @param w
-		 * @return List of List of StrandedBaseCounts, indexed by replicate index
+		 * Load all signal read hits in a region as primitive arrays, indexed by replicate.
+		 * Uses zero-copy array slices from HitCache — no StrandedBaseCount allocation.
 		 */
-		private List<List<StrandedBaseCount>> loadSignalData(Region w){
-			List<List<StrandedBaseCount>> data = new ArrayList<List<StrandedBaseCount>>();
-			for(ExperimentCondition cond : manager.getConditions()){
-				for(ControlledExperiment rep : cond.getReplicates())
-					data.add(new ArrayList<StrandedBaseCount>());
-			}
+		private RegionCounts loadSignalData(Region w){
+			int numReps = manager.getReplicates().size();
+			RegionCounts rc = new RegionCounts(numReps);
 			for(ExperimentCondition cond : manager.getConditions()){
 				for(ControlledExperiment rep : cond.getReplicates()){
-					data.get(rep.getIndex()).addAll(rep.getSignal().getBases(w));
+					Sample sig = rep.getSignal();
+					int[] plusRange = sig.getBaseRange(w, 0);
+					int[] minusRange = sig.getBaseRange(w, 1);
+					int[] plusPos = sig.getPositionArray(w.getChrom(), 0);
+					float[] plusCounts = sig.getCountArray(w.getChrom(), 0);
+					int[] minusPos = sig.getPositionArray(w.getChrom(), 1);
+					float[] minusCounts = sig.getCountArray(w.getChrom(), 1);
+					rc.setFromHits(rep.getIndex(),
+						plusPos != null ? plusPos : new int[0], plusCounts != null ? plusCounts : new float[0], plusRange[0], plusRange[1],
+						minusPos != null ? minusPos : new int[0], minusCounts != null ? minusCounts : new float[0], minusRange[0], minusRange[1]);
 				}
 			}
-			return data;
+			return rc;
 		}
 		
 		/**
-		 * Load all control read hits in a region by condition. 
-		 * 
-		 * @param w
-		 * @return List of List of StrandedBaseCounts, indexed by replicate index
+		 * Load all control read hits in a region as primitive arrays, indexed by replicate.
 		 */
-		private List<List<StrandedBaseCount>> loadControlData(Region w){
-			List<List<StrandedBaseCount>> data = new ArrayList<List<StrandedBaseCount>>();
-			for(ExperimentCondition cond : manager.getConditions()){
-				for(ControlledExperiment rep : cond.getReplicates())
-					data.add(new ArrayList<StrandedBaseCount>());
-			}
+		private RegionCounts loadControlData(Region w){
+			int numReps = manager.getReplicates().size();
+			RegionCounts rc = new RegionCounts(numReps);
 			for(ExperimentCondition cond : manager.getConditions()){
 				for(ControlledExperiment rep : cond.getReplicates()){
-					if(rep.hasControl())
-						data.get(rep.getIndex()).addAll(rep.getControl().getBases(w));
+					if(rep.hasControl()){
+						Sample ctrl = rep.getControl();
+						int[] plusRange = ctrl.getBaseRange(w, 0);
+						int[] minusRange = ctrl.getBaseRange(w, 1);
+						int[] plusPos = ctrl.getPositionArray(w.getChrom(), 0);
+						float[] plusCounts = ctrl.getCountArray(w.getChrom(), 0);
+						int[] minusPos = ctrl.getPositionArray(w.getChrom(), 1);
+						float[] minusCounts = ctrl.getCountArray(w.getChrom(), 1);
+						rc.setFromHits(rep.getIndex(),
+							plusPos != null ? plusPos : new int[0], plusCounts != null ? plusCounts : new float[0], plusRange[0], plusRange[1],
+							minusPos != null ? minusPos : new int[0], minusCounts != null ? minusCounts : new float[0], minusRange[0], minusRange[1]);
+					} else {
+						rc.setFromHits(rep.getIndex(), new int[0], new float[0], 0, 0, new int[0], new float[0], 0, 0);
+					}
 				}
 			}
-			return data;
+			return rc;
 		}
 		
 		/**
@@ -1374,7 +1385,7 @@ public class BindingMixture {
          *
          * @param currReg
          */
-        private List<NoiseComponent> initializeNoiseComponents(Region currReg, List<List<StrandedBaseCount>> sigHits, List<List<StrandedBaseCount>> ctrlHits){
+        private List<NoiseComponent> initializeNoiseComponents(Region currReg, RegionCounts sigHits, RegionCounts ctrlHits){
         	List<NoiseComponent> noise = new ArrayList<NoiseComponent>();
         	int numReps = manager.getReplicates().size();
         	double [] localSigRepCounts=new double [numReps];
@@ -1384,11 +1395,9 @@ public class BindingMixture {
         	double [][] distribs=new double[numReps][];
         	for(ExperimentCondition cond : manager.getConditions())
         		for(ControlledExperiment rep : cond.getReplicates()){
-	    			if(rep.hasControl() && ctrlHits.get(rep.getIndex()).size()>0){
-	            		distribs[rep.getIndex()] = smoothNoiseDistribs(currReg, ctrlHits.get(rep.getIndex()));
-	            		localCtrlRepCounts[rep.getIndex()]=0;
-	            		for(StrandedBaseCount b : ctrlHits.get(rep.getIndex()))
-	            			localCtrlRepCounts[rep.getIndex()]+=b.getCount();
+	    			if(rep.hasControl() && ctrlHits.getHitCount(rep.getIndex())>0){
+	            		distribs[rep.getIndex()] = smoothNoiseDistribs(currReg, ctrlHits, rep.getIndex());
+	            		localCtrlRepCounts[rep.getIndex()] = ctrlHits.getCountTotal(rep.getIndex());
 	    			}else
 	    				distribs[rep.getIndex()] = null;
 	    		}
@@ -1401,30 +1410,21 @@ public class BindingMixture {
         		//Sum signal reads & set local region experiment counts
         		double sigCounts=0;
         		for(ControlledExperiment rep : cond.getReplicates()){
-        			localSigRepCounts[rep.getIndex()]=0;
-        			for(StrandedBaseCount b : sigHits.get(rep.getIndex())){
-        				sigCounts+=b.getCount(); localSigRepCounts[rep.getIndex()]+=b.getCount();
-        			}
+        			localSigRepCounts[rep.getIndex()] = sigHits.getCountTotal(rep.getIndex());
+        			sigCounts += localSigRepCounts[rep.getIndex()];
         		}
         		
-        		//Calculate a local noise factor to check for expected over-representation of noise reads, as specified in the control.
-        		//We assume that only noise generates the control channel. Therefore, the first two terms in the localNoiseFactor calculation
-        		//test for over-representation in the observed control read counts in the local window. 
-        		//The last term in the calculation is a local replicate weight, to account for the fact that some replicate signal channels are 
-        		//producing more of the signal reads (and of course, the noise we are actually accounting for is in the signal channel). 
         		double localNoiseFactor = 0;
         		for(ControlledExperiment rep : cond.getReplicates()){
-        			if(rep.hasControl() && ctrlHits.get(rep.getIndex()).size()>0){
+        			if(rep.hasControl() && ctrlHits.getHitCount(rep.getIndex())>0){
         				localNoiseFactor+=(localCtrlRepCounts[rep.getIndex()]/(double)currReg.getWidth()) /
         								  (rep.getControl().getHitCount()/(double)currReg.getWidth())     *
-        								  (localSigRepCounts[rep.getIndex()]/sigCounts); //over-rep x weight
+        								  (localSigRepCounts[rep.getIndex()]/sigCounts);
         			}else{
-        				localNoiseFactor+=(localSigRepCounts[rep.getIndex()]/sigCounts); //1 x weight
+        				localNoiseFactor+=(localSigRepCounts[rep.getIndex()]/sigCounts);
         			}
         		}
         		
-        		//Calculate expected noise emission = number of expected noise reads over the total signal reads in this region
-        		// If local noise factor is above 1, account for it. Otherwise, meh.
         		emission = (noisePerBase[e] * (double)currReg.getWidth()) / sigCounts;
         		if(localNoiseFactor>1)
         			emission*=localNoiseFactor;
@@ -1433,7 +1433,6 @@ public class BindingMixture {
         		if(emission<config.NOISE_EMISSION_MIN)
         			emission = config.NOISE_EMISSION_MIN;
         		
-        		//Add the noise component
         		NoiseComponent n = new NoiseComponent(emission, distribs, currReg, numReps);
         		noise.add(n);
         	}
@@ -1446,17 +1445,19 @@ public class BindingMixture {
          * @param ctrlHits
          * @return double array the same width as the region, containing probabilities normalized to sum to 1
          */
-        private double[] smoothNoiseDistribs(Region currReg, List<StrandedBaseCount> ctrlHits){
+        private double[] smoothNoiseDistribs(Region currReg, RegionCounts ctrlHits, int repIndex){
         	double [] distrib = new double[currReg.getWidth()];
         	double [] counts = new double[currReg.getWidth()];
         	//Pseudocounts for distrib
         	for(int d=0; d<currReg.getWidth(); d++)
         		counts[d]=1;
         	//Add in count weights
-        	for(StrandedBaseCount hit : ctrlHits){
-        		int index = hit.getCoordinate()-currReg.getStart();
+        	int[] hitPos = ctrlHits.getPositions(repIndex);
+        	float[] hitCounts = ctrlHits.getCounts(repIndex);
+        	for(int h=0; h<ctrlHits.getHitCount(repIndex); h++){
+        		int index = hitPos[h]-currReg.getStart();
         		if(index>=0 && index<currReg.getWidth())
-        			counts[index]+=hit.getCount();
+        			counts[index]+=hitCounts[h];
         	}
         	
         	//Smooth
