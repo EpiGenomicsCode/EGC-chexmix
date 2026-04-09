@@ -1,6 +1,5 @@
 package org.egc.core.deepseq.experiments;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

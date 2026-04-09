@@ -10,6 +10,7 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 	private MetaProfile profile;
 	private PointProfiler<T, ProfileClass> profiler, threadSafe;
 	private Vector<PointAddingThread> currentlyAdding;
+	private List<Thread> activeThreads = new ArrayList<Thread>();
 	
 	public MetaProfileHandler(String name, BinningParameters bps, PointProfiler<T,ProfileClass> pp, boolean normalizedMeta) { 
 		if(normalizedMeta)
@@ -22,14 +23,6 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 	}
 	
 	public MetaProfile getProfile() { return profile; }
-	
-	public boolean addingPoints(){
-		synchronized(currentlyAdding) { 
-			for(PointAddingThread pat : currentlyAdding) { 
-				if(pat.running){return true;}
-			}
-		}return(false);
-	}
 	
 	public void addPoints(Collection<T> points) { 
 		addPoints(points.iterator());
@@ -44,6 +37,7 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 		synchronized(currentlyAdding) { 
 			currentlyAdding.add(pat);
 			Thread t = new Thread(pat);
+			activeThreads.add(t);
 			t.start();		
 		}
 	}
@@ -54,12 +48,14 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 		}
 	}
 	
-	public void stopAllAddingThreads() { 
-		synchronized(currentlyAdding) { 
-			for(PointAddingThread pat : currentlyAdding) { 
-				pat.stopAdding();
-			}
+	/**
+	 * Block until all point-adding threads have completed.
+	 */
+	public void awaitCompletion() {
+		for(Thread t : activeThreads) {
+			try { t.join(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 		}
+		activeThreads.clear();
 	}
 	
 	private class ThreadSafeProfiler implements PointProfiler<T,ProfileClass> {

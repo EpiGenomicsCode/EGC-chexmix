@@ -99,7 +99,6 @@ public class ShapeAlignConfig {
 		ArgParser ap = new ArgParser(args);
 //		if(ap.hasKey("h") || ap.hasKey("help") || args.length == 0){
 //			System.err.println(ShapeAlignConfig.getShapAlignArgsList());
-//			System.exit(1);
 //		}
 		
 		gconf = new GenomeConfig(args);

@@ -74,7 +74,7 @@ public class MetaMaker {
 							}else{
 								System.err.println("All TSS mode requires gene annotation loading, which has been removed. Provide a peak file with --peaks instead.");
 							}
-							while(handler.addingPoints()){}
+							handler.awaitCompletion();
 							if(mconfig.cluster)
 								nonframe.clusterLinePanel();
 							//Set the panel sizes here...
@@ -92,7 +92,7 @@ public class MetaMaker {
 								Vector<Point> points = multinonframe.getUtils().loadPoints(new File(pf));
 								List<MetaProfileHandler> handlers = multinonframe.getHandlers();
 								handlers.get(x).addPoints(points);
-								while(handlers.get(x).addingPoints()){}
+								handlers.get(x).awaitCompletion();
 							}
 							multinonframe.saveImage(imagePrefix);
 							multinonframe.savePointsToFile(intPrefix);
