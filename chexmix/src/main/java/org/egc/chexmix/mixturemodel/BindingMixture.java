@@ -29,7 +29,6 @@ import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.genome.location.ChromosomeGenerator;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.gseutils.RealValuedHistogram;
 import org.egc.core.math.stats.StatUtil;
@@ -147,39 +146,28 @@ public class BindingMixture {
 		if (EM)
 			trainingRound++;
 		
-		//Have to split the test regions up by chromosome in order to maintain compatibility with experiment file cache loading
-		//There will be some performance hit here, as all threads have to finish in a given chromosome before moving on to the next one. 
-		Iterator<Region> chroms = new ChromosomeGenerator().execute(gconfig.getGenome());
-		while (chroms.hasNext()) {
-			Region currChr = chroms.next();
-			List<Region> currChrTestReg = new ArrayList<Region>();
-			for(Region r : testRegions)
-				if(currChr.overlaps(r))
-					currChrTestReg.add(r);
-			
-			if(currChrTestReg.size()>0){
-				int numThreads = config.getMaxThreads()>currChrTestReg.size() ?  currChrTestReg.size() : config.getMaxThreads(); 
-				Thread[] threads = new Thread[numThreads];
-		        ArrayList<Region> threadRegions[] = new ArrayList[numThreads];
-		        int i = 0;
-		        for (i = 0 ; i < threads.length; i++) {
-		            threadRegions[i] = new ArrayList<Region>();
-		        }i=0;
-		        for(Region r : currChrTestReg){
-		            threadRegions[(i++) % numThreads].add(r);
-		        }
-		
-		        for (i = 0 ; i < threads.length; i++) {
-		            Thread t = new Thread(new BindingMixtureThread(threadRegions[i], EM, uniformBindingSubComponents, multiGPSML));
-		            t.start();
-		            threads[i] = t;
-		        }
-		        for (i = 0 ; i < threads.length; i++) {
-		            try {
-		                threads[i].join();
-		            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-		        }
-			}
+		if(testRegions.size()>0){
+			int numThreads = Math.min(config.getMaxThreads(), testRegions.size());
+			Thread[] threads = new Thread[numThreads];
+	        ArrayList<Region> threadRegions[] = new ArrayList[numThreads];
+	        int i = 0;
+	        for (i = 0 ; i < threads.length; i++) {
+	            threadRegions[i] = new ArrayList<Region>();
+	        }i=0;
+	        for(Region r : testRegions){
+	            threadRegions[(i++) % numThreads].add(r);
+	        }
+	
+	        for (i = 0 ; i < threads.length; i++) {
+	            Thread t = new Thread(new BindingMixtureThread(threadRegions[i], EM, uniformBindingSubComponents, multiGPSML));
+	            t.start();
+	            threads[i] = t;
+	        }
+	        for (i = 0 ; i < threads.length; i++) {
+	            try {
+	                threads[i].join();
+	            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+	        }
 		}
 	}
 	

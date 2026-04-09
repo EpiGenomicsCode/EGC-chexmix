@@ -133,8 +133,7 @@ public class PotentialRegionFilter {
 		//However, this method of filtering is safest when excluding regions from whole chromosomes or other large regions
 		testRegions = filterExcludedLeaveRemaining(testRegions);
 		
-		//Threading divides analysis over entire chromosomes. This approach is not compatible with file caching. 
-		int numThreads = econfig.getCacheAllData() ? config.getMaxThreads() : 1;
+		int numThreads = config.getMaxThreads();
 				
 		Thread[] threads = new Thread[numThreads];
         List<Region> threadRegions[] = new ArrayList[numThreads];

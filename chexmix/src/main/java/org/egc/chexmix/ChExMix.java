@@ -29,6 +29,7 @@ import org.egc.core.deepseq.experiments.ControlledExperiment;
 import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.deepseq.experiments.ExptConfig;
+import org.egc.core.deepseq.experiments.Sample;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
@@ -161,7 +162,18 @@ public class ChExMix {
 			System.err.println("No potential regions.");
 	//		System.exit(1);
 		}
-		potentialFilter.printPotentialRegionsToFile();		
+		potentialFilter.printPotentialRegionsToFile();
+		
+		//Free memory by subsetting the read cache to only retain hits in/near potential regions
+		if(potentials.size()>0){
+			int margin = chexconfig.MAX_BINDINGMODEL_WIDTH;
+			List<Region> expandedRegions = new ArrayList<Region>();
+			for(Region r : potentials)
+				expandedRegions.add(r.expand(margin, margin));
+			for(Sample samp : manager.getSamples())
+				samp.subsetCache(expandedRegions);
+			System.err.println("Read cache subset to potential regions (margin="+margin+"bp). Non-potential-region reads freed.");
+		}
 	}
 	
 	/**
@@ -382,7 +394,6 @@ public class ChExMix {
 				"\t--poissongausspb <filter per base using a Poisson threshold parameterized by a local Gaussian sliding window>\n" +
 				"\t--nonunique [flag to use non-unique reads]\n" +
 				"\t--mappability <fraction of the genome that is mappable for these experiments (default=0.8)>\n" +
-				"\t--nocache [flag to turn off caching of the entire set of experiments (i.e. run slower with less memory)]\n" +
 				"Scaling control vs signal counts:\n" +
 				"\t--noscaling [flag to turn off auto estimation of signal vs control scaling factor]\n" +
 				"\t--medianscale [flag to use scaling by median ratio (default = scaling by NCIS)]\n" +

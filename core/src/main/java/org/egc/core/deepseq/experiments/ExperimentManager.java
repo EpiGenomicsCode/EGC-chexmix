@@ -94,7 +94,7 @@ public class ExperimentManager {
 				allSamples.get(sampleName).addHitLoader(loaders.get(name));
 			}
 			if(loadReads){
-				allSamples.get(sampleName).initializeCache(econfig.getCacheAllData(), econfig.getInitialCachedRegions());
+				allSamples.get(sampleName).initializeCache();
 				if(econfig.getPrintLoadingProgress())
 					System.err.println("\tLoaded.");
 			}

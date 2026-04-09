@@ -1,16 +1,6 @@
 package org.egc.core.deepseq.experiments;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,7 +10,6 @@ import java.util.List;
 
 import cern.jet.random.Poisson;
 import cern.jet.random.engine.DRand;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.egc.core.deepseq.ExtReadHit;
 import org.egc.core.deepseq.HitPair;
 import org.egc.core.deepseq.ReadHit;
@@ -35,54 +24,26 @@ import org.egc.core.math.stats.StatUtil;
 
 
 /**
- * HitCache acts as a cache for some or all alignment hits associated with a particular Sample. 
+ * HitCache stores all alignment hits for a Sample in memory.
  * 
- * This class can cache either all alignment hits, or hits contained in a (rewritable) list of regions.
- * Which you choose to do in your application should be guided by the speed and memory trade-off. 
- * If you choose the latter (cache each chromosome or sets of regions as you go), be careful to match your queries 
- * with the cached regions. For example, if caching each chromosome as you go, you should group your queries
- * according to chromosome name.  
+ * All hits are loaded at initialization into primitive arrays for efficient access.
+ * After potential binding regions are identified, call subsetArrays() to free memory
+ * for reads outside the analysis regions.
  * 
- * Note that even if you are not choosing to cache all alignment hits, the initialize method (called from constructor)
- * will still load all hits to memory. This is unfortunately currently required in order to calculate accurate
- * total hits and unique hits given the application of the per-base limit schema. Perhaps we can find
- * a work-around in the future.  
+ * Hit alignments are stored in two primitive type 3D arrays -- fivePrimePos and fivePrimeCounts.
+ * In each array:
+ * - first dimension: chromosome ID (via chrom2ID map)
+ * - second dimension: strand (0 for Watson/'+', 1 for Crick/'-')
+ * - third dimension: hit positions or counts
  * 
- * Hit alignments are loaded into two primative type 3D arrays -- fivePrimePos and fivePrimeCounts.
- * The fivePrimes field for each chrom/strand will be distinct. 
- * Multiple reads mapped to the same bp position will be stored as counts.
- * In each of the 3D arrays:  <br>
- * - the first dimension corresponds to the chromosome that a hit belongs to (based on
- * the mapping from a chromosome as a <tt>String</tt> to an integer via the 
- * <tt>chrom2ID</tt> map).    <br>
- * - the second dimension corresponds to the strand. 0 for '+' (Watson), 1 for '-' (Crick). <br>
- * - the third dimension contains information for a hit (e.g. its fivePrimes or counts)
- * 
- * 
- * This class also stores paired hits, if they exist for a given Sample.
- * All paired hits are indexed off the R1 reads. When you call getPairs(region) or similar methods, you
- * will only get back pairs that have a R1 read hit located in the region. Therefore, be careful with how you
- * interpret the numbers of paired hits in a given region. 
- *  
- * It may seem inefficient to store the pair information separately from the hits. However, note that the
- * single hits are stored as compressed hit location-weight pairs (i.e. multiple hits mapping to the same position  
- * are treated as counts of the same hit). The single hit locations will also not match up completely with 
- * the paired locations - only locations of hits in valid pairs are stored as pairs.    
- * In summary, the single end hit locations are related to, but distinct from, the hit pairs, and care should be 
- * taken when comparing items from each type.  
- * 
+ * After initialization, data is read-only and all access is thread-safe
+ * without synchronization.
  * 
  * @author mahony
- * This class combines functionality from DeepSeq and ReadCache in the old GSE setup.
  */
 public class HitCache implements HitCacheInterface{
 
 	private Collection<HitLoader> loaders; //Source of reads
-	private boolean cacheMemoryEntireGenome=false;
-	private boolean cacheInLocalFiles=false; //This is set to !cacheMemoryEntireGenome for now, but there may be situations in the future where both are false
-	private File localCacheDir = null;
-	private String localCacheFileBase=null;
-	private List<Region> cachedRegions = null;
 	private Genome gen;
 	private ExptConfig econfig;
 	private int numChroms=0;
@@ -172,17 +133,15 @@ public class HitCache implements HitCacheInterface{
 	 * @param ec
 	 * @param hloaders
 	 * @param perBaseReadMax
-	 * @param cacheEverything : boolean flag to cache all hits
-	 * @param initialCacheRegions : list of regions to cache first (can be null)
 	 */
-	public HitCache(boolean loadPairs, ExptConfig ec, Collection<HitLoader> hloaders, float perBaseReadMax, boolean cacheEverything, List<Region> initialCacheRegions){
+	public HitCache(boolean loadPairs, ExptConfig ec, Collection<HitLoader> hloaders, float perBaseReadMax){
 		econfig = ec;
 		gen = econfig.getGenome();
 		this.loaders = hloaders;
 		maxReadsPerBP= perBaseReadMax;
 		this.loadPairs = loadPairs;
 		this.sortMid = ec.sortMid;
-		initialize(cacheEverything, initialCacheRegions);
+		initialize();
 	}
 	
 	//Accessors
@@ -210,10 +169,7 @@ public class HitCache implements HitCacheInterface{
 	 * @param cacheEverything : boolean flag to cache all hits (if false, local file caching is activated)
 	 * @param initialCacheRegions : list of regions to cache first (can be null)
 	 */
-	private void initialize(boolean cacheEverything, List<Region> initialCacheRegions){
-		cacheMemoryEntireGenome=cacheEverything;
-		cacheInLocalFiles = !cacheMemoryEntireGenome;
-		cachedRegions = initialCacheRegions;
+	private void initialize(){
 		
 		//These lists are temporary stores while collecting reads from all sources
 		HashMap<String, ArrayList<Integer>[]> posList = new HashMap<String, ArrayList<Integer>[]>();
@@ -300,19 +256,6 @@ public class HitCache implements HitCacheInterface{
 			initializeBackground(); //Reinitialize given updated hit count (again - just the per-base background model)
 		}
 		
-		//If you are not caching everything, reduce the assigned memory
-		if(!cacheMemoryEntireGenome){
-			//Cache in local files
-			if(cacheInLocalFiles)
-				saveCacheLocally();
-
-			//Save a subset of regions from the current data structure if necessary
-			if(cachedRegions==null)
-				emptyArrays();
-			else
-				subsetArrays(cachedRegions);
-		}
-		
 		//Free memory
 		for(String chr: posList.keySet()){
 			posList.get(chr)[0].clear();
@@ -376,16 +319,9 @@ public class HitCache implements HitCacheInterface{
 	 * @param r Region
 	 * @return List of StrandedBaseCounts
 	 */
-	public synchronized List<StrandedBaseCount> getStrandedBases(Region r, char strand) {
+	public List<StrandedBaseCount> getStrandedBases(Region r, char strand) {
 		List<StrandedBaseCount> bases = new ArrayList<StrandedBaseCount>();
 
-		if(!regionIsCached(r)){
-			if(cacheInLocalFiles){
-				loadCachedChrom(r.getChrom());
-			}else{
-				throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-			}
-		}
 		
 		String chr = r.getChrom();
 		if(chrom2ID.containsKey(chr)){
@@ -434,17 +370,10 @@ public class HitCache implements HitCacheInterface{
 	 * @param r Region
 	 * @return List of StrandedPair
 	 */
-	public synchronized List<StrandedPair> getPairsOnStrand(Region r, char strand) {
+	public List<StrandedPair> getPairsOnStrand(Region r, char strand) {
 		List<StrandedPair> pairs = new ArrayList<StrandedPair>();
 
 		if(loadPairs && hasPairs && pairR1Pos!=null){
-			if(!regionIsCached(r)){
-				if(cacheInLocalFiles){
-					loadCachedChrom(r.getChrom());
-				}else{
-					throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-				}
-			}
 			String chr = r.getChrom();
 			if(chrom2ID.containsKey(chr)){
 				int chrID = chrom2ID.get(chr);
@@ -476,17 +405,10 @@ public class HitCache implements HitCacheInterface{
 		return pairs;
 	}
 	
-	public synchronized List<StrandedPair> getPairsByMid(Region r) {
+	public List<StrandedPair> getPairsByMid(Region r) {
 		List<StrandedPair> pairs = new ArrayList<StrandedPair>();
 		
 		if(loadPairs && hasPairs && pairR1Pos!=null) {
-			if(!regionIsCached(r)) {
-				if(cacheInLocalFiles) {
-					loadCachedChrom(r.getChrom());
-				}else {
-					throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-				}
-			}
 			String chr = r.getChrom();
 			if(chrom2ID.containsKey(chr)) {
 				int chrID = chrom2ID.get(chr);
@@ -537,15 +459,8 @@ public class HitCache implements HitCacheInterface{
 	 * @param r Region
 	 * @return float 
 	 */
-    public synchronized float countStrandedBases(Region r, char strand) {
+    public float countStrandedBases(Region r, char strand) {
     	float count = 0;
-		if(!regionIsCached(r)){
-			if(cacheInLocalFiles){
-				loadCachedChrom(r.getChrom());
-			}else{
-				throw new RuntimeException("HitCache: Queried region "+r.getLocationString()+" is not in cache and local file caching not available!");
-			}
-		}
 		
     	String chr = r.getChrom();
 		if(chrom2ID.containsKey(chr)){
@@ -624,53 +539,6 @@ public class HitCache implements HitCacheInterface{
 	 * Should be called by all methods that query hits in this class 
 	 * @param r
 	 * @return
-	 */
-	private boolean regionIsCached(Region r){
-		boolean regionCached = cacheMemoryEntireGenome ? true : false;
-		if(!regionCached && cachedRegions!=null){
-			for(Region curr : cachedRegions){
-				if(curr.contains(r)){
-					regionCached=true; break;
-				}
-			}
-		}
-		return regionCached;
-	}
-	
-	/**
-	 * Empty the position and counts arrays, but leave skeleton intact
-	 */
-	private void emptyArrays(){
-		//Position arrays
-		for(int i = 0; i < fivePrimePos.length; i++) {  // chr
-			for(int j = 0; j < fivePrimePos[i].length; j++) { // strand
-				fivePrimePos[i][j]=null;
-			}
-		}
-		//Count arrays
-		for(int i = 0; i < fivePrimeCounts.length; i++) {  // chr
-			for(int j = 0; j < fivePrimeCounts[i].length; j++) { // strand
-				fivePrimeCounts[i][j]=null;
-			}
-		}
-		//Pair arrays
-		if(hasPairs && pairR1Pos!=null){
-			for(int i = 0; i < pairR1Pos.length; i++) {  // chr
-				for(int j = 0; j < pairR1Pos[i].length; j++) { // strand
-					pairR1Pos[i][j]=null;
-					pairR2Pos[i][j]=null;
-					pairR2Chrom[i][j]=null;
-					pairR2Strand[i][j]=null;
-					pairWeight[i][j]=null;
-				}
-			}
-		}
-		System.gc();
-	}
-	
-	/**
-	 * Converts lists of Integers and matched Floats to arrays.
-	 * Sorts array elements by position.
 	 */
 	private void populateArrays(HashMap<String, ArrayList<Integer>[]> posList, HashMap<String, ArrayList<Float>[]> countsList, HashMap<String, ArrayList<HitPair>[]> pairsList) {
 		//Initialize chromosome name to id maps
@@ -863,11 +731,10 @@ public class HitCache implements HitCacheInterface{
 		
 	/**
 	 * Extract hits overlapping a subset of regions and redefine the cache using just these hits.
-	 * Should only be called during initialization when the full set of hits is loaded in the cache,
-	 * or from the loadCachedRegions method after a set of full chromosomes have been loaded from local files.   
+	 * Call after initialization and scaling to free memory for reads outside the analysis regions.
 	 * @param regs
 	 */
-	private void subsetArrays(List<Region> regs){
+	public void subsetArrays(List<Region> regs){
 		//merge overlapping regions so that hits aren't loaded twice
 		List<Region> mregs = Region.mergeRegions(regs);
 		//TODO: There's probably a more efficient way to do the below without needing to use the HashMaps 
@@ -936,344 +803,6 @@ public class HitCache implements HitCacheInterface{
 	
 	/**
 	 * Save the contents of the hit arrays to local binary files
-	 */
-	private void saveCacheLocally(){
-		//Initialize a random String for the local cache name
-		localCacheFileBase = RandomStringUtils.randomAlphanumeric(20);
-		//Generate local cache directories
-		localCacheDir =  new File(econfig.getFileCacheDirName()+File.separator+localCacheFileBase);
-		if(!localCacheDir.mkdirs()){
-			throw new RuntimeException("Unable to make local cache directories: " + localCacheDir.getAbsolutePath());
-		}
-		
-		//Save arrays to binary files
-		for(String chrom : chrom2ID.keySet()){
-			for(int strand=0; strand<=1; strand++){
-				int chrID = chrom2ID.get(chrom);
-				
-				//Write single-end files
-				if(fivePrimePos[chrID][strand]!=null && fivePrimeCounts[chrID][strand]!=null){
-			        ByteBuffer posByteBuffer = ByteBuffer.allocate(fivePrimePos[chrID][strand].length * 4);
-			        ByteBuffer countsByteBuffer = ByteBuffer.allocate(fivePrimeCounts[chrID][strand].length * 4);
-			        IntBuffer posIntBuffer = posByteBuffer.asIntBuffer();
-			        FloatBuffer countsFloatBuffer = countsByteBuffer.asFloatBuffer();
-			        posIntBuffer.put(fivePrimePos[chrID][strand]);
-			        countsFloatBuffer.put(fivePrimeCounts[chrID][strand]);
-			        byte[] parray = posByteBuffer.array();
-			        byte[] carray = countsByteBuffer.array();
-			        Path ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".pos.cache");
-			        Path cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".counts.cache");
-			        try {
-						Files.write( ppath, parray, StandardOpenOption.CREATE);
-						Files.write( cpath, carray, StandardOpenOption.CREATE);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				//Write pair files
-				if(loadPairs && hasPairs){
-					if(pairR1Pos[chrID][strand]!=null && pairR2Pos[chrID][strand]!=null && pairR2Chrom[chrID][strand]!=null && pairR2Strand[chrID][strand]!=null){
-				        ByteBuffer r1PosByteBuffer = ByteBuffer.allocate(pairR1Pos[chrID][strand].length * 4);
-				        ByteBuffer r2PosByteBuffer = ByteBuffer.allocate(pairR2Pos[chrID][strand].length * 4);
-				        ByteBuffer r2ChromByteBuffer = ByteBuffer.allocate(pairR2Chrom[chrID][strand].length * 4);
-				        ByteBuffer r2StrandByteBuffer = ByteBuffer.allocate(pairR2Strand[chrID][strand].length * 4);
-				        ByteBuffer weightByteBuffer = ByteBuffer.allocate(pairWeight[chrID][strand].length * 4);
-				        IntBuffer r1PosIntBuffer = r1PosByteBuffer.asIntBuffer();
-				        IntBuffer r2PosIntBuffer = r2PosByteBuffer.asIntBuffer();
-				        IntBuffer r2ChromIntBuffer = r2ChromByteBuffer.asIntBuffer();
-				        IntBuffer r2StrandIntBuffer = r2StrandByteBuffer.asIntBuffer();
-				        FloatBuffer weightFloatBuffer = weightByteBuffer.asFloatBuffer();
-				        r1PosIntBuffer.put(pairR1Pos[chrID][strand]);
-				        r2PosIntBuffer.put(pairR2Pos[chrID][strand]);
-				        r2ChromIntBuffer.put(pairR2Chrom[chrID][strand]);
-				        r2StrandIntBuffer.put(pairR2Strand[chrID][strand]);
-				        weightFloatBuffer.put(pairWeight[chrID][strand]);
-				        byte[] r1parray = r1PosByteBuffer.array();
-				        byte[] r2parray = r2PosByteBuffer.array();
-				        byte[] r2carray = r2ChromByteBuffer.array();
-				        byte[] r2sarray = r2StrandByteBuffer.array();
-				        byte[] warray = weightByteBuffer.array();
-				        Path r1ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r1pos.cache");
-				        Path r2ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2pos.cache");
-				        Path r2cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2chr.cache");
-				        Path r2spath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2str.cache");
-				        Path wpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".weight.cache");
-				        try {
-							Files.write( r1ppath, r1parray, StandardOpenOption.CREATE);
-							Files.write( r2ppath, r2parray, StandardOpenOption.CREATE);
-							Files.write( r2cpath, r2carray, StandardOpenOption.CREATE);
-							Files.write( r2spath, r2sarray, StandardOpenOption.CREATE);
-							Files.write( wpath, warray, StandardOpenOption.CREATE);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}					
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Load the data from one chromosome from the local cache into the array data structure.
-	 * Be careful calling this outside of this class - ensure that operations are thread-safe
-	 * @param chrom
-	 */
-	public synchronized void loadCachedChrom(String chrom){
-		//Empty the current memory cache
-		emptyArrays();
-		if(cachedRegions!=null)
-			cachedRegions.clear();
-		
-		//Get the data from files
-		if(chrom2ID.containsKey(chrom)){
-			int chrID = chrom2ID.get(chrom);
-			for(int strand=0; strand<=1; strand++){
-				//Read single-end files
-				Path ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".pos.cache");
-		        Path cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".counts.cache");
-		        if(Files.exists(ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(cpath, LinkOption.NOFOLLOW_LINKS)){
-			        try {
-						FileChannel posInChannel = FileChannel.open(ppath, StandardOpenOption.READ);
-						FileChannel countsInChannel = FileChannel.open(cpath, StandardOpenOption.READ);
-						int[] pResult = new int[((int)posInChannel.size())/4];
-						float[] cResult = new float[((int)countsInChannel.size())/4];
-						ByteBuffer pbuf = ByteBuffer.allocate((int)posInChannel.size());
-						ByteBuffer cbuf = ByteBuffer.allocate((int)countsInChannel.size());
-						// Fill in the buffers
-						while(pbuf.hasRemaining( ))
-							posInChannel.read(pbuf);
-						while(cbuf.hasRemaining( ))
-							countsInChannel.read(cbuf);
-	
-						pbuf.flip( );
-						cbuf.flip( );
-						// Create buffer views
-						IntBuffer posIntBuffer = pbuf.asIntBuffer( );
-						FloatBuffer countsFloatBuffer = cbuf.asFloatBuffer( );
-						//Results will now contain all ints/floats read from file
-						posIntBuffer.get(pResult);
-						countsFloatBuffer.get(cResult);
-						
-						//Assign to arrays
-						fivePrimePos[chrID][strand] = pResult;
-						fivePrimeCounts[chrID][strand] = cResult;
-			        } catch (IOException e) {
-						e.printStackTrace();
-			        }
-				}
-		        
-		        //Load pairs
-				if(loadPairs && hasPairs){
-					Path r1ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r1pos.cache");
-					Path r2ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2pos.cache");
-					Path r2cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2chr.cache");
-					Path r2spath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2str.cache");
-					Path wpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".weight.cache");
-					
-			        if(Files.exists(r1ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2cpath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2spath, LinkOption.NOFOLLOW_LINKS)){
-				        try {
-							FileChannel r1posInChannel = FileChannel.open(r1ppath, StandardOpenOption.READ);
-							FileChannel r2posInChannel = FileChannel.open(r2ppath, StandardOpenOption.READ);
-							FileChannel r2chrInChannel = FileChannel.open(r2cpath, StandardOpenOption.READ);
-							FileChannel r2strInChannel = FileChannel.open(r2spath, StandardOpenOption.READ);
-							FileChannel wInChannel = FileChannel.open(wpath, StandardOpenOption.READ);
-							int[] r1pResult = new int[((int)r1posInChannel.size())/4];
-							int[] r2pResult = new int[((int)r2posInChannel.size())/4];
-							int[] r2cResult = new int[((int)r2chrInChannel.size())/4];
-							int[] r2sResult = new int[((int)r2strInChannel.size())/4];
-							float[] wResult = new float[((int)wInChannel.size())/4];
-							ByteBuffer r1pbuf = ByteBuffer.allocate((int)r1posInChannel.size());
-							ByteBuffer r2pbuf = ByteBuffer.allocate((int)r2posInChannel.size());
-							ByteBuffer r2cbuf = ByteBuffer.allocate((int)r2chrInChannel.size());
-							ByteBuffer r2sbuf = ByteBuffer.allocate((int)r2strInChannel.size());
-							ByteBuffer wbuf = ByteBuffer.allocate((int)wInChannel.size());
-							// Fill in the buffers
-							while(r1pbuf.hasRemaining( ))
-								r1posInChannel.read(r1pbuf);
-							while(r2pbuf.hasRemaining( ))
-								r2posInChannel.read(r2pbuf);
-							while(r2cbuf.hasRemaining( ))
-								r2chrInChannel.read(r2cbuf);
-							while(r2sbuf.hasRemaining( ))
-								r2strInChannel.read(r2sbuf);
-							while(wbuf.hasRemaining( ))
-								wInChannel.read(wbuf);
-							r1pbuf.flip( );
-							r2pbuf.flip( );
-							r2cbuf.flip( );
-							r2sbuf.flip( );
-							wbuf.flip( );
-							// Create buffer views
-							IntBuffer r1posIntBuffer = r1pbuf.asIntBuffer( );
-							IntBuffer r2posIntBuffer = r2pbuf.asIntBuffer( );
-							IntBuffer r2chrIntBuffer = r2cbuf.asIntBuffer( );
-							IntBuffer r2strIntBuffer = r2sbuf.asIntBuffer( );
-							FloatBuffer wFloatBuffer = wbuf.asFloatBuffer( );
-							//Results will now contain all ints/floats read from file
-							r1posIntBuffer.get(r1pResult);
-							r2posIntBuffer.get(r2pResult);
-							r2chrIntBuffer.get(r2cResult);
-							r2strIntBuffer.get(r2sResult);
-							wFloatBuffer.get(wResult);
-							//Assign to arrays
-							pairR1Pos[chrID][strand] = r1pResult;
-							pairR2Pos[chrID][strand] = r2pResult;
-							pairR2Chrom[chrID][strand] = r2cResult;
-							pairR2Strand[chrID][strand] = r2sResult;
-							pairWeight[chrID][strand] = wResult;
-				        } catch (IOException e) {
-							e.printStackTrace();
-				        }
-					}
-				}
-			}
-		}
-		
-		//Initialize cached regions
-		if(gen.containsChromName(chrom)){
-			if(cachedRegions==null)
-				cachedRegions=new ArrayList<Region>();
-			cachedRegions.add(new Region(gen, chrom, 1, gen.getChromLength(chrom)));
-		}
-	}
-	
-	/**
-	 * Load the data from a set of regions from the local cache into the array data structure.
-	 * To do this, each relevant chromosome is loaded one by one, and then the appropriate regions are extracted using subsetArrays()
-	 * This is an intensive method, so use very sparingly, and double check that you couldn't have 
-	 * just provided appropriate regions to the constructor.
-	 * @param chrom
-	 */
-	public synchronized void loadCachedRegions(List<Region> regs){
-		if(cacheMemoryEntireGenome)//By definition, all regions are loaded
-			return;
-		
-		//Empty the current memory cache
-		emptyArrays();
-		if(cachedRegions!=null)
-			cachedRegions.clear();
-		
-		//Load the appropriate chromosomes from files
-		List<String> loadChrs = new ArrayList<String>();
-		for(Region r : regs)
-			if(!loadChrs.contains(r.getChrom()))
-				loadChrs.add(r.getChrom());
-		
-		for(String chrom : loadChrs){
-			//Get the data from files
-			if(chrom2ID.containsKey(chrom)){
-				int chrID = chrom2ID.get(chrom);
-				for(int strand=0; strand<=1; strand++){
-					//Read single-end files
-					Path ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".pos.cache");
-			        Path cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".counts.cache");
-			        if(Files.exists(ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(cpath, LinkOption.NOFOLLOW_LINKS)){
-				        try {
-							FileChannel posInChannel = FileChannel.open(ppath, StandardOpenOption.READ);
-							FileChannel countsInChannel = FileChannel.open(cpath, StandardOpenOption.READ);
-							int[] pResult = new int[((int)posInChannel.size())/4];
-							float[] cResult = new float[((int)countsInChannel.size())/4];
-							ByteBuffer pbuf = ByteBuffer.allocate((int)posInChannel.size());
-							ByteBuffer cbuf = ByteBuffer.allocate((int)countsInChannel.size());
-							// Fill in the buffers
-							while(pbuf.hasRemaining( ))
-								posInChannel.read(pbuf);
-							while(cbuf.hasRemaining( ))
-								countsInChannel.read(cbuf);
-		
-							pbuf.flip( );
-							cbuf.flip( );
-							// Create buffer views
-							IntBuffer posIntBuffer = pbuf.asIntBuffer( );
-							FloatBuffer countsFloatBuffer = cbuf.asFloatBuffer( );
-							//Results will now contain all ints/floats read from file
-							posIntBuffer.get(pResult);
-							countsFloatBuffer.get(cResult);
-							
-							//Assign to arrays
-							fivePrimePos[chrID][strand] = pResult;
-							fivePrimeCounts[chrID][strand] = cResult;
-				        } catch (IOException e) {
-							e.printStackTrace();
-				        }
-					}
-			        
-			        //Load pairs
-					if(loadPairs && hasPairs){
-						Path r1ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r1pos.cache");
-						Path r2ppath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2pos.cache");
-						Path r2cpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2chr.cache");
-						Path r2spath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".r2str.cache");
-						Path wpath = FileSystems.getDefault().getPath(econfig.getFileCacheDirName(), localCacheFileBase, localCacheFileBase+"_"+chrom+"-"+strand+".weight.cache");
-				        if(Files.exists(r1ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2ppath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2cpath, LinkOption.NOFOLLOW_LINKS) && Files.exists(r2spath, LinkOption.NOFOLLOW_LINKS)){
-					        try {
-								FileChannel r1posInChannel = FileChannel.open(r1ppath, StandardOpenOption.READ);
-								FileChannel r2posInChannel = FileChannel.open(r2ppath, StandardOpenOption.READ);
-								FileChannel r2chrInChannel = FileChannel.open(r2cpath, StandardOpenOption.READ);
-								FileChannel r2strInChannel = FileChannel.open(r2spath, StandardOpenOption.READ);
-								FileChannel wInChannel = FileChannel.open(wpath, StandardOpenOption.READ);
-								int[] r1pResult = new int[((int)r1posInChannel.size())/4];
-								int[] r2pResult = new int[((int)r2posInChannel.size())/4];
-								int[] r2cResult = new int[((int)r2chrInChannel.size())/4];
-								int[] r2sResult = new int[((int)r2strInChannel.size())/4];
-								float[] wResult = new float[((int)wInChannel.size())/4];
-								ByteBuffer r1pbuf = ByteBuffer.allocate((int)r1posInChannel.size());
-								ByteBuffer r2pbuf = ByteBuffer.allocate((int)r2posInChannel.size());
-								ByteBuffer r2cbuf = ByteBuffer.allocate((int)r2chrInChannel.size());
-								ByteBuffer r2sbuf = ByteBuffer.allocate((int)r2strInChannel.size());
-								ByteBuffer wbuf = ByteBuffer.allocate((int)wInChannel.size());
-								// Fill in the buffers
-								while(r1pbuf.hasRemaining( ))
-									r1posInChannel.read(r1pbuf);
-								while(r2pbuf.hasRemaining( ))
-									r2posInChannel.read(r2pbuf);
-								while(r2cbuf.hasRemaining( ))
-									r2chrInChannel.read(r2cbuf);
-								while(r2sbuf.hasRemaining( ))
-									r2strInChannel.read(r2sbuf);
-								while(wbuf.hasRemaining( ))
-									wInChannel.read(wbuf);
-								r1pbuf.flip( );
-								r2pbuf.flip( );
-								r2cbuf.flip( );
-								r2sbuf.flip( );
-								wbuf.flip( );
-								// Create buffer views
-								IntBuffer r1posIntBuffer = r1pbuf.asIntBuffer( );
-								IntBuffer r2posIntBuffer = r2pbuf.asIntBuffer( );
-								IntBuffer r2chrIntBuffer = r2cbuf.asIntBuffer( );
-								IntBuffer r2strIntBuffer = r2sbuf.asIntBuffer( );
-								FloatBuffer wFloatBuffer = wbuf.asFloatBuffer( );
-								//Results will now contain all ints/floats read from file
-								r1posIntBuffer.get(r1pResult);
-								r2posIntBuffer.get(r2pResult);
-								r2chrIntBuffer.get(r2cResult);
-								r2strIntBuffer.get(r2sResult);
-								wFloatBuffer.get(wResult);
-								//Assign to arrays
-								pairR1Pos[chrID][strand] = r1pResult;
-								pairR2Pos[chrID][strand] = r2pResult;
-								pairR2Chrom[chrID][strand] = r2cResult;
-								pairR2Strand[chrID][strand] = r2sResult;
-								pairWeight[chrID][strand] = wResult;
-					        } catch (IOException e) {
-								e.printStackTrace();
-					        }
-						}
-					}
-				}
-			}
-		}
-		subsetArrays(regs);
-		if(cachedRegions==null)
-			cachedRegions = new ArrayList<Region>();
-		cachedRegions.addAll(regs);
-	}
-	
-	/**
-	 * Simple convertor
-	 * @param list
-	 * @return
 	 */
 	private int[] list2int(List<Integer> list) {
 		int[] out = new int[list.size()];
@@ -1447,14 +976,5 @@ public class HitCache implements HitCacheInterface{
 	 * Tidy up the local read caches
 	 */
 	public void close(){
-		//Delete the file cache if it exists
-		if(cacheInLocalFiles){
-			if(localCacheDir.exists() ) {
-				File[] files = localCacheDir.listFiles();
-				for(int i=0; i<files.length; i++)
-					files[i].delete();
-				localCacheDir.delete();
-			}
-		}
 	}
 }

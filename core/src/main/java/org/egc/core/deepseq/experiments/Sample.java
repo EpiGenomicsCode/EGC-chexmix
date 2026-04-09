@@ -77,12 +77,10 @@ public class Sample {
 	}
 	
 	/**
-	 * Initialize the cache
-	 * @param cacheEntireGenome : boolean to keep the full set of hits cached
-	 * @param initialCachedRegions : list of regions to keep cached at the start (can be null)
+	 * Initialize the cache — loads all hits into memory
 	 */
-	public void initializeCache(boolean cacheEntireGenome, List<Region> initialCachedRegions){
-		cache = new HitCache(econfig.getLoadPairs(), econfig, loaders, maxReadsPerBP, cacheEntireGenome, initialCachedRegions);
+	public void initializeCache(){
+		cache = new HitCache(econfig.getLoadPairs(), econfig, loaders, maxReadsPerBP);
 		totalHits = cache.getHitCount();
 		totalHitsPos = cache.getHitCountPos();
 		totalHitsNeg = cache.getHitCountNeg();
@@ -91,6 +89,14 @@ public class Sample {
 		uniquePairs = cache.getUniquePairCount();
 		if(gen==null)
 			gen = cache.getGenome();
+	}
+	
+	/**
+	 * Subset the cache to only retain hits in the given regions, freeing memory for the rest.
+	 * Call after scaling and potential region identification are complete.
+	 */
+	public void subsetCache(List<Region> regions){
+		cache.subsetArrays(regions);
 	}
 	
 	/**

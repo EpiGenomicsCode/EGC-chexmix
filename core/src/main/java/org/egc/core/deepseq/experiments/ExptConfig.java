@@ -47,9 +47,6 @@ public class ExptConfig {
 	protected float fixedScalingFactor = 1; //Default is to estimate scaling by NCIS
 	protected int scalingSlidingWindow = 10000; 
 	protected boolean plotScaling = false; //Make a scaling method plot
-	protected boolean cacheAllHits=true; //Cache all hits
-	protected String fileCacheDir = "hitcache";
-	protected List<Region> initialCachedRegions=null;
 	protected boolean loadType1Reads = true; //Load Type1 reads
 	protected boolean loadType2Reads = false; //Load Type2 reads (if exists and distinguishable)
 	protected boolean loadRead2=true; //Load second in pair reads (only used by BAM loader for now)
@@ -160,7 +157,6 @@ public class ExptConfig {
 				localBackgroundWindows= (List<Integer>) Args.parseIntegers(args, "dynback");
 				if(localBackgroundWindows.size()==0){localBackgroundWindows.add(10000);}
 				//Caching
-				cacheAllHits = Args.parseFlags(args).contains("nocache") ? false : true;
 				
 				//Parse command-line experiments (optional experiment and replicate names can be specified within the argument name - e.g. --exptName-Rep )
 				String fileFormat = Args.parseString(args, "format", "SAM").toUpperCase();
@@ -303,9 +299,6 @@ public class ExptConfig {
 	public boolean getScalingByHitRatioAndNCIS(){return scalingByHitRatioAndNCIS;}
 	public int getScalingSlidingWindow(){return scalingSlidingWindow;}
 	public boolean getPlotScaling(){return plotScaling;}
-	public boolean getCacheAllData(){return cacheAllHits;}
-	public String getFileCacheDirName(){return fileCacheDir;}
-	public List<Region> getInitialCachedRegions(){return initialCachedRegions;}
 	public boolean getLoadType1Reads(){return loadType1Reads;}
 	public boolean getLoadType2Reads(){return loadType2Reads;}
 	public boolean getLoadRead2(){return loadRead2;}
@@ -321,7 +314,6 @@ public class ExptConfig {
 	public void setRegressionScaling(boolean rs){scalingByRegression = rs;}
 	public void setSESScaling(boolean ses){scalingBySES = ses;}
 	public void setScalingSlidingWindow(int ssw){scalingSlidingWindow = ssw;}
-	public void setFileCacheDirName(String d){fileCacheDir = d;}
 	public void setLoadType1Reads(boolean l){loadType1Reads = l;}
 	public void setLoadType2Reads(boolean l){loadType2Reads = l;}
 	public void setLoadRead2(boolean l){loadRead2 = l;}
@@ -375,7 +367,6 @@ public class ExptConfig {
 				"\t--fixedpb <fixed per base limit>\n" +
 				"\t--poissongausspb <filter per base using a Poisson threshold parameterized by a local Gaussian sliding window>\n" +
 				"\t--mappability <fraction of the genome that is mappable for these experiments>\n" +
-				"\t--nocache [flag to turn off caching of the entire set of experiments (i.e. run slower with less memory)]\n" +
 				"\t--not1reads / --loadt2reads [flags to use Type1 or Type2 reads] (Type1 loaded by default)\n" +
 				"\t--noread2 [flag to ignore second reads in paired-end]\n" +
 				"\t--sortMid [flag to decide if sort read pairs by midpoint or 5' end (default: 5' end)]\n" +
