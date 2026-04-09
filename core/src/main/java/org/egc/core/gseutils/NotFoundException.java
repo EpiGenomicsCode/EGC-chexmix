@@ -7,7 +7,7 @@ package org.egc.core.gseutils;
  * @author <a href="mailto:arolfe@mit.edu">Alex Rolfe</a>
  * @version 1.0
  */
-public class NotFoundException extends Exception {
+public class NotFoundException extends RuntimeException {
 
     public NotFoundException(String s) {
         super(s);

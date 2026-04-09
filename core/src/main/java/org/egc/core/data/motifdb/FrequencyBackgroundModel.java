@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.NotFoundException;
 import org.egc.core.gseutils.Pair;
-import org.egc.core.math.stats.Fmath;
+
 
 
 /**
@@ -142,7 +141,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
   	}
   	
   	//set the model to use the specified probabilities
-  	if (Fmath.isEqualWithinLimits(total, 1.0, BackgroundModel.EPSILON)) {
+  	if (Math.abs(total - 1.0) <= BackgroundModel.EPSILON) {
   		modelProbs[kmerLen] = new HashMap<String, Double>(probs);
   	}
 		else {
@@ -165,8 +164,8 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
       List<Pair<Integer, Integer>> revCompPairs = BackgroundModel.computeDistinctRevCompPairs(currKmerLen);
 
       for (Pair<Integer, Integer> rcPair : revCompPairs) {
-        if (!Fmath.isEqualWithinLimits(this.getFrequency(currKmerLen, rcPair.car()), 
-            this.getFrequency(currKmerLen,rcPair.cdr()), BackgroundModel.EPSILON)) {
+        if (Math.abs(this.getFrequency(currKmerLen, rcPair.car()) - 
+            this.getFrequency(currKmerLen,rcPair.cdr())) > BackgroundModel.EPSILON) {
           isStranded = true;
           return isStranded;
         }
@@ -218,7 +217,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
         String currMer = int2seq(k, i);
         total += modelProbs[i].get(currMer);
       }
-      if (!Fmath.isEqualWithinLimits(total, 1.0, 1E-6)) {
+      if (Math.abs(total - 1.0) > 1E-6) {
         return i;
       }
     }

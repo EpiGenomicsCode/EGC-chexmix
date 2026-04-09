@@ -159,7 +159,7 @@ public class WeightMatrixImport {
   }
 
     public static Set<Integer> insertMultiWMFromFile(String species, String wmtype, String wmfile, String wmversion) 
-        throws IOException, NotFoundException { 
+        throws IOException { 
 
         HashSet<Integer> ids = new HashSet<Integer>();
         List<WeightMatrix> matrices = null;
@@ -191,7 +191,7 @@ public class WeightMatrixImport {
                                        String wmname,
                                        String wmversion,
                                        String wmtype,
-                                       String wmfile) throws NotFoundException, FileNotFoundException, ParseException, IOException {
+                                       String wmfile) throws FileNotFoundException, ParseException, IOException {
         WeightMatrix matrix;
         System.err.println("name " + wmname + " version " + wmversion + " type " + wmtype);
         if (wmtype.matches(".*TAMO.*")) {
@@ -225,7 +225,7 @@ public class WeightMatrixImport {
     version, and returns its dbid.  This means that the file may contain
     only a single weight matrix*/
   public static int insertWMFromFile(String species, String wmname, String wmversion, String wmtype, String wmfile, String bgFreq) 
-  throws NotFoundException, FileNotFoundException, ParseException, IOException {
+  throws FileNotFoundException, ParseException, IOException {
     WeightMatrix matrix;
     if (wmtype.matches(".*TAMO.*")) {
       matrix = PWMParser.readTamoMatrix(wmfile);

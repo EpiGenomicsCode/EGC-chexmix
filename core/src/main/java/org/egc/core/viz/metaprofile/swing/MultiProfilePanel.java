@@ -31,7 +31,6 @@ public class MultiProfilePanel extends JPanel {
 	private int fontSize=12;
 	private int border=20;
 	private int lineHeight=20, lineWidth=4;
-	private Color fontColor=Color.black;
 	private Color[] peakColors={Color.blue, Color.red, Color.gray, Color.green, Color.cyan, Color.orange, Color.magenta};
 	private String style = "line";
 	

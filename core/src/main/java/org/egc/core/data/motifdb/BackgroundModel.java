@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.sequence.SequenceUtils;
 import org.egc.core.gseutils.Pair;
-import org.egc.core.math.stats.Fmath;
+
 
 
 public abstract class BackgroundModel extends BackgroundModelMetadata {
@@ -265,7 +265,7 @@ public abstract class BackgroundModel extends BackgroundModelMetadata {
                 otherProb = ((FrequencyBackgroundModel) other).getFrequency(kmer);
               }
             }
-            if (!Fmath.isEqualWithinLimits(thisProb, otherProb, EPSILON)) {
+            if (Math.abs(thisProb - otherProb) > EPSILON) {
               return false;
             }
           }

@@ -175,7 +175,7 @@ public class FreqMatrixImport {
     }
     
     public static Set<Integer> insertMultiFMFromFile(String species, String version,String fmtype, String fmfile) 
-        throws IOException, NotFoundException { 
+        throws IOException { 
     	LinkedList<WeightMatrix> matrices=null;
         HashSet<Integer> ids = new HashSet<Integer>();
         
@@ -211,7 +211,7 @@ public class FreqMatrixImport {
                                        String fmname,
                                        String fmversion,
                                        String fmtype,
-                                       String fmfile) throws NotFoundException, FileNotFoundException, ParseException, IOException {
+                                       String fmfile) throws FileNotFoundException, ParseException, IOException {
     	LinkedList<WeightMatrix> matrices;
     	
         if (fmtype.matches(".*TRANSFAC.*")) {

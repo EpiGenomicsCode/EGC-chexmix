@@ -10,7 +10,6 @@ import org.egc.core.genome.Genome;
 import org.egc.core.genome.Species;
 import org.egc.core.gseutils.ArgParser;
 import org.egc.core.gseutils.Args;
-import org.egc.core.gseutils.NotFoundException;
 import org.egc.core.gseutils.Pair;
 
 

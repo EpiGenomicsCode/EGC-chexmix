@@ -267,7 +267,7 @@ public class Args {
      *  NOTE: This was a database-backed lookup that is no longer functional
      *  in local-only mode. Use --geninfo instead. Always returns null.
      */
-    public static Pair<Species,Genome> parseGenome(String args[]) throws NotFoundException {
+    public static Pair<Species,Genome> parseGenome(String args[])  {
         return null;
     }
 
@@ -279,7 +279,7 @@ public class Args {
      * @see org.egc.core.genome.Genome
      * @see org.egc.core.genome.location.Region
      */
-    public static List<Region> readLocations(String args[], String key) throws IOException, NotFoundException {
+    public static List<Region> readLocations(String args[], String key) throws IOException {
         Genome genome = parseGenome(args).getLast();
         ArrayList<Region> output = null;
         if (!key.matches("^\\-\\-")) {
@@ -314,7 +314,7 @@ public class Args {
     /** Parses the regions from the command line as specified by <tt>--region</tt>.
      *  The command line must also contain a <tt>--species</tt> option somewhere
      */
-    public static List<Region> parseRegions(String args[]) throws NotFoundException {
+    public static List<Region> parseRegions(String args[])  {
         Genome genome = parseGenome(args).getLast();
         ArrayList<Region> regions = new ArrayList<Region>();
         for (int i = 0; i < args.length; i++) {
@@ -328,7 +328,7 @@ public class Args {
      *   returns regions corresponding to the chromosomes in the genome specified
      *   on the command line.
     */
-    public static List<Region> parseRegionsOrDefault(String args[]) throws NotFoundException {
+    public static List<Region> parseRegionsOrDefault(String args[])  {
         Genome genome = parseGenome(args).getLast();
         ArrayList<Region> regions = new ArrayList<Region>();
         for (int i = 0; i < args.length; i++) {

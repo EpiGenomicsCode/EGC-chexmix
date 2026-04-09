@@ -36,7 +36,6 @@ public class ProfilePanel extends JPanel {
 	private int fontSize=12;
 	private int border=20;
 	private int lineHeight=20, lineWidth=4;
-	private Color fontColor=Color.black;
 	private Color peakColor=Color.blue;
 	private String style = "line";
 	private boolean transparent = false;

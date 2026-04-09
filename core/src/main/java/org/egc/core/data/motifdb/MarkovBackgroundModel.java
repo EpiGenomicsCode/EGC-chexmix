@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.NotFoundException;
 import org.egc.core.gseutils.Pair;
-import org.egc.core.math.stats.Fmath;
+
 
 import cern.colt.matrix.*;
 import cern.colt.matrix.impl.*;
@@ -133,7 +132,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
 	  if (BackgroundModel.isKmerValid(prevBases)) {
 	    double total = aProb + cProb + gProb + tProb;
 	    //if ((aProb >= 0) && (cProb >= 0) && (gProb >= 0) && (tProb >= 0) 
-	    //    && (Fmath.isEqualWithinLimits(total, 1.0, BackgroundModel.EPSILON)
+	    //    && (Math.abs(total - 1.0) <= BackgroundModel.EPSILON
 	    //        || (total == 0))) {
 	      int kmerLen = prevBases.length() + 1;
 	      modelProbs[kmerLen].put(prevBases + "A", aProb/total);
@@ -173,7 +172,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
           currMers[b] = currMer;
           total += this.getMarkovProb(currMer);
         }
-        if (!Fmath.isEqualWithinLimits(total, 1.0, 1E-6)) {
+        if (Math.abs(total - 1.0) > 1E-6) {
           return currMers;
         }
       }
@@ -215,7 +214,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
       
       //now check that the rev. comp components of the solution are matched       
       for (Pair<Integer, Integer> rcPair : revCompPairs) {
-        if (!Fmath.isEqualWithinLimits(sol.getQuick(rcPair.car()), sol.getQuick(rcPair.cdr()), BackgroundModel.EPSILON)) {
+        if (Math.abs(sol.getQuick(rcPair.car()) - sol.getQuick(rcPair.cdr())) > BackgroundModel.EPSILON) {
           isStranded = true;
           return isStranded;
         }
@@ -225,7 +224,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
       for (int i = 0; i < numCurrKmers; i+= 4) {
         double sum = sol.viewPart(i, 4).zSum();
         int solSumIndex = numCurrKmers + (i / 4);
-        if (!Fmath.isEqualWithinLimits(sum, sol.getQuick(solSumIndex), BackgroundModel.EPSILON)) {
+        if (Math.abs(sum - sol.getQuick(solSumIndex)) > BackgroundModel.EPSILON) {
           isStranded = true;
           return isStranded;
         }

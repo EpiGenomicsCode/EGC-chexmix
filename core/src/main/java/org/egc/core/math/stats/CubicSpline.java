@@ -142,13 +142,13 @@ public class CubicSpline{
     	    double[] dummy = new double[nPoints];
     	    this.newAndOldIndices = new int[nPoints];
     	    // Sort x into ascending order storing indices changes
-    	    Fmath.selectionSort(this.x, dummy, this.newAndOldIndices);
+    	    selectionSort(this.x, dummy, this.newAndOldIndices);
     	    // Sort x into ascending order and make y match the new order storing both new x and new y
-    	    Fmath.selectionSort(this.x, this.y, this.x, this.y);
+    	    selectionSort(this.x, this.y, this.x, this.y);
 
     	    // Minimum and maximum values and range
-    	    this.xMin = Fmath.minimum(this.x);
-    	    this.xMax = Fmath.maximum(this.x);
+    	    this.xMin = arrayMin(this.x);
+    	    this.xMax = arrayMax(this.x);
     	    range = xMax - xMin;
     	}
 
@@ -531,6 +531,50 @@ public class CubicSpline{
 	        	yy=a*y[klo]+b*y[khi]+((a*a*a-a)*deriv[klo]+(b*b*b-b)*deriv[khi])*(h*h)/6.0;
 	    	}
 	    	return yy;
+	}
+
+	// Selection sort: sorts aa into bb in ascending order, tracking index permutation in indices
+	private static void selectionSort(double[] aa, double[] bb, int[] indices) {
+		int n = aa.length;
+		for (int i = 0; i < n; i++) { bb[i] = aa[i]; indices[i] = i; }
+		int lastIndex = -1;
+		while (lastIndex != n - 1) {
+			int index = lastIndex + 1;
+			for (int i = lastIndex + 2; i < n; i++) {
+				if (bb[i] < bb[index]) index = i;
+			}
+			lastIndex++;
+			double hold = bb[index]; bb[index] = bb[lastIndex]; bb[lastIndex] = hold;
+			int holdi = indices[index]; indices[index] = indices[lastIndex]; indices[lastIndex] = holdi;
+		}
+	}
+
+	// Selection sort: sorts aa into cc in ascending order, with matching reorder of bb into dd
+	private static void selectionSort(double[] aa, double[] bb, double[] cc, double[] dd) {
+		int n = aa.length;
+		for (int i = 0; i < n; i++) { cc[i] = aa[i]; dd[i] = bb[i]; }
+		int lastIndex = -1;
+		while (lastIndex != n - 1) {
+			int index = lastIndex + 1;
+			for (int i = lastIndex + 2; i < n; i++) {
+				if (cc[i] < cc[index]) index = i;
+			}
+			lastIndex++;
+			double holdx = cc[index]; cc[index] = cc[lastIndex]; cc[lastIndex] = holdx;
+			double holdy = dd[index]; dd[index] = dd[lastIndex]; dd[lastIndex] = holdy;
+		}
+	}
+
+	private static double arrayMin(double[] aa) {
+		double min = aa[0];
+		for (int i = 1; i < aa.length; i++) if (aa[i] < min) min = aa[i];
+		return min;
+	}
+
+	private static double arrayMax(double[] aa) {
+		double max = aa[0];
+		for (int i = 1; i < aa.length; i++) if (aa[i] > max) max = aa[i];
+		return max;
 	}
 
 }

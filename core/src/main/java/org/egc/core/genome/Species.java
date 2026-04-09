@@ -1,6 +1,5 @@
 package org.egc.core.genome;
 
-import org.egc.core.gseutils.NotFoundException;
 
 /**
  * Species represents a species.
@@ -24,9 +23,9 @@ public class Species{
     /**
      * Constructor from species name. In local-only mode, dbid defaults to -1.
      * @param species
-     * @throws NotFoundException (retained for API compatibility; never thrown in local-only mode)
+     * @ (retained for API compatibility; never thrown in local-only mode)
      */
-    public Species(String species) throws NotFoundException {
+    public Species(String species)  {
     	this.species = species;
     	this.dbid = -1;
     }

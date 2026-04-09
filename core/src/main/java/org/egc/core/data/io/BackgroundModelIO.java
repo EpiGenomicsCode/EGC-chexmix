@@ -14,7 +14,6 @@ import org.egc.core.data.motifdb.CountsBackgroundModel;
 import org.egc.core.data.motifdb.FrequencyBackgroundModel;
 import org.egc.core.data.motifdb.MarkovBackgroundModel;
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.NotFoundException;
 
 
 /**
