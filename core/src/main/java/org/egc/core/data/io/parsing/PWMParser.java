@@ -318,17 +318,10 @@ public class PWMParser {
   public static List<WeightMatrix> readJASPARFreqMatrices(String wmfile, String wmversion) throws IOException {
     LinkedList<WeightMatrix> matrices = new LinkedList<WeightMatrix>();
     Map<Integer, String> speciesmap = new HashMap<Integer, String>();
-    String taxofile = "/afs/csail.mit.edu/group/psrg/datasets/ncbi_taxonomy_nov_09/id_to_name.tsv";
-    BufferedReader br = new BufferedReader(new FileReader(new File(taxofile)));
-    String line = null;
-    while ((line = br.readLine()) != null) {
-      String pieces[] = line.split("\\t");
-      speciesmap.put(Integer.parseInt(pieces[0]), pieces[1]);
-    }
-    br.close();
 
     File inputfile = new File(wmfile);
-    br = new BufferedReader(new FileReader(inputfile));
+    BufferedReader br = new BufferedReader(new FileReader(inputfile));
+    String line = null;
     String dirname = inputfile.getParent();
     Pattern specpatt = Pattern.compile("species \"(\\d+)\"");
     Pattern grouppatt = Pattern.compile("tax_group \"(\\w+)\"");

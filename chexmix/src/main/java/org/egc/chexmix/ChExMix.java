@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.egc.chexmix.math.diff.Normalization;
-
 import org.egc.chexmix.composite.CompositeTagDistribution;
 import org.egc.chexmix.composite.ProteinDNAInteractionModel;
 import org.egc.chexmix.composite.TagProbabilityDensity;
@@ -48,7 +46,6 @@ public class ChExMix {
 	protected BindingMixture mixtureModel;
 	protected PotentialRegionFilter potentialFilter;
 	protected OutputFormatter outFormatter;
-	protected Normalization normalizer;
 	protected Map<ControlledExperiment, List<TagProbabilityDensity>> repBindingModels;
 	protected Map<ControlledExperiment, List<BindingModel>> repUnstrandedBindingModels;
 	protected Map<ExperimentCondition, List<BindingSubtype>> prevModels;

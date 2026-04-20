@@ -11,22 +11,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.egc.core.data.io.RegionFileUtilities;
 import org.egc.core.data.io.StreamGobbler;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.deepseq.experiments.ExperimentManager;
-import org.egc.core.deepseq.experiments.ExptConfig;
 import org.egc.core.genome.Genome;
-import org.egc.core.genome.GenomeConfig;
-import org.egc.core.genome.location.Region;
-import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
 import org.egc.core.gseutils.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.egc.chexmix.framework.ChExMixConfig;
 
 
 public class MEMERunner {
+	private static final Logger logger = LogManager.getLogger(MEMERunner.class);
 
 	protected ExperimentManager manager; 
 	protected ChExMixConfig config;
@@ -78,15 +74,13 @@ public class MEMERunner {
 			}else{
 				proc = Runtime.getRuntime().exec(MEMEcmd+" "+seqFilename+" "+MEMEargs +" -p "+config.getMaxThreads()+" -o "+memeOutDir);				
 			}		
-			// any error message? 
-			StreamGobbler errorGobbler = new 
-			StreamGobbler(proc.getErrorStream(), "MEME_ERR", true);
-			// any output? 
-			StreamGobbler outputGobbler = new 
-			StreamGobbler(proc.getInputStream(), "MEME_OUT", false);
-			// kick them off 
-			errorGobbler.start(); 
-			outputGobbler.start(); 
+			// any error message?
+			Thread errorGobbler = new Thread(new StreamGobbler(proc.getErrorStream(), "MEME_ERR", true));
+			// any output?
+			Thread outputGobbler = new Thread(new StreamGobbler(proc.getInputStream(), "MEME_OUT", false));
+			// kick them off
+			errorGobbler.start();
+			outputGobbler.start();
 			// any error??? 
 			int exitVal = proc.waitFor(); 
 			System.err.println("MEME ExitValue: " + exitVal);
@@ -132,9 +126,10 @@ public class MEMERunner {
             	seqFile.delete();
             proc.destroy();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("MEME execution failed", e);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error("MEME process interrupted", e);
+			Thread.currentThread().interrupt();
 		}
 		return new Pair<List<WeightMatrix>,List<WeightMatrix>>(wm,fm);
 	}
@@ -162,20 +157,18 @@ public class MEMERunner {
 		    		back.put("T", T);
 		    	}
 		    	catch (NumberFormatException ex) {
-		    		System.err.println("At line " + lineno + ": " + line);
-		    		ex.printStackTrace();
+		    		logger.error("Parse error at line {}: {}", lineno, line);
 		    		throw ex;
 		    	}
 		    	catch (ArrayIndexOutOfBoundsException ex) {
-		    		System.err.println("At line " + lineno + ": " + line);
-		    		ex.printStackTrace();
+		    		logger.error("Index error at line {}: {}", lineno, line);
 		    		throw ex;
 		    	}
 			}
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			logger.error("Failed to parse MEME background frequencies", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error reading MEME output for background", e);
 		}
 		return back;
 	}
@@ -231,9 +224,9 @@ public class MEMERunner {
 				}
 			}
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			logger.error("Failed to parse MEME frequency matrix", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error reading MEME output for frequency matrices", e);
 		}
 		return parsed;
 	}

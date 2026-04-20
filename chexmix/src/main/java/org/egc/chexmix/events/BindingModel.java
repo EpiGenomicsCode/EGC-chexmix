@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.egc.core.gseutils.Args;
 import org.egc.core.gseutils.Pair;
 import org.egc.core.math.stats.StatUtil;
 
@@ -69,9 +68,9 @@ public class BindingModel {
 	        loadData(empiricalDistribution);
 			makeProbabilities();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Binding model file not found: " + f.getPath(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Error reading binding model file: " + f.getPath(), e);
 		}
 	}
 	
