@@ -336,9 +336,18 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
     return CountsBackgroundModel.modelFromRegionList(gen, chromList, k);
   }
  
-  public static CountsBackgroundModel modelFromWholeGenome(Genome gen){ return modelFromWholeGenome(gen,  DEFAULT_MAX_KMER_LEN);}
-  
- 
+  public static CountsBackgroundModel modelFromWholeGenome(Genome gen){ return modelFromWholeGenome(gen, DEFAULT_MAX_KMER_LEN);}
+
+  public static CountsBackgroundModel modelFromWholeGenome(Genome gen, SequenceGenerator<Region> seqgen){
+    ArrayList<Region> chromList = new ArrayList<Region>();
+    Iterator<NamedRegion> chroms = new ChromRegionIterator(gen);
+    while (chroms.hasNext()) {
+      chromList.add(chroms.next());
+    }
+    return CountsBackgroundModel.modelFromRegionList(gen, chromList, DEFAULT_MAX_KMER_LEN, seqgen);
+  }
+
+
   /**
    * Create a model from a list of regions from the specified genome
    * @param gen
@@ -346,9 +355,10 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
    * @return
    */
   public static CountsBackgroundModel modelFromRegionList(Genome gen, List<Region> regionList, int k){
-    SequenceGenerator<Region> seqgen = new SequenceGenerator<Region>();
-    //seqgen.useCache(false);
+    return modelFromRegionList(gen, regionList, k, new SequenceGenerator<Region>());
+  }
 
+  public static CountsBackgroundModel modelFromRegionList(Genome gen, List<Region> regionList, int k, SequenceGenerator<Region> seqgen){
     CountsBackgroundModel cbg = new CountsBackgroundModel(null, gen, k);
     cbg.gen = gen;
 
@@ -360,6 +370,7 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
     }
     return cbg;
   }
+
   public static CountsBackgroundModel modelFromRegionList(Genome gen, List<Region> regionList) { return modelFromRegionList(gen, regionList, DEFAULT_MAX_KMER_LEN);}
   
 

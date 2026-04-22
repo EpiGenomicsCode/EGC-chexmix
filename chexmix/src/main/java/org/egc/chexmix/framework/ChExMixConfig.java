@@ -325,13 +325,18 @@ public class ChExMixConfig {
 				MEMEnonparallel = Args.parseFlags(args).contains("meme1proc");
 				
 				// Markov background model
-				String backfile = Args.parseString(args, "back", null);				
+				String backfile = Args.parseString(args, "back", null);
 				//Load the background model or make background model
 				if (findMotifs){
-					try{       
-						if(backfile == null)
-							markovBackMode = new MarkovBackgroundModel(CountsBackgroundModel.modelFromWholeGenome(gen)); // this doesn't seem working for sacCer3
-						else
+					try{
+						if(backfile == null){
+							System.err.println("No --back file provided; generating Markov background model from whole genome sequence.");
+							markovBackMode = new MarkovBackgroundModel(CountsBackgroundModel.modelFromWholeGenome(gen, gconfig.getSequenceGenerator()));
+							outDir.mkdirs();
+							String bgOutPath = outDir.getPath() + File.separator + outBase + ".background";
+							BackgroundModelIO.printProbsToFile(markovBackMode, bgOutPath);
+							System.err.println("Background model saved to: " + bgOutPath + " (use --back " + bgOutPath + " to skip generation on future runs)");
+						}else
 							markovBackMode = BackgroundModelIO.parseMarkovBackgroundModel(backfile, gen);
 					} catch (IOException | ParseException e) {
 						e.printStackTrace();
