@@ -319,9 +319,7 @@ public class XLAnalysisConfig {
 	public String getArgsList(){
 		return(new String("" +
 				"Genome:" +
-				"\t--species <Species;Genome>\n" +
-				"\tOR\n" +
-				"\t--geninfo <genome info file> AND --seq <fasta seq directory>\n" +
+				"\t--seq <fasta seq directory>\n" +
 				"General:\n" +
 				"\t--cwin <composite window size (default="+compositeWinSize+")>\n" +
 				"\t--cpoints <composite plot stranded center points>\n" +

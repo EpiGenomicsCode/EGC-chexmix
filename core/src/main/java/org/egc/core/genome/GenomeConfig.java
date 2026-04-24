@@ -6,25 +6,32 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.gseutils.ArgParser;
 import org.egc.core.gseutils.Args;
 import org.egc.core.gseutils.NotFoundException;
-import org.egc.core.gseutils.Pair;
+
+import htsjdk.samtools.SAMSequenceRecord;
+import htsjdk.samtools.SamReader;
+import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.ValidationStringency;
 
 
 /**
  * GenomeConfig:
- * A config parser that loads genome objects from the command-line or config files. 
- * You can also use the Args class directly to load Genomes from the command-line. 
- * However, GenomeConfig allows convenient loading of cached sequences as well, 
- * and fits the schema of the other config parser classes.   
- * 
+ * A config parser that loads genome objects from the command-line or config files.
+ * You can also use the Args class directly to load Genomes from the command-line.
+ * However, GenomeConfig allows convenient loading of cached sequences as well,
+ * and fits the schema of the other config parser classes.
+ *
  * @author mahony
  *
  */
@@ -34,7 +41,7 @@ public class GenomeConfig {
 	private SequenceGenerator<Region> seqgen=null;
 	private boolean sequenceAvailable=false;
 	private boolean printHelp=false;
-	
+
 	private String[] args;
 	public String getArgs(){
 		String a="";
@@ -42,14 +49,14 @@ public class GenomeConfig {
 			a = a+" "+args[i];
 		return a;
 	}
-	
+
 	public GenomeConfig(String [] arguments){
 		this.args=arguments;
 		ArgParser ap = new ArgParser(args);
 		seqgen = new SequenceGenerator<Region>();
-		
+
 		if(args.length==0 || ap.hasKey("h")){
-			printHelp=true;			
+			printHelp=true;
 		}else{
 			try{
 				//Test for a config file... if there is concatenate the contents into the args
@@ -66,7 +73,7 @@ public class GenomeConfig {
 			        	String[] words = line.split("\\s+");
 			        	if(!words[0].startsWith("--"))
 			        		words[0] = new String("--"+words[0]);
-			        	confArgs.add(words[0]); 
+			        	confArgs.add(words[0]);
 			        	if(words.length>1){
 				        	String rest=words[1];
 				        	for(int w=2; w<words.length; w++)
@@ -82,29 +89,10 @@ public class GenomeConfig {
 			        ap = new ArgParser(args);
 			        reader.close();
 				}
-				
-				//Load genome
-				if(ap.hasKey("species") || ap.hasKey("genome") || ap.hasKey("gen")){
-					Pair<Species, Genome> pair = Args.parseGenome(args);
-					if(pair != null){
-						gen = pair.cdr();
-						sequenceAvailable=true;
-					}
-				}else{
-					if(ap.hasKey("geninfo") || ap.hasKey("g")){
-						//Make fake genome... chr lengths provided
-						String fName = ap.hasKey("geninfo") ? ap.getKeyValue("geninfo") : ap.getKeyValue("g");
-						gen = new Genome("Genome", new File(fName), true);
-					}else{
-					    gen = null;
-					}
-				}
-				
-				if(gen==null){
-					System.err.println("WARNING: please provide chromosome length information in a genome info file (option --geninfo). " +
-							"MultiGPS will attempt to estimate chromosome lengths from data, but this may not work or may not be accurate.");
-				}
-				
+
+				//Load genome from BAM headers
+				gen = buildGenomeFromBAMHeaders(args, ap);
+
 				//Cache genome sequence
 				if(ap.hasKey("seq")){
 					genomeSequencePath = ap.getKeyValue("seq");
@@ -113,7 +101,7 @@ public class GenomeConfig {
 					seqgen.useLocalFiles(true);
 					sequenceAvailable=true;
 				}
-				
+
 			} catch (NotFoundException e) {
 				e.printStackTrace();
 			} catch (FileNotFoundException e) {
@@ -123,9 +111,71 @@ public class GenomeConfig {
 			}
 		}
 	}
-	
+
 	/**
-	 * Merge a set of estimated genomes 
+	 * Collect BAM file paths from --expt/--ctrl flags and --design file,
+	 * open each BAM header, and merge chromosome lengths into a Genome.
+	 */
+	private static Genome buildGenomeFromBAMHeaders(String[] args, ArgParser ap) throws IOException {
+		Set<String> bamPaths = new HashSet<>();
+
+		// Collect paths from --expt / --ctrl style flags
+		for(String key : ap.getKeys()){
+			if(key.contains("expt") || key.contains("ctrl")){
+				Collection<String> names = Args.parseStrings(args, key);
+				bamPaths.addAll(names);
+			}
+		}
+
+		// Collect paths from --design file (filename is in column 0 or 1)
+		if(ap.hasKey("design")){
+			File df = new File(ap.getKeyValue("design"));
+			try(BufferedReader reader = new BufferedReader(new FileReader(df))){
+				String line;
+				while((line = reader.readLine()) != null){
+					if(line.startsWith("#")) continue;
+					line = line.trim();
+					String[] words = line.split("\\t");
+					if(words.length >= 3){
+						if(words[0].toUpperCase().equals("SIGNAL") || words[0].toUpperCase().equals("CONTROL"))
+							bamPaths.add(words[1]);
+						else if(words[1].toUpperCase().equals("SIGNAL") || words[1].toUpperCase().equals("CONTROL"))
+							bamPaths.add(words[0]);
+					}
+				}
+			}
+		}
+
+		if(bamPaths.isEmpty()) return null;
+
+		HashMap<String, Integer> chrLenMap = new HashMap<>();
+		for(String fname : bamPaths){
+			File f = new File(fname);
+			if(!f.isFile()){
+				System.err.println("Warning: BAM file not found, skipping for genome inference: "+fname);
+				continue;
+			}
+			try(SamReader reader = SamReaderFactory.makeDefault()
+					.validationStringency(ValidationStringency.SILENT)
+					.open(f)){
+				for(SAMSequenceRecord rec : reader.getFileHeader().getSequenceDictionary().getSequences()){
+					String name = rec.getSequenceName()
+							.replaceFirst("^chromosome", "")
+							.replaceFirst("^chrom", "")
+							.replaceFirst("^chr", "");
+					int len = rec.getSequenceLength();
+					if(!chrLenMap.containsKey(name) || chrLenMap.get(name) < len)
+						chrLenMap.put(name, len);
+				}
+			}
+		}
+
+		if(chrLenMap.isEmpty()) return null;
+		return new Genome("Genome", chrLenMap);
+	}
+
+	/**
+	 * Merge a set of estimated genomes
 	 * @param estGenomes
 	 * @return
 	 */
@@ -140,27 +190,23 @@ public class GenomeConfig {
 			}
 		}
 		gen =new Genome("Genome", chrLenMap);
-		return gen;		
+		return gen;
 	}
-	
+
 	//Accessors
 	public Genome getGenome(){return gen;}
 	public SequenceGenerator getSequenceGenerator(){return seqgen;}
 	public String getGenomeSequencePath(){return genomeSequencePath;}
 	public boolean sequenceAvailable(){return sequenceAvailable;}
 	public boolean helpWanted(){return printHelp;}
-	
-	
+
+
 	/**
-	 * Returns a string describing the arguments handled by this config parser. 
+	 * Returns a string describing the arguments handled by this config parser.
 	 * @return String
 	 */
 	public static String getArgsList(){
 		return(new String("" +
-				"Genome:" +
-				"\t--species <Species;Genome>\n" +
-				"\tOR\n" +
-				"\t--geninfo <genome info file>" +
 				"Genome Sequence Caching:" +
 				"\t--seq <fasta seq directory>\n" +
 				""));

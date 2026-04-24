@@ -135,7 +135,7 @@ public class SequenceGenerator<X extends Region> {
             throw new RuntimeException(
                 "Chromosome " + region.getChrom()
                 + " not found in FASTA file " + f.getAbsolutePath()
-                + ". Check that chromosome names in --geninfo match the FASTA headers.");
+                + ". Check that chromosome names in the BAM header match the FASTA headers.");
         }
 
         synchronized(cache) {

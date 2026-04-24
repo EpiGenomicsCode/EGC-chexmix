@@ -177,8 +177,7 @@ public class ShapeAlignConfig {
 	public static String getShapAlignArgsList(){
 		return(new String("" +
                 "ShapeAlignment\n" +
-                "--species <organism;genome> OR\n" +
-                "--geninfo <genome info> AND --seq <path to seqs>\n" +
+                "--seq <path to seqs>\n" +
                 "--peaks <file containing coordinates of peaks> \n" +
                 "--win <window of regions to take around peaks> \n" +
                 "\nOPTIONS:General\n" +

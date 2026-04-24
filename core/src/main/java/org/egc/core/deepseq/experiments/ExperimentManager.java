@@ -8,7 +8,6 @@ import java.util.List;
 import org.egc.core.deepseq.hitloaders.HitLoader;
 import org.egc.core.deepseq.hitloaders.HitLoaderFactory;
 import org.egc.core.genome.Genome;
-import org.egc.core.genome.GenomeConfig;
 import org.egc.core.gseutils.Pair;
 
 
@@ -98,15 +97,6 @@ public class ExperimentManager {
 				if(econfig.getPrintLoadingProgress())
 					System.err.println("\tLoaded.");
 			}
-		}
-		//Merge estimated genomes if necessary
-		if(gen == null){
-			List<Genome> estGenomes = new ArrayList<Genome>();
-			for(String s : allSamples.keySet())
-				estGenomes.add(allSamples.get(s).getGenome());
-			gen = econfig.mergeEstGenomes(estGenomes);
-			for(String s : allSamples.keySet())
-				allSamples.get(s).setGenome(gen);
 		}
 		
 		//Thirdly, initialize the replicates

@@ -595,16 +595,23 @@ public class HitCache implements HitCacheInterface{
 	 * @return
 	 */
 	private void populateArrays(HashMap<String, ArrayList<Integer>[]> posList, HashMap<String, ArrayList<Float>[]> countsList, HashMap<String, ArrayList<HitPair>[]> pairsList) {
-		//Initialize chromosome name to id maps
+		//Initialize chromosome name to id maps.
+		//Iterate posList (all chromosomes seen by the loader) rather than
+		//gen.getChromList(), so that reads on chromosomes absent from the
+		//genome (e.g. chrM when excluded via --excludechr) are still stored
+		//and counted in totalHits for Poisson/NCIS background modelling.
+		//The genome length denominator stays clean because getGenomeLength()
+		//only sums chromosomes registered in the Genome object.
 		numChroms=0;
-		for(String chr : gen.getChromList()){
+		for(String chr : posList.keySet()){
 			chrom2ID.put(chr, numChroms);
-			chrom2DBID.put(chr, gen.getChromID(chr));
-			id2DBID.put(numChroms, gen.getChromID(chr));
+			int dbid = gen.containsChromName(chr) ? gen.getChromID(chr) : -(numChroms + 1);
+			chrom2DBID.put(chr, dbid);
+			id2DBID.put(numChroms, dbid);
 			id2Chrom.put(numChroms, chr);
 			numChroms++;
 		}
-		
+
 		//Initialize the data structures
 		fivePrimePos  = new int[numChroms][2][];
 		fivePrimeCounts = new float[numChroms][2][];
@@ -616,25 +623,16 @@ public class HitCache implements HitCacheInterface{
 			pairWeight = new float[numChroms][2][];
 			pairMid = new int[numChroms][2][];
 		}
-		
-		//Copy over the 5' position data
-		for(String chr : gen.getChromList()){
-			if(posList.containsKey(chr)){
-				for(int j = 0; j < posList.get(chr).length; j++)
-					fivePrimePos[chrom2ID.get(chr)][j] = list2int(posList.get(chr)[j]);
-			}else{
-				fivePrimePos[chrom2ID.get(chr)][0]=null;
-				fivePrimePos[chrom2ID.get(chr)][1]=null;
-			}
-		}//Copy over the count data
-		for(String chr : gen.getChromList()){
-			if(countsList.containsKey(chr)){
-				for(int j = 0; j < countsList.get(chr).length; j++)
-					fivePrimeCounts[chrom2ID.get(chr)][j] = list2float(countsList.get(chr)[j]);
-			}else{
-				fivePrimeCounts[chrom2ID.get(chr)][0]=null;
-				fivePrimeCounts[chrom2ID.get(chr)][1]=null;
-			}
+
+		//Copy over the 5' position data (all chromosomes in posList)
+		for(String chr : posList.keySet()){
+			for(int j = 0; j < posList.get(chr).length; j++)
+				fivePrimePos[chrom2ID.get(chr)][j] = list2int(posList.get(chr)[j]);
+		}
+		//Copy over the count data (all chromosomes in countsList)
+		for(String chr : countsList.keySet()){
+			for(int j = 0; j < countsList.get(chr).length; j++)
+				fivePrimeCounts[chrom2ID.get(chr)][j] = list2float(countsList.get(chr)[j]);
 		}
 		if(loadPairs && hasPairs){ //Copy over the paired data
 			for(String chr : gen.getChromList()){
@@ -1020,7 +1018,7 @@ public class HitCache implements HitCacheInterface{
 	private void initializeBackground(){
 		perBaseBack=new BackgroundCollection();
 		if(econfig.getGenome()==null){
-			throw new RuntimeException("Genome chromosome lengths not specified. Please define using --geninfo.");
+			throw new RuntimeException("Genome chromosome lengths could not be determined from BAM headers.");
 		}
 		perBaseBack.addBackgroundModel(
 				new PoissonBackgroundModel(-1, econfig.getPerBaseLogConf(), getHitCount(), econfig.getGenome().getGenomeLength(), econfig.getMappableGenomeProp(), 1, '.', 1, true));

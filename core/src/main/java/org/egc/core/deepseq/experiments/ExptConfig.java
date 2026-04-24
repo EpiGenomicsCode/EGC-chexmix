@@ -159,7 +159,6 @@ public class ExptConfig {
 				//Caching
 				
 				//Parse command-line experiments (optional experiment and replicate names can be specified within the argument name - e.g. --exptName-Rep )
-				String fileFormat = Args.parseString(args, "format", "SAM").toUpperCase();
 				ArrayList<String> exptTags = new ArrayList<String>();
 				for(String s : ap.getKeys()){
 					if(!exptTags.contains(s)){
@@ -182,7 +181,7 @@ public class ExptConfig {
 		        			Collection<String> sourceNames = Args.parseStrings(args, s);
 		        			List<Pair<String,String>> sources = new ArrayList<Pair<String,String>>();
 		        			for(String n : sourceNames)
-		        				sources.add(new Pair<String,String>(n,fileFormat));
+		        				sources.add(new Pair<String,String>(n,"BAM"));
 		        			
 		        			expts.add(new ExptDescriptor("", "", cond, rep, signal, sources, perBaseReadLimit));		        		
 		        			exptTags.add(s);
@@ -210,10 +209,10 @@ public class ExptConfig {
 					            boolean signal= true;
 					            if(words[0].toUpperCase().equals("SIGNAL") || words[0].toUpperCase().equals("CONTROL")){
 					            	signal = words[0].toUpperCase().equals("SIGNAL") ? true : false;
-					            	src = new Pair<String, String>(words[1], words[2]);
+					            	src = new Pair<String, String>(words[1], "BAM");
 					            }else if(words[1].toUpperCase().equals("SIGNAL") || words[1].toUpperCase().equals("CONTROL")){
 					            	signal = words[1].toUpperCase().equals("SIGNAL") ? true : false;
-					            	src = new Pair<String, String>(words[0], words[2]);
+					            	src = new Pair<String, String>(words[0], "BAM");
 					            }else{
 					            	System.err.println("Incorrectly formatted line in design file:\n\t"+line+"\n");
 					            	validLine=false;
@@ -351,7 +350,7 @@ public class ExptConfig {
 				"Experiments:\n" +
 				"\t--design <design file name>\n" +
 				"\tOR\n" +
-				"\t--expt/--ctrl <signal/control experiment file name> AND --format <SAM/BAM/BED>\n" +
+				"\t--expt/--ctrl <signal/control BAM file name>\n" +
 				"\t\tNote that if you use --expt/--ctrl, you can specify the names of the experiment & replicate\n" +
 				"\t\tdirectly in the argument. Here's an example: --exptConditionA-Rep1 somefile.bam\n" +
 				"Scaling control vs signal counts:\n" +

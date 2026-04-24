@@ -380,10 +380,10 @@ public class ChExMix {
 				"\t--verbose [flag to print intermediate files and extra output]\n" +
 				"\t--config <config file: all options here can be specified in a name<space>value text file, over-ridden by command-line args>\n" +
 				" Genome:\n" +
-				"\t--geninfo <genome info file> AND --seq <fasta seq directory reqd if finding motif>\n" +
+				"\t--seq <fasta seq directory (required if finding motif)>\n" +
 				"\t--back <Markov background model file; if omitted, model is estimated from whole-genome sequence>\n"+
 				" Loading Data:\n" +
-				"\t--expt <file name> AND --format <SAM/BED/IDX>\n" +
+				"\t--expt <BAM file name>\n" +
 				"\t--ctrl <file name (optional argument. must be same format as expt files)>\n" +
 				"\t--design <experiment design file name to use instead of --expt and --ctrl; see website for format>\n"+
 				"\t--fixedpb <fixed per base limit (default: estimated from background model)>\n" +

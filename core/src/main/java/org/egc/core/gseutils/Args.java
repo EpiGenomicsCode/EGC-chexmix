@@ -265,7 +265,7 @@ public class Args {
 
     /** Parses <tt>--species "Mus musculus;mm8"</tt> or <tt>--genome mm8</tt>.
      *  NOTE: This was a database-backed lookup that is no longer functional
-     *  in local-only mode. Use --geninfo instead. Always returns null.
+     *  in local-only mode. Always returns null.
      */
     public static Pair<Species,Genome> parseGenome(String args[])  {
         return null;
