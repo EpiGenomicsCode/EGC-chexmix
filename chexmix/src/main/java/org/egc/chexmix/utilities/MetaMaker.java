@@ -7,17 +7,10 @@ import java.util.Vector;
 
 import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
-import org.egc.core.deepseq.experiments.ExptConfig;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Point;
 import org.egc.chexmix.framework.ChExMixConfig;
-import org.egc.core.viz.metaprofile.BinningParameters;
-import org.egc.core.viz.metaprofile.MetaConfig;
-import org.egc.core.viz.metaprofile.MetaProfileHandler;
-import org.egc.core.viz.metaprofile.PointProfiler;
-import org.egc.core.viz.metaprofile.swing.MetaNonFrame;
-import org.egc.core.viz.metaprofile.swing.MetaNonFrameMultiSet;
 
 
 public class MetaMaker {
@@ -58,17 +51,17 @@ public class MetaMaker {
 						System.out.println("Batch running...");
 						System.setProperty("java.awt.headless", "true");
 						if(mconfig.peakFiles.size()==1 || mconfig.peakFiles.size()==0){
-							MetaNonFrame nonframe = new MetaNonFrame(gen, params, profiler, normalizeProfile, mconfig.saveSVG);
-							nonframe.setColor(mconfig.color);
-							nonframe.setDrawColorBar(mconfig.drawColorBar);
-							nonframe.setTransparent(mconfig.transparent);
-							nonframe.setDrawBorder(mconfig.drawBorder);
-							MetaProfileHandler handler = nonframe.getHandler();
+							MetaProfileRenderer renderer = new MetaProfileRenderer(gen, params, profiler, normalizeProfile, mconfig.saveSVG);
+							renderer.setColor(mconfig.color);
+							renderer.setDrawColorBar(mconfig.drawColorBar);
+							renderer.setTransparent(mconfig.transparent);
+							renderer.setDrawBorder(mconfig.drawBorder);
+							MetaProfileHandler handler = renderer.getHandler();
 							if(mconfig.peakFiles.size()==1){
 								System.out.println("Single set mode...");
 								File peakFile = new File(mconfig.peakFiles.get(0));
 								if (peakFile.exists()){
-									Vector<Point> points = nonframe.getUtils().loadPoints(peakFile);
+									Vector<Point> points = renderer.getUtils().loadPoints(peakFile);
 									handler.addPoints(points);
 								}
 							}else{
@@ -76,26 +69,26 @@ public class MetaMaker {
 							}
 							handler.awaitCompletion();
 							if(mconfig.cluster)
-								nonframe.clusterLinePanel();
+								renderer.clusterLinePanel();
 							//Set the panel sizes here...
-							nonframe.setStyle(mconfig.profileStyle);
-							nonframe.setLineMax(mconfig.lineMax);
-							nonframe.setLineMin(mconfig.lineMin);
-							nonframe.setLineThick(mconfig.lineThick);
-							nonframe.saveImages(imagePrefix);
-							nonframe.savePointsToFile(intPrefix);
+							renderer.setStyle(mconfig.profileStyle);
+							renderer.setLineMax(mconfig.lineMax);
+							renderer.setLineMin(mconfig.lineMin);
+							renderer.setLineThick(mconfig.lineThick);
+							renderer.saveImages(imagePrefix);
+							renderer.savePointsToFile(intPrefix);
 						}else if(mconfig.peakFiles.size()>1){
 							System.out.println("Multiple set mode...");
-							MetaNonFrameMultiSet multinonframe = new MetaNonFrameMultiSet(mconfig.peakFiles, gen, params, profiler, true);
+							MetaProfileRenderer multirenderer = new MetaProfileRenderer(mconfig.peakFiles, gen, params, profiler, true);
 							for(int x=0; x<mconfig.peakFiles.size(); x++){
 								String pf = mconfig.peakFiles.get(x);
-								Vector<Point> points = multinonframe.getUtils().loadPoints(new File(pf));
-								List<MetaProfileHandler> handlers = multinonframe.getHandlers();
+								Vector<Point> points = multirenderer.getUtils().loadPoints(new File(pf));
+								List<MetaProfileHandler> handlers = multirenderer.getHandlers();
 								handlers.get(x).addPoints(points);
 								handlers.get(x).awaitCompletion();
 							}
-							multinonframe.saveImage(imagePrefix);
-							multinonframe.savePointsToFile(intPrefix);
+							multirenderer.saveImage(imagePrefix);
+							multirenderer.savePointsToFileMulti(intPrefix);
 						}
 						System.out.println("Finished");
 						if(profiler!=null)

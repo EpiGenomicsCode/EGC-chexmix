@@ -1,6 +1,6 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
-public class NormalizedMetaProfile extends MetaProfile{
+public class NormalizedMetaProfile extends MetaProfile {
 
 	public NormalizedMetaProfile(String n, BinningParameters bps) {
 		super(n, bps);
@@ -10,25 +10,25 @@ public class NormalizedMetaProfile extends MetaProfile{
 		if(p.isStranded()){
 			stranded=true;
 		}
-		if(p.length() != params.getNumBins()) { 
+		if(p.length() != params.getNumBins()) {
 			throw new IllegalArgumentException(String.format("Profile length %d doesn't" +
 					" match bin-length %d", p.length(), params.getNumBins()));
 		}
-		
-		if(isNormalized()) { 
+
+		if(isNormalized()) {
 			throw new IllegalArgumentException("Can't add profile to a normalized MetaProfile");
 		}
-		
-		if(profiles.contains(p)) { 
+
+		if(profiles.contains(p)) {
 			/*throw new IllegalArgumentException(String.format(
-					"Can't add same profile %s to MetaProfile", 
+					"Can't add same profile %s to MetaProfile",
 					p.getName()));*/
 		}else{
-		
+
 			profiles.add(p);
 			double count = profiles.size();
 			min=max=0.0;
-			for(int i = 0; i< values.length ;i++) { 
+			for(int i = 0; i< values.length ;i++) {
 				values[i] = (values[i]*(count-1.0)/(count))+(p.value(i)/count);
 				max = Math.max(max, values[i]);
 				min = Math.min(min, values[i]);

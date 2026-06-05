@@ -1,4 +1,4 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
 import java.awt.Color;
 import java.util.List;
@@ -25,15 +25,15 @@ public class MetaConfig {
 	public boolean transparent = false;
 	public boolean printMatrix = false;
 	public boolean drawBorder = true;
-	public String profilerType = "fiveprime";	
-	public String profileStyle = "Line";	
+	public String profilerType = "fiveprime";
+	public String profileStyle = "Line";
 	public List<String> peakFiles = null;
 	public String outName = "meta";
 	public Color color = Color.blue;
 	public char baseLimit='.'; //Only draw meta-plots for tags with this character at baseLimitRelPosition relative to 5' end (. = draw all tags)
 	public int baseLimitRelPosition=0;
 	public int fivePrimeShift=0;
-	
+
 	public MetaConfig(String [] args){
 		if(args.length < 2){
 			printHelp = true;
@@ -56,8 +56,8 @@ public class MetaConfig {
 			cpmNorm = Args.parseFlags(args).contains("cpm");
 			transparent = Args.parseFlags(args).contains("transparent");
 			printMatrix = Args.parseFlags(args).contains("printMatrix");
-			profilerType = Args.parseString(args, "profiler", "simplechipseq");	
-			profileStyle = Args.parseString(args, "style", "Line");	
+			profilerType = Args.parseString(args, "profiler", "simplechipseq");
+			profileStyle = Args.parseString(args, "style", "Line");
 			peakFiles = (List<String>)Args.parseStrings(args, "peaks");
 			outName = Args.parseString(args, "out", "meta");
 			batchRun = Args.parseFlags(args).contains("batch");
@@ -82,12 +82,11 @@ public class MetaConfig {
 			baseLimitRelPosition = Args.parseInteger(args, "baselimitposition", 0);
 		}
 	}
-	
+
 	public boolean helpWanted(){return printHelp;}
-	
+
 	/**
-	 * Returns a string describing the arguments handled by this config parser. 
-	 * @return String
+	 * Returns a string describing the arguments handled by this config parser.
 	 */
 	public String getArgsList(){
 		return(new String(""+

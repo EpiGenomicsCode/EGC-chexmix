@@ -1,6 +1,6 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
-/** Profile: meta-profiles are made from these. 
+/** Profile: meta-profiles are made from these.
  * @author: tdanford
  * Date: Aug 12, 2008
  */
@@ -13,7 +13,7 @@ public interface Profile {
 	public int getNumProfiles();
 	public void setStranded(boolean s);
 	public boolean isStranded();
-	
+
 	public BinningParameters getBinningParameters();
-	
+
 }

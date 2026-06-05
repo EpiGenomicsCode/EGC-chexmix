@@ -1,4 +1,4 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -19,10 +19,10 @@ public class SequenceAlignmentFigure {
 	private static Color TColor = Color.GREEN;
 	private static Color GapColor = Color.WHITE;
 	private static Color NColor = Color.GRAY;
-	
-	
+
+
 	public SequenceAlignmentFigure(){}
-	
+
 	public static void setColors(Color a, Color c, Color g, Color t){
 		AColor = a;
 		CColor = c;
@@ -30,7 +30,7 @@ public class SequenceAlignmentFigure {
 		TColor = t;
 	}
 	/**
-	 * Visualize sequences as color pixels. 
+	 * Visualize sequences as color pixels.
 	 * Note that if the sequences are of differing lengths, this code assumes they should be left-aligned
 	 * @param seqs, raw sequences or FASTA sequences
 	 * @param width, width of each base, in pixel
@@ -40,7 +40,7 @@ public class SequenceAlignmentFigure {
 	public static void visualizeSequences(List<String> seqs, int width, int height, File f){
 		if (seqs.size()==0)
 			return;
-		
+
 		int pixheight = 0;
 		int maxLen = 0;
 		for (String s:seqs){
@@ -51,14 +51,14 @@ public class SequenceAlignmentFigure {
         	}
 		}
 		int pixwidth = maxLen*width;
-		
+
 		System.setProperty("java.awt.headless", "true");
 		BufferedImage im = new BufferedImage(pixwidth, pixheight,BufferedImage.TYPE_INT_ARGB);
         Graphics g = im.getGraphics();
         Graphics2D g2 = (Graphics2D)g;
         g2.setColor(NColor);
         g2.fillRect(0,0,pixwidth, pixheight);
-        
+
         int count = 0;
         for (String s:seqs){
         	if (s.charAt(0)=='>')			// ignore header line of FASTA file

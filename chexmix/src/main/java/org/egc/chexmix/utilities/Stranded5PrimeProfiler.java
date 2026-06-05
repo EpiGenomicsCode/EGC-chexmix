@@ -13,9 +13,6 @@ import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.viz.metaprofile.BinningParameters;
-import org.egc.core.viz.metaprofile.PointProfile;
-import org.egc.core.viz.metaprofile.PointProfiler;
 
 
 /**

@@ -1,4 +1,4 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,24 +13,20 @@ import org.egc.core.genome.location.StrandedPoint;
 
 /**
  * MetaUtils: loaders from various sources
- * 
+ *
  * @author tdanford
  * @author mahony
- *
  */
 public class MetaUtils {
 
 	private Genome genome;
-	
+
 	public MetaUtils(Genome g){
 		genome = g;
 	}
-	
+
 	/**
 	 * Load a set of (stranded) points from a file
-	 * @param f
-	 * @return
-	 * @throws IOException
 	 */
 	public Vector<Point> loadPoints(File f) throws IOException {
 		System.err.println("Loading points");
@@ -64,9 +60,9 @@ public class MetaUtils {
 						pt = new StrandedPoint(genome, chrom, location, strand);
 					else
 						pt = new Point(genome, chrom, location);
-				
+
 					pts.add(pt);
-				} else { 
+				} else {
 					System.err.println(String.format("Couldn't find point in line \"%s\"", line));
 				}
 			}

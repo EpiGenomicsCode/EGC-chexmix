@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -37,8 +38,6 @@ import org.egc.chexmix.events.BindingSubtype;
 import org.egc.chexmix.events.EventsConfig;
 import org.egc.chexmix.framework.ChExMixConfig;
 import org.egc.chexmix.motifs.MotifPlatform;
-import org.egc.core.viz.metaprofile.MetaConfig;
-import org.egc.core.viz.metaprofile.SequenceAlignmentFigure;
 
 
 public class EventsPostAnalysis {
@@ -297,11 +296,14 @@ public class EventsPostAnalysis {
 						// Save as new image						
 						ImageIO.write(combinedFull, "PNG", new File(pngPath+"heatmap.full.png"));
 												
-						// resize image to 250 x 1000
-						Image resizedImage = combinedFull.getScaledInstance(Math.min(combinedFull.getWidth(), 250),  Math.min(combinedFull.getHeight(), 1000), Image.SCALE_DEFAULT);						
-						// convert image back to buffered image
-						BufferedImage bimg = new BufferedImage(Math.min(combinedFull.getWidth(), 250),  Math.min(combinedFull.getHeight(), 1000), BufferedImage.TYPE_INT_ARGB);
-						bimg.getGraphics().drawImage(resizedImage,0,0, null);	
+						// resize image to 250 x 1000 (synchronous scaling — getScaledInstance is async)
+						int bw = Math.min(combinedFull.getWidth(), 250);
+						int bh = Math.min(combinedFull.getHeight(), 1000);
+						BufferedImage bimg = new BufferedImage(bw, bh, BufferedImage.TYPE_INT_ARGB);
+						Graphics2D g2bimg = bimg.createGraphics();
+						g2bimg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+						g2bimg.drawImage(combinedFull, 0, 0, bw, bh, null);
+						g2bimg.dispose();
 						ImageIO.write(bimg, "PNG", new File(pngPath+"heatmap.png"));
 											
 						// delete source images

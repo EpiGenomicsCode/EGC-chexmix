@@ -1,4 +1,4 @@
-package org.egc.core.viz.metaprofile;
+package org.egc.chexmix.utilities;
 
 import java.util.*;
 
@@ -11,43 +11,43 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 	private PointProfiler<T, ProfileClass> profiler, threadSafe;
 	private Vector<PointAddingThread> currentlyAdding;
 	private List<Thread> activeThreads = new ArrayList<Thread>();
-	
-	public MetaProfileHandler(String name, BinningParameters bps, PointProfiler<T,ProfileClass> pp, boolean normalizedMeta) { 
+
+	public MetaProfileHandler(String name, BinningParameters bps, PointProfiler<T,ProfileClass> pp, boolean normalizedMeta) {
 		if(normalizedMeta)
 			profile = new NormalizedMetaProfile(name, bps);
 		else
-			profile = new MetaProfile(name, bps);		
+			profile = new MetaProfile(name, bps);
 		profiler = pp;
 		threadSafe = new ThreadSafeProfiler();
 		currentlyAdding = new Vector<PointAddingThread>();
 	}
-	
+
 	public MetaProfile getProfile() { return profile; }
-	
-	public void addPoints(Collection<T> points) { 
+
+	public void addPoints(Collection<T> points) {
 		addPoints(points.iterator());
 	}
-	
-	public void addPoints(Iterator<T> points) { 
+
+	public void addPoints(Iterator<T> points) {
 		PointAddingThread pat = new PointAddingThread(points);
 		startAddingThread(pat);
 	}
-	
-	private void startAddingThread(PointAddingThread pat) { 
-		synchronized(currentlyAdding) { 
+
+	private void startAddingThread(PointAddingThread pat) {
+		synchronized(currentlyAdding) {
 			currentlyAdding.add(pat);
 			Thread t = new Thread(pat);
 			activeThreads.add(t);
-			t.start();		
+			t.start();
 		}
 	}
-	
-	private void addingThreadFinished(PointAddingThread pat) { 
-		synchronized(currentlyAdding) { 
+
+	private void addingThreadFinished(PointAddingThread pat) {
+		synchronized(currentlyAdding) {
 			currentlyAdding.remove(pat);
 		}
 	}
-	
+
 	/**
 	 * Block until all point-adding threads have completed.
 	 */
@@ -57,7 +57,7 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 		}
 		activeThreads.clear();
 	}
-	
+
 	private class ThreadSafeProfiler implements PointProfiler<T,ProfileClass> {
 
 		public BinningParameters getBinningParameters() {
@@ -65,29 +65,29 @@ public class MetaProfileHandler<T extends Point, ProfileClass extends Profile> {
 		}
 
 		public ProfileClass execute(T a) {
-			synchronized(this) { 
+			synchronized(this) {
 				return profiler.execute(a);
 			}
-		} 	
+		}
 		public void cleanup() {}
 	}
-	
-	private class PointAddingThread implements Runnable { 
-		
+
+	private class PointAddingThread implements Runnable {
+
 		public boolean running;
 		private Iterator<T> points;
 
-		public PointAddingThread(Iterator<T> pts) { 
+		public PointAddingThread(Iterator<T> pts) {
 			running = true;
 			points = pts;
 		}
-		
-		public void stopAdding() { 
+
+		public void stopAdding() {
 			running = false;
 		}
-		
-		public void run() { 
-			while(running && points.hasNext()) { 
+
+		public void run() {
+			while(running && points.hasNext()) {
 				T pt = points.next();
 				profile.addProfile(threadSafe.execute(pt));
 			}
