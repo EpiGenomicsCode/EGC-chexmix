@@ -16,7 +16,7 @@ import org.egc.core.gseutils.Pair;
  *         frequencies. For example the probabilities of all 16 possible
  *         dinucleotides sum to 1.
  */
-public class FrequencyBackgroundModel extends BackgroundModel implements BackgroundModelFrequencySupport {
+public class FrequencyBackgroundModel extends BackgroundModel {
   
   private static final String MODEL_TYPE = "FREQUENCY";
   
@@ -92,7 +92,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
 	
 	
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    */
   public double getFrequency(String kmer) {
   	if (modelProbs[kmer.length()].containsKey(kmer)) {
@@ -105,7 +105,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
   
   
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    */
   public double getFrequency(int intVal, int kmerLen) {
     return this.getFrequency(BackgroundModel.int2seq(intVal, kmerLen));
@@ -182,7 +182,7 @@ public class FrequencyBackgroundModel extends BackgroundModel implements Backgro
   
 
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    * For a frequency based model this is accomplished by setting reverse
    * complements to have the average of their frequencies, so there is no harm
    * in running this method even if the model is already destranded.

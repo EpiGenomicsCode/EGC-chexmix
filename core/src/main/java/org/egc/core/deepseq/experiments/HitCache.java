@@ -24,23 +24,24 @@ import org.egc.core.math.stats.StatUtil;
 
 /**
  * HitCache stores all alignment hits for a Sample in memory.
- * 
+ * Provides region-based access to alignment hits, pairs, and aggregate counts.
+ *
  * All hits are loaded at initialization into primitive arrays for efficient access.
  * After potential binding regions are identified, call subsetArrays() to free memory
  * for reads outside the analysis regions.
- * 
+ *
  * Hit alignments are stored in two primitive type 3D arrays -- fivePrimePos and fivePrimeCounts.
  * In each array:
  * - first dimension: chromosome ID (via chrom2ID map)
  * - second dimension: strand (0 for Watson/'+', 1 for Crick/'-')
  * - third dimension: hit positions or counts
- * 
+ *
  * After initialization, data is read-only and all access is thread-safe
  * without synchronization.
- * 
+ *
  * @author mahony
  */
-public class HitCache implements HitCacheInterface{
+public class HitCache {
 
 	private Collection<HitLoader> loaders; //Source of reads
 	private Genome gen;

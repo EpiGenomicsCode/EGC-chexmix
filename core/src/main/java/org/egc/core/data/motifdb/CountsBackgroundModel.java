@@ -25,7 +25,7 @@ import org.egc.core.gseutils.Pair;
  * @author rca
  *
  */
-public class CountsBackgroundModel extends BackgroundModel implements BackgroundModelFrequencySupport {
+public class CountsBackgroundModel extends BackgroundModel {
   
   private static final String MODEL_TYPE = "FREQUENCY";
 
@@ -109,7 +109,7 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
 
 
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    */
 	public double getFrequency(String kmer) {
 		//build the cache if it's not ready
@@ -126,7 +126,7 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
 	}
 
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    */
 	public double getFrequency(int intVal, int kmerLen) {
 		return this.getFrequency(BackgroundModel.int2seq(intVal, kmerLen));
@@ -273,7 +273,7 @@ public class CountsBackgroundModel extends BackgroundModel implements Background
   
     
   /**
-   * @see BackgroundModelFrequencySupport
+   *
    * For a count based model this is accomplished by setting reverse
    * complements to have the sum of their counts.
    */

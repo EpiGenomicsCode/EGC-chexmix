@@ -17,21 +17,28 @@ import htsjdk.samtools.util.CloseableIterator;
 
 
 /**
- * SAMFileHitLoader: A FileHitLoader for SAM and BAM files.
- * Accounts for uniqueness of hits according to user-specified option. 
+ * SAMFileHitLoader: Loads reads from SAM and BAM alignment files.
+ * Accounts for uniqueness of hits according to user-specified option.
  * Ignores secondary & supplementary (i.e. chimeric) alignments.
  * @author mahony
  *
  */
-public class SAMFileHitLoader extends FileHitLoader{
+public class SAMFileHitLoader extends HitLoader{
 
-	private boolean useChimericReads=false; //Ignore chimeric mappings for now. 
-	
+	protected File file;
+	protected boolean useNonUnique=true;
+	private boolean useChimericReads=false; //Ignore chimeric mappings for now.
+
 	public SAMFileHitLoader(File f, boolean nonUnique, boolean loadT1Reads, boolean loadT2Reads, boolean loadRead2, boolean loadPairs) {
-    	super(f, nonUnique, true, false, loadRead2, loadPairs);
+    	super(true, false, loadRead2, loadPairs);
+    	this.file = f;
+    	this.useNonUnique = nonUnique;
+    	this.sourceName = f.getName();
     	if(!loadT1Reads || loadT2Reads)
 			System.err.println("SAMFileHitLoader: You asked to load only Type1 or Type2 reads, we do not yet load this information from SAM format.");
     }
+
+	public void cleanup(){}
     
     /**
 	 * Get the reads from the appropriate source (implementation-specific).
