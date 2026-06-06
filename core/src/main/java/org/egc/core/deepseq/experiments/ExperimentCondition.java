@@ -187,24 +187,16 @@ public class ExperimentCondition {
 			//Calculate scaling factors for each replicate's signal vs control
 			for(ControlledExperiment expt : getReplicates()){
 				if(expt.hasControl()){
-					String scalingPlotFilename =null;
-					if(econfig.getPlotScaling())
-						scalingPlotFilename = expt.getName();
-					
-					if(econfig.getScalingBySES())
-						expt.setScaling(scaler.scalingRatioBySES(sampleWindowCounts.get(expt.getSignal()), sampleWindowCounts.get(expt.getControl())));
-					else if(econfig.getScalingByRegression())
-						expt.setScaling(scaler.scalingRatioByRegression(sampleWindowCounts.get(expt.getSignal()), sampleWindowCounts.get(expt.getControl())));
-					else if(econfig.getScalingByMedian())
-						expt.setScaling(scaler.scalingRatioByMedian(sampleWindowCounts.get(expt.getSignal()), sampleWindowCounts.get(expt.getControl())));
-					else if(econfig.getScalingByHitRatioAndNCIS())
-						expt.setScaling(scaler.scalingRatioByHitRatioAndNCIS(sampleWindowCounts.get(expt.getSignal()), sampleWindowCounts.get(expt.getControl()),
-								expt.getSignal().getHitCount(), expt.getControl().getHitCount(),scalingPlotFilename,econfig.getNCISMinBinFrac()));
-					else
-						expt.setScaling(scaler.scalingRatioByNCIS(sampleWindowCounts.get(expt.getSignal()), sampleWindowCounts.get(expt.getControl()), scalingPlotFilename,econfig.getNCISMinBinFrac()));
+					String plotFile = econfig.getPlotScaling() ? expt.getName() : null;
+					expt.setScaling(scaler.computeScalingRatio(econfig,
+							sampleWindowCounts.get(expt.getSignal()),
+							sampleWindowCounts.get(expt.getControl()),
+							expt.getSignal().getHitCount(),
+							expt.getControl().getHitCount(),
+							plotFile));
 				}
 			}
-				
+
 			//Calculate scaling factor for pooled signal vs pooled control for this condition
 			List<Float> pooledSignal = new ArrayList<Float>();
 			List<Float> pooledControl = new ArrayList<Float>();
@@ -213,7 +205,7 @@ public class ExperimentCondition {
 				for(Sample s : signalSamples)
 					sumSig+=sampleWindowCounts.get(s).get(x);
 				pooledSignal.add(sumSig);
-				
+
 				float sumCtrl = 0;
 				for(Sample s : controlSamples)
 					sumCtrl+=sampleWindowCounts.get(s).get(x);
@@ -222,18 +214,11 @@ public class ExperimentCondition {
 			double totalSignalHits=0; double totalCtrlHits=0;
 			for(Sample s : signalSamples)
 				totalSignalHits+=s.getHitCount();
-			for (Sample s : controlSamples)
+			for(Sample s : controlSamples)
 				totalCtrlHits+=s.getHitCount();
-			if(econfig.getScalingBySES())
-				pooledSampleControlScaling = scaler.scalingRatioBySES(pooledSignal, pooledControl);
-			else if(econfig.getScalingByRegression())
-				pooledSampleControlScaling = scaler.scalingRatioByRegression(pooledSignal, pooledControl);
-			else if(econfig.getScalingByMedian())
-				pooledSampleControlScaling = scaler.scalingRatioByMedian(pooledSignal, pooledControl);
-			else if(econfig.getScalingByHitRatioAndNCIS())
-				pooledSampleControlScaling = scaler.scalingRatioByHitRatioAndNCIS(pooledSignal, pooledControl,totalSignalHits,totalCtrlHits, null, econfig.getNCISMinBinFrac());
-			else
-				pooledSampleControlScaling = scaler.scalingRatioByNCIS(pooledSignal, pooledControl, null, econfig.getNCISMinBinFrac());
+			pooledSampleControlScaling = scaler.computeScalingRatio(econfig,
+					pooledSignal, pooledControl,
+					totalSignalHits, totalCtrlHits, null);
 			
 			if(econfig.getPrintLoadingProgress())
 				System.err.println("\tComplete.");

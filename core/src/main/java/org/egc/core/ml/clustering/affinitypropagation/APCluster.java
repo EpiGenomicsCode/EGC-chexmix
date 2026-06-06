@@ -1,6 +1,5 @@
 package org.egc.core.ml.clustering.affinitypropagation;
 
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -9,7 +8,7 @@ import org.egc.core.ml.clustering.ClusterablePair;
 
 
 /**
- * 
+ *
  * @author reeder
  *
  */
@@ -28,7 +27,7 @@ public class APCluster {
 		int[][] e = new int[s.size()][convit];
 		int[] se = new int[s.size()];
 		int decsumc = 0, decsum0 = 0;
-		
+
 		//initialize variables
 		for (int i=0; i<s.size(); i++) {
 			for (int j=0; j<s.size(); j++) {
@@ -43,24 +42,8 @@ public class APCluster {
 			}
 			se[i] = 0;
 		}
-		
-		//System.err.println("a size: "+a.size());
-		//System.err.println("r size: "+r.size());
-		
-		/*
-		System.out.println("a:");
-		print(a);
-		System.out.println();
-		System.out.println("r:");
-		print(r);
-		System.out.println();
-		*/
 
 		while (!done) {
-			if (it%10 == 0) {
-				//System.err.println("Iteration: "+it);
-			}
-			
 			//compute responsibilities
 			for (int i=0; i<s.size(); i++) {
 				max1 = SimilarityMeasure.NEGINF; max2 = SimilarityMeasure.NEGINF;
@@ -68,11 +51,9 @@ public class APCluster {
 				for (int k=0; k<s.size(); k++) {
 					ClusterablePair ikpair = new ClusterablePair(objects.get(i), objects.get(k));
 					if (!s.exists(ikpair)) {
-						//System.out.println("!exists");
 						continue;
 					}
 					tmp = a.get(ikpair) + s.evaluate(ikpair);
-					//if (it==0) System.out.println(i+" "+k+" "+tmp);
 					if (tmp > max1) {
 						max2 = max1;
 						max1 = tmp;
@@ -81,45 +62,18 @@ public class APCluster {
 						max2 = tmp;
 					}
 				}
-				//System.err.println("MAX1: " + max1 + " MAX2: " + max2);
 				for (int k=0; k<s.size(); k++) {
 					ClusterablePair ikpair = new ClusterablePair(objects.get(i), objects.get(k));
 					if (!s.exists(ikpair)) continue;
 					if (k==i1) {
 						double message = lam*r.get(ikpair) + (1.0-lam)*(s.evaluate(ikpair) - max2);
-						//System.err.println("R " + objects.get(i).name() + " to " + objects.get(k).name() + ": " + message);
 						r.put(ikpair, message);
 					} else {
 						double message = lam*r.get(ikpair) + (1.0-lam)*(s.evaluate(ikpair) - max1);
-						//System.err.println("R " + objects.get(i).name() + " to " + objects.get(k).name() + ": " + message);
 						r.put(ikpair, message);
 					}
 				}
 			}
-			/*
-			if (false) {
-				System.out.println("max1: "+max1);
-				System.out.println("max2: "+max2);
-				System.out.println("i1: "+i1);
-				for (int i=0; i<s.size(); i++) {
-					for (int j=0; j<s.size(); j++) {
-						if (!s.exists(objects.get(i), objects.get(j))) continue;
-						System.out.print(r.get(objects.get(i).name()+"SEP"+objects.get(j).name()));
-						System.out.print("\t");
-					}
-					System.out.println();
-				}
-			}
-			
-			/*
-			if (it==0) {
-				System.out.println("max1: "+max1);
-				System.out.println("max2: "+max2);
-				System.out.println("r("+it+"):");
-				print(r);
-				System.out.println();
-			}
-			*/
 
 			//compute availabilities
 			for (int k=0; k<s.size(); k++) {
@@ -144,15 +98,12 @@ public class APCluster {
 					}
 					if (i==k) {
 						double message = lam*a.get(ikpair) + (1.0 - lam)*tmp2;
-						//System.err.println("A " + objects.get(i).name() + " to " + objects.get(k).name() + ": " + message);
 						a.put(ikpair, message);
 					} else if (tmp2 < 0) {
 						double message = lam*a.get(ikpair) + (1.0-lam)*tmp2;
-						//System.err.println("A " + objects.get(i).name() + " to " + objects.get(k).name() + ": " + message);
 						a.put(ikpair, message);
 					} else {
 						double message = lam*a.get(ikpair);
-						//System.err.println("A " + objects.get(i).name() + " to " + objects.get(k).name() + ": " + message);
 						a.put(ikpair, message);
 					}
 				}
@@ -171,12 +122,7 @@ public class APCluster {
 					se[j] += e[j][d];
 				}
 			}
-			
-			/*
-			System.out.println("e("+it+"):");
-			print(e);
-			*/
-			
+
 			decsumc = 0;
 			decsum0 = 0;
 			for (int j = 0; j<s.size(); j++) {
@@ -190,7 +136,7 @@ public class APCluster {
 				done = true;
 				decit--;
 			}
-			
+
 			it++; decit++;
 			if (decit>=convit) {
 				decit = 0;
@@ -202,9 +148,8 @@ public class APCluster {
 		//e[][decit] represents the exemplars
 		//decsumc is the number of exemplars
 		Vector<Integer> exidx = new Vector<Integer>();
-		int tmpidx = 0;
 		int[] assgn = new int[s.size()];
-		
+
 		for (int i=0; i<s.size(); i++) {
 			if (e[i][decit]==1) {
 				exidx.add(i);
@@ -223,20 +168,18 @@ public class APCluster {
 		for (int i=0; i<decsumc; i++) {
 			assgn[exidx.get(i)] = i;
 		}
-		
-		int[] intarry = new int[1];
-		
+
 		s.putAssignments(assgn);
 		s.putExemplars(toIntArray(exidx));
-		
+
 		double netsim = 0.0;
 		for (int i=0; i<s.size(); i++) {
     		netsim += s.evaluate(new ClusterablePair(objects.get(i), objects.get(exidx.get(assgn[i]))));
     	}
-		
+
 		return netsim;
 	}
-	
+
 	public static int[] toIntArray(Vector<Integer> vec) {
 		int[] toreturn = new int[vec.size()];
 		for (int i=0; i<toreturn.length; i++) {
@@ -244,23 +187,5 @@ public class APCluster {
 		}
 		return toreturn;
 	}
-	
-	private static void print(double[][] a) {
-		for (int i=0; i<a.length; i++) {
-			for (int j=0; j<a[i].length; j++) {
-				System.out.print(a[i][j]+" ");
-			}
-			System.out.println();
-		}
-	}
-	
-	private static void print(int[][] a) {
-		for (int i=0; i<a.length; i++) {
-			for (int j=0; j<a[i].length; j++) {
-				System.out.print(a[i][j]+" ");
-			}
-			System.out.println();
-		}
-	}
-	
+
 }

@@ -67,11 +67,6 @@ public class MatrixSimilarityMeasure<X extends Clusterable> extends SimilarityMe
 		return objects.get(idx).name();
 	}
 
-	/*public double evaluate(Clusterable e1, Clusterable e2) {
-		if (valuemap.containsKey(e1.name()+e2.name()));
-		return 0;
-	}*/
-
 	public double evaluate(X e1, X e2) {
 		if (e1.name().equals(e2.name())) {
 			return prefvalue;
