@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.HashMap;
 
-import org.egc.core.deepseq.ExtReadHit;
 import org.egc.core.deepseq.ReadHit;
 import org.egc.core.deepseq.StrandedBaseCount;
 import org.egc.core.deepseq.StrandedPair;
@@ -187,10 +186,6 @@ public class Sample {
 		return(cache.exportReadHits(readLen));
 	}
     
-    
-    public List<ExtReadHit> exportExtReadHits(Region r, int readLen, int startShift, int fivePrimeExt, int threePrimeExt){
-    	return(cache.exportExtReadHits(r, readLen, startShift, fivePrimeExt, threePrimeExt));
-    }
     
     /**
 	 * Simple count correction with a scaling factor and a floor of one. 

@@ -119,7 +119,6 @@ public class SimilarityScore {
 	}
 	
 	protected double ALLR(){
-		double score = 0;
-		return score;
+		throw new UnsupportedOperationException("ALLR similarity metric is not implemented");
 	}
 }

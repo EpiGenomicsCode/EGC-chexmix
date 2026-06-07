@@ -262,7 +262,7 @@ public class StatUtil {
 	}
 
 	/** KL divergence for discrete distributions P and Q (http://en.wikipedia.org/wiki/Kullback-Leibler_divergence). */
-	public static double KL_Divergence(double[] P, double[] Q) {
+	private static double KL_Divergence(double[] P, double[] Q) {
 		double d = 0;
 		double[] p = P.clone();
 		double[] q = Q.clone();

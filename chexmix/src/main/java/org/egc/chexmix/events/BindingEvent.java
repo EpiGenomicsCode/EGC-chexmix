@@ -54,7 +54,6 @@ public class BindingEvent implements Comparable<BindingEvent>{
 	protected double [][] interCondScMean;   //Signal vs signal scaled mean (logCPM from EdgeR), inter-condition  [indexed by condition & condition]
 	protected double [][] interCondFold;   //Signal vs signal fold difference  (logFold from EdgeR), inter-condition  [indexed by condition & condition]
 	protected double [][] interCondP;   //Signal vs signal P, inter-condition         [indexed by condition & condition]
-	protected double [][] interRepP;   //Signal vs signal P, inter-replicate        [indexed by replicate & replicate]
 	protected double []   LLd; 			//Log-likelihood loss test statistic resulting from eliminating component [indexed by condition]
 	protected double []   LLp;			//P-value for LL [indexed by condition]
 	protected double [][][] motifScores;	//LL score for motif match at binding event
@@ -86,7 +85,6 @@ public class BindingEvent implements Comparable<BindingEvent>{
 		repSigVCtrlFold = new double [numR];
 		repSigVCtrlP = new double [numR];
 		repSigVCtrlQ = new double [numR];
-		interRepP = new double [numR][numR];
 		LLd = new double [numC];
 		LLp = new double [numC];
 		motifScores = new double[numC][][];
@@ -125,7 +123,6 @@ public class BindingEvent implements Comparable<BindingEvent>{
  	public double getInterCondScMean(ExperimentCondition c1, ExperimentCondition c2){return(interCondScMean[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]);}
  	public double getInterCondFold(ExperimentCondition c1, ExperimentCondition c2){return(interCondFold[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]);}
  	public double getInterCondP(ExperimentCondition c1, ExperimentCondition c2){return(interCondP[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]);}
-	public double getInterRepP(ControlledExperiment r1, ControlledExperiment r2){return interRepP[r1.getIndex()][r2.getIndex()];}
 	public static int getNumSingleCondCols(){return numSingleCondCols;}
 	public static int getNumInterCondCols(){return numInterCondCols;}
 	public double getLLd(ExperimentCondition c1){return(LLd[experiments.getConditionIndex(c1)]);}
@@ -190,7 +187,6 @@ public class BindingEvent implements Comparable<BindingEvent>{
 	public void setInterCondScMean(ExperimentCondition c1, ExperimentCondition c2, double x){interCondScMean[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]=x;}
 	public void setInterCondFold(ExperimentCondition c1, ExperimentCondition c2, double x){interCondFold[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]=x;}
 	public void setInterCondP(ExperimentCondition c1, ExperimentCondition c2, double x){interCondP[experiments.getConditionIndex(c1)][experiments.getConditionIndex(c2)]=x;}
-	public void setInterRepP(ControlledExperiment r1, ControlledExperiment r2, double x){interRepP[r1.getIndex()][r2.getIndex()]=x;}
 	public void setMotifScore(ExperimentCondition c1, double[][] s){motifScores[experiments.getConditionIndex(c1)] = s;}
 	public void setReplicationCode(ExperimentCondition c1, char r){replicated[experiments.getConditionIndex(c1)] = r;}
 	public void setSequence(ExperimentCondition c1, String[][] seq){sequences[experiments.getConditionIndex(c1)]=seq;}

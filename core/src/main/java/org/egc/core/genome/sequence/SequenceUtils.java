@@ -1,9 +1,5 @@
 package org.egc.core.genome.sequence;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Random;
-
 /**
  * <code>SequenceUtils</code> provides a number of static methods for manipulating
  * DNA sequences stores as strings or char[].
@@ -12,24 +8,24 @@ import java.util.Random;
  */
 public class SequenceUtils {
 
-    
     /**
      * <code>complement</code> returns the complement of a nucleotide in the 2-bit representation.
      */
-    public static int complement(int i) { 
-    	switch(i) { 
+    public static int complement(int i) {
+    	switch(i) {
     	case 0: return 1;
     	case 1: return 0;
-    	case 2: return 3; 
+    	case 2: return 3;
     	case 3: return 2;
     	default: return -1;
     	}
     }
+
     /**
      * <code>complement</code> returns the complement of a nucleotide in the character representation
      * (A,C,T,G,a,c,t,g).
      */
-    public static char complementChar(char c) { 
+    public static char complementChar(char c) {
         if (trans == null) {
             trans = new char['z'];
             trans['A'] = 'T';
@@ -45,10 +41,9 @@ public class SequenceUtils {
         }
         return trans[c];
     }
-    
-
 
     private static char[] trans;
+
     /**
      * <code>reverseComplement</code> mutates in the input array of characters
      * (A,C,T,G,a,c,t,g) to be the reverse complement.
@@ -68,10 +63,9 @@ public class SequenceUtils {
             trans['n'] = 'n';
             trans['X'] = 'X';
             trans['x'] = 'x';
-
         }
         int i;
-        int end = array.length - 1;        
+        int end = array.length - 1;
         for (i = 0; i <= array.length / 2 && i < array.length; i++) {
             try {
                 char first = array[i];
@@ -87,28 +81,27 @@ public class SequenceUtils {
         }
     }
 
-    public static String reverseComplement(String str) { 
+    public static String reverseComplement(String str) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = str.length()-1; i>= 0; i--) { 
+		for(int i = str.length()-1; i>= 0; i--) {
 			sb.append(complementChar(str.charAt(i)));
 		}
 		return sb.toString();
 	}
-    
+
     public static byte[] reverseComplement(byte[] bases) {
 		byte[] rc = new byte[bases.length];
 		int j=0;
-		for(int i = bases.length-1; i>= 0; i--) { 
+		for(int i = bases.length-1; i>= 0; i--) {
 			rc[j]=(byte)complementChar((char)bases[i]);
 			j++;
 		}
 		return rc;
 	}
 
-    /** converts from 2-bit representation to character representation
-     */
-    public static char int2char(int i) { 
-        switch(i) { 
+    /** converts from 2-bit representation to character representation */
+    public static char int2char(int i) {
+        switch(i) {
         case 0: return 'A';
         case 1: return 'C';
         case 2: return 'G';
@@ -116,14 +109,13 @@ public class SequenceUtils {
         }
         return 'n';
     }
-    
-    /** converts from character representation to 2-bit representation
-     */
-    public static int char2int(char c) { 
-        switch(c) { 
+
+    /** converts from character representation to 2-bit representation */
+    public static int char2int(char c) {
+        switch(c) {
         case 'a':
-        case 'A': 
-            return 0; 
+        case 'A':
+            return 0;
         case 'c':
         case 'C':
             return 1;
@@ -136,75 +128,4 @@ public class SequenceUtils {
         }
         return -1;
     }
-
-    public static long StringToLong(String a) {
-        return StringToLong(a,0,a.length());
-    }
-
-    public static long StringToLong(String a, int offset, int k) {
-        long sum = (long)0;
-        for(int i = 0; i < k; i++) { 
-            int val = char2int(a.charAt(i + offset));
-            sum = (sum << 2) + val;
-        }
-        return sum;
-    }
-
-    public static String LongToString(Long l, int length) {
-        char[] output = new char[length];
-        while (length-- > 0) {
-            output[length] = int2char((int)(l & 3));
-            l >>= 2;
-        }
-        return new String(output);
-    }
-
-	public static Collection<String> creatKMers(String original, int k) { 
-		LinkedList<String> kmers = new LinkedList<String>();
-		for(int i = 0; i <= original.length() - k; i++) { 
-			kmers.addLast(original.substring(i, i + k));
-		}
-		return kmers;
-	}    
-	
-	private static cern.jet.random.engine.RandomEngine randomEngine;
-	public static String generateRandomBases(int k){
-		if (randomEngine==null)
-			randomEngine = new cern.jet.random.engine.MersenneTwister();
-		StringBuffer sb=new StringBuffer();
-		for (int i=0;i<k;i++){
-			int num = Math.abs(randomEngine.nextInt()) % 4;
-			sb.append(int2char(num));
-		}
-		return sb.toString();
-	}
-	public static String generateRandomString(int k){
-		if (randomEngine==null)
-			randomEngine = new cern.jet.random.engine.MersenneTwister();
-		char[] chars = new char[k];
-		for (int i=0;i<k;i++){
-			chars[i]=(char)(Math.abs(randomEngine.nextInt()) % 26 + 'A');
-		}
-		return new String(chars);
-	}
-	/**
-	 * Single nucleotide shuffle
-	 * @param str
-	 * @param randObj
-	 * @return
-	 */
-	public static String shuffle(String str, Random randObj){
-		if (str.length()<=1)
-		    return str;
-
-		int split=str.length()/2;
-
-		String temp1=shuffle(str.substring(0,split), randObj);
-		String temp2=shuffle(str.substring(split), randObj);
-
-		if (randObj.nextDouble() > 0.5) 
-		    return temp1 + temp2;
-		else 
-		    return temp2 + temp1;
-	}
 }

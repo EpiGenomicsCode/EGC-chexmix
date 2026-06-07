@@ -87,7 +87,7 @@ public class CubicSpline{
 
     	// Constructor with data arrays initialised to zero
     	// Primarily for use by BiCubicSpline
-    	public CubicSpline(int nPoints){
+    	CubicSpline(int nPoints){
         	this.nPoints=nPoints;
         	this.nPointsOriginal = this.nPoints;
         	if(this.nPoints<3)throw new IllegalArgumentException("A minimum of three data points is needed");
@@ -100,7 +100,7 @@ public class CubicSpline{
     	// Reset rounding error check option
     	// Default option: points outside the interpolation bounds by less than the potential rounding error rounded to the bounds limit
     	// This method causes this check to be ignored and an exception to be thrown if any poit lies outside the interpolation bounds
-    	public static void noRoundingErrorCheck(){
+    	static void noRoundingErrorCheck(){
             CubicSpline.roundingCheck = false;
         }
 
@@ -108,12 +108,12 @@ public class CubicSpline{
         // Default option: points outside the interpolation bounds by less than the potential rounding error rounded to the bounds limit
         // The default value for the potential rounding error is 5e-15*times the 10^exponent of the value outside the bounds
 	    // This method allows the 5e-15 to be reset
-    	public static void potentialRoundingError(double potentialRoundingError){
+    	static void potentialRoundingError(double potentialRoundingError){
             CubicSpline.potentialRoundingError = potentialRoundingError;
         }
 
     	// Resets the x y data arrays - primarily for use in BiCubicSpline
-    	public void resetData(double[] x, double[] y){
+    	void resetData(double[] x, double[] y){
         	this.nPoints = this.nPointsOriginal;
         	if(x.length!=y.length)throw new IllegalArgumentException("Arrays x and y are of different length");
         	if(this.nPoints!=x.length)throw new IllegalArgumentException("Original array length not matched by new array length");
@@ -126,19 +126,19 @@ public class CubicSpline{
     	}
 
     	// Set sub-matrix indices - for use with higher order interpolations calling CubicSpline
-    	public void setSubMatrix(String subMatrixIndices){
+    	void setSubMatrix(String subMatrixIndices){
     	    this.subMatrixIndices = subMatrixIndices;
     	}
 
         // Reset the default handing of identical abscissae with different ordinates
         // from the default option of separating the two relevant abscissae by 0.001 of the range
         // to avraging the relevant ordinates
-    	public void averageIdenticalAbscissae(){
+    	void averageIdenticalAbscissae(){
     	    this.averageIdenticalAbscissae = true;
     	}
 
     	// Sort points into an ascending abscissa order
-    	public void orderPoints(){
+    	void orderPoints(){
     	    double[] dummy = new double[nPoints];
     	    this.newAndOldIndices = new int[nPoints];
     	    // Sort x into ascending order storing indices changes
@@ -153,30 +153,30 @@ public class CubicSpline{
     	}
 
     	// get the maximum value
-    	public double getXmax(){
+    	double getXmax(){
     	    return this.xMax;
     	}
 
      	// get the minimum value
-    	public double getXmin(){
+    	double getXmin(){
     	    return this.xMin;
     	}
 
      	// get the limits of x
-    	public double[] getLimits(){
+    	double[] getLimits(){
     	    double[] limits = {this.xMin, this.xMax};
     	    return limits;
     	}
 
     	// print to screen the limis of x
-    	public void displayLimits(){
+    	void displayLimits(){
     	    System.out.println("\nThe limits of the abscissae (x-values) are " + this.xMin + " and " + this.xMax +"\n");
     	}
 
 
     	// Checks for and removes all but one of identical points
     	// Checks and appropriately handles identical abscissae with differing ordinates
-    	public void checkForIdenticalPoints(){
+    	void checkForIdenticalPoints(){
     	    int nP = this.nPoints;
     	    boolean test1 = true;
     	    int ii = 0;
@@ -350,7 +350,7 @@ public class CubicSpline{
 
     	// Returns a new CubicSpline setting array lengths to n and all array values to zero with natural spline default
     	// Primarily for use in BiCubicSpline
-    	public static CubicSpline zero(int n){
+    	static CubicSpline zero(int n){
         	if(n<3)throw new IllegalArgumentException("A minimum of three data points is needed");
         	CubicSpline aa = new CubicSpline(n);
         	return aa;
@@ -358,7 +358,7 @@ public class CubicSpline{
 
     	// Create a one dimensional array of cubic spline objects of length n each of array length m
     	// Primarily for use in BiCubicSpline
-    	public static CubicSpline[] oneDarray(int n, int m){
+    	static CubicSpline[] oneDarray(int n, int m){
         	if(m<3)throw new IllegalArgumentException("A minimum of three data points is needed");
         	CubicSpline[] a =new CubicSpline[n];
 	    	for(int i=0; i<n; i++){
@@ -370,14 +370,14 @@ public class CubicSpline{
     	// Enters the first derivatives of the cubic spline at
     	// the first and last point of the tabulated data
     	// Overrides a natural spline
-    	public void setDerivLimits(double yp1, double ypn){
+    	void setDerivLimits(double yp1, double ypn){
         	this.yp1=yp1;
         	this.ypn=ypn;
     	}
 
     	// Resets a natural spline
     	// Use above - this kept for backward compatibility
-    	public void setDerivLimits(){
+    	void setDerivLimits(){
         	this.yp1=Double.NaN;
         	this.ypn=Double.NaN;
     	}
@@ -386,21 +386,21 @@ public class CubicSpline{
     	// the first and last point of the tabulated data
     	// Overrides a natural spline
     	// Use setDerivLimits(double yp1, double ypn) - this kept for backward compatibility
-    	public void setDeriv(double yp1, double ypn){
+    	void setDeriv(double yp1, double ypn){
         	this.yp1=yp1;
         	this.ypn=ypn;
         	this.derivCalculated = false;
     	}
 
     	// Returns the internal array of second derivatives
-    	public double[] getDeriv(){
+    	double[] getDeriv(){
     	    if(!this.derivCalculated)this.calcDeriv();
         	return this.d2ydx2;
     	}
 
     	// Sets the internal array of second derivatives
     	// Used primarily with BiCubicSpline
-    	public void setDeriv(double[] deriv){
+    	void setDeriv(double[] deriv){
     	    this.d2ydx2 = deriv;
     	    this.derivCalculated = true;
     	}
@@ -500,7 +500,7 @@ public class CubicSpline{
 
     	//  Returns an interpolated value of y for a value of x (xx) from a tabulated function y=f(x)
     	//  after the derivatives (deriv) have been calculated independently of calcDeriv().
-    	public static double interpolate(double xx, double[] x, double[] y, double[] deriv){
+    	static double interpolate(double xx, double[] x, double[] y, double[] deriv){
 
         	if(((x.length != y.length) || (x.length != deriv.length)) || (y.length != deriv.length)){
             		throw new IllegalArgumentException("array lengths are not all equal");

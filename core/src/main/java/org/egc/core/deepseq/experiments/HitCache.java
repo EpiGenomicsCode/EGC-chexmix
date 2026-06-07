@@ -9,7 +9,6 @@ import java.util.List;
 
 import cern.jet.random.Poisson;
 import cern.jet.random.engine.DRand;
-import org.egc.core.deepseq.ExtReadHit;
 import org.egc.core.deepseq.HitPair;
 import org.egc.core.deepseq.ReadHit;
 import org.egc.core.deepseq.StrandedBaseCount;
@@ -544,16 +543,6 @@ public class HitCache {
 	    return count;
     }
     
-    
-    
-    public List<ExtReadHit> exportExtReadHits(Region r, int readLen, int startShift, int fivePrimeExt, int threePrimeExt){
-    	List<ReadHit> readHits = exportReadHits(r,readLen);
-    	List<ExtReadHit> extReadHits = new ArrayList<ExtReadHit>();
-    	for(ReadHit rh : readHits){
-    		extReadHits.add(new ExtReadHit(gen, rh, startShift, fivePrimeExt, threePrimeExt));
-    	}
-    	return extReadHits;
-    }
     
     
     /**

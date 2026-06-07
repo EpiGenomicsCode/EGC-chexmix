@@ -931,8 +931,9 @@ public class BindingMixture {
 		 * @throws FileNotFoundException 
 		 */
 		private Pair<List<NoiseComponent>, List<List<BindingSubComponents>>> analyzeWindowEM(Region w) throws FileNotFoundException{
-			BindingEM EM = new BindingEM(config, manager, bindingManager, conditionBackgrounds, replicateBackgrounds, potRegFilter.getPotentialRegions().size());
-			MultiGPSBindingEM multiGPSEM = new MultiGPSBindingEM(config, manager, bindingManager, conditionBackgrounds, replicateBackgrounds,  potRegFilter.getPotentialRegions().size());
+			boolean useMultiGPS = uniformBindingComponents && mixconfig.getModelFilename() == null;
+			BindingEM EM = useMultiGPS ? null : new BindingEM(config, manager, bindingManager, conditionBackgrounds, replicateBackgrounds, potRegFilter.getPotentialRegions().size());
+			MultiGPSBindingEM multiGPSEM = useMultiGPS ? new MultiGPSBindingEM(config, manager, bindingManager, conditionBackgrounds, replicateBackgrounds, potRegFilter.getPotentialRegions().size()) : null;
 			
 			List<List<BindingSubComponents>> bindingComponents=null;
 			List<NoiseComponent> noiseComponents=null;
@@ -967,8 +968,8 @@ public class BindingMixture {
             double[][][] forMotifPrior = config.getFindingMotifs() ? motifFinder.scanStrandedRegionWithMotifs(w, seq, true) : null;
             double[][][] revMotifPrior = config.getFindingMotifs() ? motifFinder.scanStrandedRegionWithMotifs(w, seq, false) : null;
                         
-            //EM learning: resulting binding components list will only contain non-zero components   
-            if (uniformBindingComponents && mixconfig.getModelFilename()== null)
+            //EM learning: resulting binding components list will only contain non-zero components
+            if (useMultiGPS)
             	nonZeroComponents = multiGPSEM.train(signals.toLegacyFormat(), w, noiseComponents, bindingComponents, numBindingComponents, trainingRound, plotSubReg);
             else
             	nonZeroComponents = EM.train(signals, w, noiseComponents, bindingComponents, numBindingComponents, forMotifPrior, revMotifPrior, trainingRound, plotSubReg);
@@ -984,8 +985,8 @@ public class BindingMixture {
 		 * @return Pair of component lists (noise components and binding components) indexed by condition
 		 */
 		private List<BindingEvent> analyzeWindowML(Region w){
-			BindingMLAssignment ML = new BindingMLAssignment(econfig, evconfig, config, manager,bindingManager, conditionBackgrounds, potRegFilter.getPotentialRegions().size());
-			MultiGPSMLAssignment GPSML = new MultiGPSMLAssignment(econfig, evconfig, config, manager,bindingManager, conditionBackgrounds, potRegFilter.getPotentialRegions().size());
+			BindingMLAssignment ML = runMultiGPSML ? null : new BindingMLAssignment(econfig, evconfig, config, manager, bindingManager, conditionBackgrounds, potRegFilter.getPotentialRegions().size());
+			MultiGPSMLAssignment GPSML = runMultiGPSML ? new MultiGPSMLAssignment(econfig, evconfig, config, manager, bindingManager, conditionBackgrounds, potRegFilter.getPotentialRegions().size()) : null;
 			List<BindingSubComponents> bindingComponents=null;
 			List<NoiseComponent> noiseComponents=null;
 			List<BindingEvent> currEvents = new ArrayList<BindingEvent>(); 
