@@ -1,17 +1,16 @@
 package org.egc.core.genome.location;
 
 import java.util.*;
+import java.util.function.Function;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.genome.location.Region;
-import org.egc.core.gseutils.Expander;
 
 
 /* gives an iterator over all of the chromosomes in a genome */
 
-public class ChromosomeGenerator<X extends Genome> implements Expander<X,Region> {
-    
-    public Iterator<Region> execute (X genome) {
+public class ChromosomeGenerator<X extends Genome> implements Function<X, Iterator<Region>> {
+
+    public Iterator<Region> apply(X genome) {
         List<String> names = genome.getChromList();
         List<Region> chroms = new ArrayList<Region>();
         for (int i = 0; i < names.size(); i++) {

@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.core.math.stats.StatUtil;
 
 
@@ -57,7 +57,7 @@ public class BindingModel {
 	              //make sure the current data point is within the specified range
 	              if ((dist.intValue() >= minDist) && (dist.intValue() <= maxDist)) {
 	                Pair<Integer,Double> p = new Pair<Integer,Double>(dist, Double.valueOf(words[1]));
-	                if (p.cdr().doubleValue()>=0)	// should be non-negative value
+	                if (p.last().doubleValue()>=0)	// should be non-negative value
 	                	empiricalDistribution.add(p);
 	                else {
 	                	throw new RuntimeException("\nRead distribution file contains negative probability(count) value!"); 
@@ -124,7 +124,7 @@ public class BindingModel {
 	//Update the influence range
 	protected void updateInfluenceRange(){
 		Pair<Integer,Integer> intervals = probIntervalDistances(0.95);
-		int longest = Math.max(Math.abs(intervals.car()), Math.abs(intervals.cdr()));
+		int longest = Math.max(Math.abs(intervals.first()), Math.abs(intervals.last()));
 		influenceRange = longest*2;
 	}
 	//Load data
@@ -133,10 +133,10 @@ public class BindingModel {
 		
 		//Find max, min values first
 		for(Pair<Integer, Double> p : bindingDist){
-			if(p.car()<min)
-				min=p.car();
-			if(p.car()>max)
-				max=p.car();
+			if(p.first()<min)
+				min=p.first();
+			if(p.first()>max)
+				max=p.first();
 		}
 		//Initialize arrays
 		data = new double[(max-min)+1];
@@ -149,8 +149,8 @@ public class BindingModel {
 		//Populate the data array (assumes sorted)
 		int last=min-1;
 		for(Pair<Integer, Double> p : bindingDist){
-			int index = p.car();
-			double val = p.cdr();
+			int index = p.first();
+			double val = p.last();
 			//if list is not properly sorted (need to make this into an exception)
 			if(index-last<0){
 				throw new RuntimeException("Incorrectly sorted binding read distribution data!"); 
@@ -165,7 +165,7 @@ public class BindingModel {
 			}
 			data[index-min]=val;
 			
-			last = p.car();
+			last = p.first();
 		}
 	}
 	
@@ -182,7 +182,7 @@ public class BindingModel {
 				minProb = probs[i-min];
 		}
 		Pair<Double, TreeSet<Integer>> sorted = StatUtil.findMax(probs);
-		summit = sorted.cdr().first()+min;
+		summit = sorted.last().first()+min;
 		
 		// update empiricalDistribution with normalized probability
 		List<Pair<Integer, Double>> newDist = new ArrayList<Pair<Integer, Double>> ();
@@ -199,12 +199,12 @@ public class BindingModel {
 	protected void smooth(int splineStepSize, int avgStepSize){
 		probs=StatUtil.cubicSpline(probs, splineStepSize, avgStepSize);
 		Pair<Double, TreeSet<Integer>> sorted = StatUtil.findMax(probs);
-		summit = sorted.cdr().first()+min;
+		summit = sorted.last().first()+min;
 	}
 	protected void smoothGaussian (int kernelWidth){
 		probs=StatUtil.gaussianSmoother(probs, kernelWidth);
 		Pair<Double, TreeSet<Integer>> sorted = StatUtil.findMax(probs);
-		summit = sorted.cdr().first()+min;
+		summit = sorted.last().first()+min;
 	}	
 	//Look up the probability corresponding to a distance
 	// Distance should be defined as (Read position - Peak position)

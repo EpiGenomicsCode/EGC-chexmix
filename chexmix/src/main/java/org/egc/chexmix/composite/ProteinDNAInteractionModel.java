@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 /**
  * ProteinDNAInteractionModel: defines a collection of composite model components 

@@ -18,7 +18,7 @@ import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
 import org.egc.core.genome.location.ChromRegionIterator;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 /**
@@ -256,7 +256,7 @@ public class CountsBackgroundModel extends BackgroundModel {
       List<Pair<Integer, Integer>> revCompPairs = BackgroundModel.computeDistinctRevCompPairs(currKmerLen);
       
       for (Pair<Integer, Integer> rcPair : revCompPairs) {
-        if (this.getKmerCount(rcPair.car(), currKmerLen) == this.getKmerCount(rcPair.cdr(), currKmerLen)) {
+        if (this.getKmerCount(rcPair.first(), currKmerLen) == this.getKmerCount(rcPair.last(), currKmerLen)) {
           isStranded = true;
           return isStranded;
         }
@@ -287,11 +287,11 @@ public class CountsBackgroundModel extends BackgroundModel {
   			List<Pair<Integer, Integer>> revCompPairs = BackgroundModel.computeDistinctRevCompPairs(currKmerLen);
 
   			for (Pair<Integer, Integer> rcPair : revCompPairs) {
-  				long count = this.getKmerCount(rcPair.car(), currKmerLen);;
-  				long revCompCount = this.getKmerCount(rcPair.cdr(), currKmerLen);;
+  				long count = this.getKmerCount(rcPair.first(), currKmerLen);;
+  				long revCompCount = this.getKmerCount(rcPair.last(), currKmerLen);;
   				long newCount = count + revCompCount;
-  				this.setKmerCount(BackgroundModel.int2seq(rcPair.car(), currKmerLen), newCount);
-  				this.setKmerCount(BackgroundModel.int2seq(rcPair.cdr(), currKmerLen), newCount);
+  				this.setKmerCount(BackgroundModel.int2seq(rcPair.first(), currKmerLen), newCount);
+  				this.setKmerCount(BackgroundModel.int2seq(rcPair.last(), currKmerLen), newCount);
   			}    	
   		}
   	}
@@ -401,7 +401,7 @@ public class CountsBackgroundModel extends BackgroundModel {
     while (stream.hasNext()) {
       Pair<String, String> currSeq = stream.next();
 
-      String tmpSeq = currSeq.cdr();
+      String tmpSeq = currSeq.last();
       String regionSeq = tmpSeq.toUpperCase();
 
       cbg.addKmerCountsFromSequence(regionSeq);

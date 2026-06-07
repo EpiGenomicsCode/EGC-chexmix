@@ -6,8 +6,7 @@ import org.egc.core.data.motifdb.*;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gseutils.Expander;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.core.math.stats.StatUtil;
 
 
@@ -89,10 +88,10 @@ public class WeightMatrixScorer {
     	
     	double[] scores = score(matrix, sequence.toCharArray(), '+');
     	Pair<Double, TreeSet<Integer>> max = StatUtil.findMax(scores);
-    	double maxScore = max.car();
+    	double maxScore = max.first();
     	scores = score(matrix, SequenceUtils.reverseComplement(sequence).toCharArray(), '-');
     	max = StatUtil.findMax(scores);
-    	maxScore = Math.max(maxScore, max.car());
+    	maxScore = Math.max(maxScore, max.first());
     	return maxScore;
     }
     

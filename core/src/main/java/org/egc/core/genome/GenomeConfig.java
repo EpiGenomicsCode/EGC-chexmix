@@ -15,9 +15,8 @@ import java.util.Set;
 
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
-import org.egc.core.gseutils.NotFoundException;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
 
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamReader;
@@ -102,8 +101,6 @@ public class GenomeConfig {
 					sequenceAvailable=true;
 				}
 
-			} catch (NotFoundException e) {
-				e.printStackTrace();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

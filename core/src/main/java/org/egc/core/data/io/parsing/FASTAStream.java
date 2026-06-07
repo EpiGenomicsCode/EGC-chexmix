@@ -5,7 +5,7 @@ package org.egc.core.data.io.parsing;
 
 import java.util.*;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 import java.io.*;
 

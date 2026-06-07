@@ -8,9 +8,9 @@ import org.egc.core.data.io.BackgroundModelIO;
 import org.egc.core.data.motifdb.MarkovBackgroundModel;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.Species;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
+import org.egc.core.utils.Pair;
 
 
 public class RandomSequenceGenerator {

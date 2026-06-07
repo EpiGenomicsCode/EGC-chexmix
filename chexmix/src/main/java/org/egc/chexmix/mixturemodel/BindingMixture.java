@@ -30,8 +30,8 @@ import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.gseutils.Pair;
-import org.egc.core.gseutils.RealValuedHistogram;
+import org.egc.core.utils.Pair;
+import org.egc.chexmix.utilities.RealValuedHistogram;
 import org.egc.core.math.stats.StatUtil;
 import org.egc.core.ml.clustering.Clusterable;
 import org.egc.core.ml.clustering.affinitypropagation.APCluster;
@@ -887,8 +887,8 @@ public class BindingMixture {
 	                    for(int e=0; e<manager.getNumConditions(); e++){ noiseRSums[e]=0.0;}
 		        		Pair<List<NoiseComponent>, List<List<BindingSubComponents>>> wComps = analyzeWindowEM(rr);
 		        		for(int e=0; e<manager.getNumConditions(); e++){
-		        			noiseRSums[e] += wComps.car().get(e).getSumResponsibility();
-		        			currComps.get(e).addAll(wComps.cdr().get(e));
+		        			noiseRSums[e] += wComps.first().get(e).getSumResponsibility();
+		        			currComps.get(e).addAll(wComps.last().get(e));
 	                    }
 		        		
 		        		//Only non-zero components are returned by analyzeWindow, so add them to the recorded active components
@@ -1070,12 +1070,12 @@ public class BindingMixture {
 		            				scores[bt][0]=0; seqs[bt][0] = ""; scores[bt][1]=0; seqs[bt][1]="";
 		            				if (subtype.hasMotif() && b.getTypePoints(cond)!=null){
 		            					if (b.getTypePoints(cond)[bt][0].getLocation()-w.getStart()>0){
-		            						scores[bt][0] = motifForScores.car()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][0].getLocation()-w.getStart()];
-		            						seqs[bt][0] = motifForScores.cdr()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][0].getLocation()-w.getStart()];
+		            						scores[bt][0] = motifForScores.first()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][0].getLocation()-w.getStart()];
+		            						seqs[bt][0] = motifForScores.last()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][0].getLocation()-w.getStart()];
 		            					}
 		            					if (b.getTypePoints(cond)[bt][1].getLocation()-w.getStart()>0){
-		            						scores[bt][1] = motifRevScores.car()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][1].getLocation()-w.getStart()];
-		            						seqs[bt][1] = motifRevScores.cdr()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][1].getLocation()-w.getStart()];
+		            						scores[bt][1] = motifRevScores.first()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][1].getLocation()-w.getStart()];
+		            						seqs[bt][1] = motifRevScores.last()[cond.getIndex()][bt][b.getTypePoints(cond)[bt][1].getLocation()-w.getStart()];
 		            					}
 		            				}
 		            			}

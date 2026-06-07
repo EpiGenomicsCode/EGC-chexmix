@@ -9,7 +9,6 @@ import org.egc.core.data.motifdb.MarkovBackgroundModel;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.data.motifdb.WeightMatrixImport;
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.*;
 
 
 /* Loads frequency and count matrix motifs to the db. 

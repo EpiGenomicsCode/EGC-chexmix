@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 import cern.colt.matrix.*;
@@ -214,7 +214,7 @@ public class MarkovBackgroundModel extends BackgroundModel {
       
       //now check that the rev. comp components of the solution are matched       
       for (Pair<Integer, Integer> rcPair : revCompPairs) {
-        if (Math.abs(sol.getQuick(rcPair.car()) - sol.getQuick(rcPair.cdr())) > BackgroundModel.EPSILON) {
+        if (Math.abs(sol.getQuick(rcPair.first()) - sol.getQuick(rcPair.last())) > BackgroundModel.EPSILON) {
           isStranded = true;
           return isStranded;
         }
@@ -262,8 +262,8 @@ public class MarkovBackgroundModel extends BackgroundModel {
     
     for (int i = 0; i < revCompPairs.size(); i++) {
       Pair<Integer, Integer> revComps = revCompPairs.get(i);
-      linSys.setQuick(numKmers + i, revComps.car(), 1);
-      linSys.setQuick(numKmers + i, revComps.cdr(), -1);
+      linSys.setQuick(numKmers + i, revComps.first(), 1);
+      linSys.setQuick(numKmers + i, revComps.last(), -1);
     }
     
     return linSys;

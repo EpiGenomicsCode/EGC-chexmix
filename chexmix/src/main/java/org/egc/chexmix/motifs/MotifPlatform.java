@@ -29,7 +29,7 @@ import org.egc.core.genome.sequence.SequenceUtils;
 import org.egc.core.genome.location.ChromRegionIterator;
 import org.egc.core.data.motifdb.WeightMatrixScoreProfile;
 import org.egc.core.data.motifdb.WeightMatrixScorer;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.core.math.stats.StatUtil;
 import org.egc.core.motifs.DrawMotifs;
 import org.egc.core.motifs.MarkovMotifThresholdFinder;
@@ -152,8 +152,8 @@ public class MotifPlatform {
 				}else{						
 					//Execute MEME
 					Pair<List<WeightMatrix>,List<WeightMatrix>> matrices = meme.execute(localSeqs, new String("motif_"+cond.getName()+"_t"+trainingRound+"_c"+counter), false);
-					List<WeightMatrix> wm = matrices.car();
-					List<WeightMatrix> fm = matrices.cdr();
+					List<WeightMatrix> wm = matrices.first();
+					List<WeightMatrix> fm = matrices.last();
 					if(wm.size()>0){
 						//Evaluate the significance of the discovered motifs
 						int bestMotif=0;
@@ -321,8 +321,8 @@ public class MotifPlatform {
 			
 					//Execute MEME
 					Pair<List<WeightMatrix>,List<WeightMatrix>> matrices = meme.execute(seqs, new String("motif_"+cond.getName()+"_t"+trainingRound+"_s"+setCounter+"_c"+counter), false);   	
-					List<WeightMatrix> wm = matrices.car();
-					List<WeightMatrix> fm = matrices.cdr();
+					List<WeightMatrix> wm = matrices.first();
+					List<WeightMatrix> fm = matrices.last();
 		
 					if(wm.size()>0){
 						//Evaluate the significance of the discovered motifs
@@ -585,15 +585,15 @@ public class MotifPlatform {
 					Pair<Integer,Double> revAlignment = aligner.align(refMotif, WeightMatrix.reverseComplement(condFreqMatrix.get(index)));
 					int refOffset=(int)((refMotif.length()-condFreqMatrix.get(index).length())/2);
 					
-					if(revAlignment.cdr()>forAlignment.cdr() && refMotif.length()%2 ==0 && condFreqMatrix.get(index).length()%2 ==0)
+					if(revAlignment.last()>forAlignment.last() && refMotif.length()%2 ==0 && condFreqMatrix.get(index).length()%2 ==0)
 						refOffset = (int)((refMotif.length()-condFreqMatrix.get(index).length())/2-1);
-					if(revAlignment.cdr()>forAlignment.cdr()){
+					if(revAlignment.last()>forAlignment.last()){
 						currSubtype.setMotif(WeightMatrix.reverseComplement(condMotifs.get(index)), WeightMatrix.reverseComplement(condFreqMatrix.get(index)));
-						currSubtype.setMotifOffset(refOffset+revAlignment.car()); // is this correct ?
+						currSubtype.setMotifOffset(refOffset+revAlignment.first()); // is this correct ?
 						currSubtype.setReverseMotif(true);
 					}else{
 						currSubtype.setMotif(condMotifs.get(index), condFreqMatrix.get(index));
-						currSubtype.setMotifOffset(refOffset+forAlignment.car()); // is this correct ?
+						currSubtype.setMotifOffset(refOffset+forAlignment.first()); // is this correct ?
 						currSubtype.setReverseMotif(false);
 					}
 				}
@@ -606,8 +606,8 @@ public class MotifPlatform {
 		Pair<Integer,Double> forAlignment = aligner.align(wma,wmb);
 		Pair<Integer,Double> revAlignment = aligner.align(wma,WeightMatrix.reverseComplement(wmb));
 		double maxscore = 0;
-		if (forAlignment.cdr() > maxscore) { maxscore=forAlignment.cdr();}
-		if (revAlignment.cdr() > maxscore) { maxscore=revAlignment.cdr();}
+		if (forAlignment.last() > maxscore) { maxscore=forAlignment.last();}
+		if (revAlignment.last() > maxscore) { maxscore=revAlignment.last();}
 		return maxscore;
 	}
 

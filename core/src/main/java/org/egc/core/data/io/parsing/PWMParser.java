@@ -25,7 +25,6 @@ import org.egc.core.data.io.LineByLineFileReader;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.data.motifdb.WeightMatrixImport;
 import org.egc.core.genome.Species;
-import org.egc.core.gseutils.NotFoundException;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
@@ -456,14 +455,7 @@ public class PWMParser {
           Matcher matcher = speciesPattern.matcher(line);
           if (matcher.matches()) {
             String specname = matcher.group(1);
-            try {
-              currentSpecies = new Species(specname);
-              // System.err.println("Got species " + specname);
-            }
-            catch (NotFoundException e) {
-              System.err.println("Couldn't find species " + specname);
-              // ignore it and move on
-            }
+            currentSpecies = new Species(specname);
           }
         }
         else if (pieces[0].equals("DE")) {

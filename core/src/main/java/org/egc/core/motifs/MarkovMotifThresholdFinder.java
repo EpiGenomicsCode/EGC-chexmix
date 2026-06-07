@@ -10,7 +10,7 @@ import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.genome.sequence.RandomSequenceGenerator;
 import org.egc.core.data.motifdb.WeightMatrixScoreProfile;
 import org.egc.core.data.motifdb.WeightMatrixScorer;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 public class MarkovMotifThresholdFinder {

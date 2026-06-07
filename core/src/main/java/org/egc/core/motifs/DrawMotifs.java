@@ -13,7 +13,6 @@ import java.io.*;
 
 import org.egc.core.data.motifdb.*;
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.*;
 
 
 /** Generates a .png file with a set of motif logos in it.

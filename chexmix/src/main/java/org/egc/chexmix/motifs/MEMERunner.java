@@ -15,7 +15,7 @@ import org.egc.core.data.io.StreamGobbler;
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.egc.chexmix.framework.ChExMixConfig;
@@ -104,9 +104,9 @@ public class MEMERunner {
 					double minScore = Double.MAX_VALUE; 
 					WeightMatrix bestMotif=null; 
 					for(Pair<WeightMatrix,Double> m : currFM)
-						if(m.cdr()<minScore){
-							minScore = m.cdr();
-							bestMotif = m.car();
+						if(m.last()<minScore){
+							minScore = m.last();
+							bestMotif = m.first();
 						}
 					fm.add(bestMotif);
 					WeightMatrix wMatrix = WeightMatrix.getLogOddsVersion(bestMotif, back);
@@ -115,8 +115,8 @@ public class MEMERunner {
 					//System.out.println(WeightMatrix.printMatrix(bestMotif));
 				}else{
 					for(Pair<WeightMatrix,Double> m : currFM){
-						fm.add(m.car());
-						WeightMatrix wMatrix = WeightMatrix.getLogOddsVersion(m.car(), back);
+						fm.add(m.first());
+						WeightMatrix wMatrix = WeightMatrix.getLogOddsVersion(m.first(), back);
 						wm.add(wMatrix);
 					}
 				}

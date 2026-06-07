@@ -31,7 +31,7 @@ import org.egc.core.deepseq.experiments.Sample;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 public class ChExMix {
 	
@@ -114,8 +114,8 @@ public class ChExMix {
 			List<Integer> pos = new ArrayList<Integer>();
 			List<Double> prob = new ArrayList<Double>();
 			for (Pair<Integer,Double> data : watsonModel){
-				pos.add(data.car());
-				prob.add(data.cdr());
+				pos.add(data.first());
+				prob.add(data.last());
 			}
 			List<Double> revProb = new ArrayList<Double>(prob);
 			Collections.reverse(revProb);

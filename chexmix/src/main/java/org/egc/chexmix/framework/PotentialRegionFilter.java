@@ -24,7 +24,7 @@ import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.ChromosomeGenerator;
-import org.egc.core.gseutils.RealValuedHistogram;
+import org.egc.chexmix.utilities.RealValuedHistogram;
 import org.egc.chexmix.events.BindingManager;
 import org.egc.chexmix.events.BindingModel;
 import org.egc.chexmix.events.EventsConfig;
@@ -124,7 +124,7 @@ public class PotentialRegionFilter {
 	 */
 	public List<Region> execute(){
 		//TODO: check config for defined subset of regions
-		Iterator<Region> testRegionsIter = new ChromosomeGenerator().execute(config.getGenome());
+		Iterator<Region> testRegionsIter = new ChromosomeGenerator().apply(config.getGenome());
 		List<Region> testRegions = new ArrayList<Region>();
 		while(testRegionsIter.hasNext())
 			testRegions.add(testRegionsIter.next());

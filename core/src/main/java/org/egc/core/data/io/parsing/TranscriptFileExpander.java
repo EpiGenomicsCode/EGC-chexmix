@@ -8,14 +8,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.function.Function;
+
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Gene;
 import org.egc.core.genome.location.Region;
-import org.egc.core.gseutils.Expander;
 
 //TODO: Add GTF loader
-public class TranscriptFileExpander <X extends Region> 
-	implements Expander<X,Gene>{
+public class TranscriptFileExpander<X extends Region>
+		implements Function<X, Iterator<Gene>> {
 	
 	protected File f;
 	protected Genome gen;
@@ -47,7 +48,7 @@ public class TranscriptFileExpander <X extends Region>
 		}
 	}
 	
-	public Iterator<Gene> execute(X a) {
+	public Iterator<Gene> apply(X a) {
 		List<Gene> currGenes = new ArrayList<Gene>();
 		for(Gene x : allGenes){
 			if(x.overlaps(a)){

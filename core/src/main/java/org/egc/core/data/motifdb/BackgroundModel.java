@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.sequence.SequenceUtils;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 

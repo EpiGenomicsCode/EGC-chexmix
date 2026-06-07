@@ -14,8 +14,8 @@ import java.util.Map;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.AnnotationLoader;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
 
 
 /**

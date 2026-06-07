@@ -2,7 +2,7 @@ package org.egc.core.motifs;
 
 import java.util.ArrayList;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 public class Score2Sp {
@@ -17,22 +17,22 @@ public class Score2Sp {
 		Double sp=0.0;
 		int i=0;
 		Pair<Double,Double> p = scores.get(i);
-		while(i<scores.size() && p.car()<score){
+		while(i<scores.size() && p.first()<score){
 			p = scores.get(i);
 			i++;
 		}
-		sp=p.cdr();
+		sp=p.last();
 		return(sp);
 	}
 	public Double getScore(Double sp){
 		Double score=0.0;
 		int i=0;
 		Pair<Double,Double> p = scores.get(i);
-		while(i<scores.size() && p.cdr()<sp){
+		while(i<scores.size() && p.last()<sp){
 			p = scores.get(i);
 			i++;
 		}
-		score=p.car();
+		score=p.first();
 		return(score);
 	}
 }

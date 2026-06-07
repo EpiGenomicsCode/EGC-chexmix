@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.core.math.stats.StatUtil;
 
 
@@ -74,7 +74,7 @@ public class TagProbabilityDensity {
 		            	  max = dist.intValue();
 		                
 		              Pair<Integer,Double> p = new Pair<Integer,Double>(dist, Double.valueOf(words[1]));
-		              if (p.cdr().doubleValue()>=0)	// should be non-negative value
+		              if (p.last().doubleValue()>=0)	// should be non-negative value
 		            	  empiricalDistribution.add(p);
 		              else {
 		            	  throw new RuntimeException("\nTag distribution file contains negative probability(count) values!"); 
@@ -102,17 +102,17 @@ public class TagProbabilityDensity {
 		int min=Integer.MAX_VALUE, max=Integer.MIN_VALUE;
 		try{
 			for(Pair<Integer,Double> p : empiricalWatson){
-				if(p.car() < min)
-					min = p.car();
-				if(p.car() > max)
-					max = p.car();
+				if(p.first() < min)
+					min = p.first();
+				if(p.first() > max)
+					max = p.first();
 			}
 			if(empiricalCrick!=null){
 				for(Pair<Integer,Double> p : empiricalCrick){
-					if(p.car() < min)
-						min = p.car();
-					if(p.car() > max)
-						max = p.car();
+					if(p.first() < min)
+						min = p.first();
+					if(p.first() > max)
+						max = p.first();
 				}
 			}
 			winSize = max-min+1;
@@ -179,13 +179,13 @@ public class TagProbabilityDensity {
 	public void loadData(List<Pair<Integer, Double>> watsonTagDist, List<Pair<Integer, Double>> crickTagDist) throws Exception{		
 		//Find left, right values first
 		for(Pair<Integer, Double> p : watsonTagDist){
-			if(p.car()<left){ left=p.car();}
-			if(p.car()>right){right=p.car();}
+			if(p.first()<left){ left=p.first();}
+			if(p.first()>right){right=p.first();}
 		}
 		if(crickTagDist!=null){
 			for(Pair<Integer, Double> p : crickTagDist){
-				if(p.car()<left){ left=p.car();}
-				if(p.car()>right){right=p.car();}
+				if(p.first()<left){ left=p.first();}
+				if(p.first()>right){right=p.first();}
 			}
 		}
 		
@@ -196,8 +196,8 @@ public class TagProbabilityDensity {
 		//WATSON
 		int last=left-1;
 		for(Pair<Integer, Double> p : watsonTagDist){
-			int index = p.car();
-			double val = p.cdr();
+			int index = p.first();
+			double val = p.last();
 			//if list is not properly sorted, throw exception
 			if(index-last<0)
 				throw new Exception("Incorrectly sorted binding read distribution data!"); 
@@ -210,7 +210,7 @@ public class TagProbabilityDensity {
 				}
 			}
 			watsonData[index-left]=val;
-			last = p.car();
+			last = p.first();
 		}
 		//CRICK
 		if(crickTagDist==null){
@@ -219,8 +219,8 @@ public class TagProbabilityDensity {
 		}else{
 			last=left-1;
 			for(Pair<Integer, Double> p : crickTagDist){
-				int index = p.car();
-				double val = p.cdr();
+				int index = p.first();
+				double val = p.last();
 				//if list is not properly sorted, throw exception
 				if(index-last<0)
 					throw new Exception("Incorrectly sorted binding read distribution data!"); 
@@ -233,7 +233,7 @@ public class TagProbabilityDensity {
 					}
 				}
 				crickData[index-left]=val;
-				last = p.car();
+				last = p.first();
 			}
 		}
 		makeProbabilities();
@@ -309,8 +309,8 @@ public class TagProbabilityDensity {
 		}
 		Pair<Double, TreeSet<Integer>> wSorted = StatUtil.findMax(watsonProbs);
 		Pair<Double, TreeSet<Integer>> cSorted = StatUtil.findMax(crickProbs);
-		watsonSummit = wSorted.cdr().first()+left;
-		crickSummit = cSorted.cdr().first()+left;
+		watsonSummit = wSorted.last().first()+left;
+		crickSummit = cSorted.last().first()+left;
 		
 		bgProb = Math.max(TAGDISTRIB_MIN_PROB, minProb/100);
 		logBgProb = Math.log(bgProb)/LOG2;
@@ -321,18 +321,18 @@ public class TagProbabilityDensity {
 	protected void smooth(int splineStepSize, int avgStepSize){
 		watsonProbs=StatUtil.cubicSpline(watsonProbs, splineStepSize, avgStepSize);
 		Pair<Double, TreeSet<Integer>> sorted = StatUtil.findMax(watsonProbs);
-		watsonSummit = sorted.cdr().first()+left;
+		watsonSummit = sorted.last().first()+left;
 		crickProbs=StatUtil.cubicSpline(crickProbs, splineStepSize, avgStepSize);
 		sorted = StatUtil.findMax(crickProbs);
-		crickSummit = sorted.cdr().first()+left;
+		crickSummit = sorted.last().first()+left;
 	}
 	protected void smoothGaussian (int kernelWidth){
 		watsonProbs=StatUtil.gaussianSmoother(watsonProbs, kernelWidth);
 		Pair<Double, TreeSet<Integer>> sorted = StatUtil.findMax(watsonProbs);
-		watsonSummit = sorted.cdr().first()+left;
+		watsonSummit = sorted.last().first()+left;
 		crickProbs=StatUtil.gaussianSmoother(crickProbs, kernelWidth);
 		sorted = StatUtil.findMax(crickProbs);
-		crickSummit = sorted.cdr().first()+left;
+		crickSummit = sorted.last().first()+left;
 	}	
 	
 	public void printDensityToFile(String filename){
@@ -394,7 +394,7 @@ public class TagProbabilityDensity {
 	//Update the influence range
 	protected void updateInfluenceRange(){
 		Pair<Integer,Integer> intervals = probIntervalDistances(0.95);
-		int longest = Math.max(Math.abs(intervals.car()), Math.abs(intervals.cdr()));
+		int longest = Math.max(Math.abs(intervals.first()), Math.abs(intervals.last()));
 		influenceRange = longest;
 	}
 	

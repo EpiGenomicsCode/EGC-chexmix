@@ -3,7 +3,7 @@ package org.egc.chexmix.utilities;
 import java.awt.Color;
 import java.util.List;
 
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.Args;
 
 
 public class MetaConfig {

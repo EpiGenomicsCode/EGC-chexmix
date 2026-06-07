@@ -28,8 +28,8 @@ import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
 import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.Pair;
-import org.egc.core.gseutils.RealValuedHistogram;
+import org.egc.core.utils.Pair;
+import org.egc.chexmix.utilities.RealValuedHistogram;
 import org.egc.core.motifs.DrawMotifs;
 import org.egc.chexmix.composite.TagProbabilityDensity;
 import org.egc.chexmix.events.BindingEvent;
@@ -332,7 +332,7 @@ public class EventsPostAnalysis {
 				for (BindingSubtype sub : bindingManager.getBindingSubtype(cond)){
 					TagProbabilityDensity model =sub.getBindingModel(0);
 					Pair<Integer,Integer> intervals = model.probIntervalDistances(0.90);
-					int longest = Math.max(Math.abs(intervals.car()), Math.abs(intervals.cdr()));
+					int longest = Math.max(Math.abs(intervals.first()), Math.abs(intervals.last()));
 					secondline+=(longest+"\t");
 					double weightedModelSize = (double) longest*(double) subtypeCounts[subIndex];
 					aveWidth+=weightedModelSize;

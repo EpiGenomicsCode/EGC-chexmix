@@ -9,8 +9,8 @@ import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.location.StrandedRegion;
 import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
 
 /**
  * @author naomi yamada

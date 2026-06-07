@@ -7,7 +7,6 @@ import java.text.ParseException;
 
 import org.egc.core.data.io.parsing.PWMParser;
 import org.egc.core.genome.Species;
-import org.egc.core.gseutils.*;
 
 
 /** 
@@ -69,14 +68,7 @@ public class WeightMatrixImport {
           Matcher matcher = speciesPattern.matcher(line);
           if (matcher.matches()) {
             String specname = matcher.group(1);
-            try {
-              currentSpecies = new Species(specname);
-              // System.err.println("Got species " + specname);
-            }
-            catch (NotFoundException e) {
-              System.err.println("Couldn't find species " + specname);
-              // ignore it and move on
-            }
+            currentSpecies = new Species(specname);
           }
         }
         else if (pieces[0].equals("DE")) {
@@ -175,7 +167,7 @@ public class WeightMatrixImport {
         } else if (wmtype.toUpperCase().matches(".*GIMME.*")) {
             matrices = PWMParser.readGimmeMotifsMatrices(wmfile,wmversion,wmtype);
         } else {
-            throw new NotFoundException("Unknown weight matrix type " + wmtype);
+            throw new IllegalArgumentException("Unknown weight matrix type " + wmtype);
         }
         for(WeightMatrix matrix : matrices) { 
             ids.add(insertMatrixIntoDB(matrix));                

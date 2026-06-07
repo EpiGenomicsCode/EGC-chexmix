@@ -3,7 +3,7 @@ package org.egc.core.deepseq.experiments;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 /**

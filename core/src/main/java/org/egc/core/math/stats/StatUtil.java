@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 public class StatUtil {

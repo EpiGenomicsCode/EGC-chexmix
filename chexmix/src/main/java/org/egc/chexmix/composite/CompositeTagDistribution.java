@@ -13,7 +13,7 @@ import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.deepseq.experiments.ExptConfig;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.Args;
 
 
 /**

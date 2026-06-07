@@ -8,7 +8,7 @@ import java.util.List;
 import org.egc.core.deepseq.hitloaders.HitLoader;
 import org.egc.core.deepseq.hitloaders.HitLoaderFactory;
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 /** 
@@ -64,8 +64,8 @@ public class ExperimentManager {
 			if(econfig.getPrintLoadingProgress())
 				System.err.println("Processing HitLoaders for:\t"+e.condition+"\t"+e.replicate);
 			for(Pair<String,String> source : e.sources){
-				String name = source.car();
-				String type = source.cdr();
+				String name = source.first();
+				String type = source.last();
 				//Assume File HitLoader
 					if(!loaders.containsKey(name)){
 						HitLoader hl = hlfactory.makeFileHitLoader(name, type, econfig.getNonUnique());
@@ -89,7 +89,7 @@ public class ExperimentManager {
 				sampCount++;
 			}
 			for(Pair<String,String> source : e.sources){
-				String name = source.car();
+				String name = source.first();
 				allSamples.get(sampleName).addHitLoader(loaders.get(name));
 			}
 			if(loadReads){

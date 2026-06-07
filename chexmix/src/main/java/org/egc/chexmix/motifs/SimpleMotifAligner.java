@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.egc.core.data.motifdb.WeightMatrix;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Pair;
 import org.egc.core.motifs.FreqMatrixImport;
 
 public class SimpleMotifAligner {

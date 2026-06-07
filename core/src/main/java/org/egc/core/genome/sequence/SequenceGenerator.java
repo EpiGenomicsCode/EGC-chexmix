@@ -8,7 +8,7 @@ import org.egc.core.data.io.parsing.FASTAStream;
 import org.egc.core.genome.Genome;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.gseutils.*;
+import org.egc.core.utils.Pair;
 
 
 /**
@@ -114,9 +114,9 @@ public class SequenceGenerator<X extends Region> {
             FASTAStream stream = new FASTAStream(f);
             while (stream.hasNext()) {
                 Pair<String,String> pair = stream.next();
-                String pairchrom = pair.car().replaceFirst("^chromosome", "").replaceFirst("^chrom", "").replaceFirst("^chr","");
+                String pairchrom = pair.first().replaceFirst("^chromosome", "").replaceFirst("^chrom", "").replaceFirst("^chr","");
                 if (pairchrom.equals(region.getChrom())) {
-                    chromseq = pair.cdr();
+                    chromseq = pair.last();
                     break;
                 }
             }

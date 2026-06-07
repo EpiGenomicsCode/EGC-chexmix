@@ -16,7 +16,7 @@ import org.egc.core.deepseq.experiments.ExperimentCondition;
 import org.egc.core.deepseq.experiments.ExperimentManager;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.chexmix.composite.TagProbabilityDensity;
 import org.egc.chexmix.framework.ChExMixConfig;
 import org.egc.chexmix.mixturemodel.BindingSubComponents;
@@ -177,7 +177,7 @@ public class BindingManager {
 		ArrayList<Integer> subtyeCount= new ArrayList<Integer>();
 		for(BindingEvent e : events){
 			if(e.isFoundInCondition(cond) && e.getCondSigVCtrlQ(cond) <=qMinThres)
-				subtypeCount[e.getMaxSubtypePoint(cond).car()]++;
+				subtypeCount[e.getMaxSubtypePoint(cond).first()]++;
 		}
 		return subtypeCount;
 	}
@@ -317,8 +317,8 @@ public class BindingManager {
 			    		
 			    		if (reportEvent){
 							Pair<Integer, StrandedPoint>p=e.getMaxSubtypePoint(cond);
-							subtypePoints.get(p.car()).add(p.cdr());
-							potReg.get(p.car()).add(e.getContainingRegion());
+							subtypePoints.get(p.first()).add(p.last());
+							potReg.get(p.first()).add(e.getContainingRegion());
 						}
 					}	
 						

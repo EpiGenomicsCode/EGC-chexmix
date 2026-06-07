@@ -14,8 +14,8 @@ import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.data.motifdb.WeightMatrixImport;
 import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.StrandedRegion;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
 import org.egc.core.math.stats.StatUtil;
 import org.egc.core.motifs.DrawMotifs;
 

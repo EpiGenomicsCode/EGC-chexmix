@@ -9,7 +9,7 @@ import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
 import org.egc.core.genome.sequence.SequenceGenerator;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 import org.egc.chexmix.framework.ChExMixConfig;
 
 /**

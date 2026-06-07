@@ -20,8 +20,8 @@ import org.egc.core.genome.GenomeConfig;
 import org.egc.core.genome.location.Point;
 import org.egc.core.genome.location.Region;
 import org.egc.core.genome.location.StrandedPoint;
-import org.egc.core.gseutils.ArgParser;
-import org.egc.core.gseutils.Args;
+import org.egc.core.utils.ArgParser;
+import org.egc.core.utils.Args;
 import org.egc.chexmix.composite.TagProbabilityDensity;
 
 

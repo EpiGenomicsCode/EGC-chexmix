@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.egc.core.genome.Genome;
-import org.egc.core.gseutils.Pair;
+import org.egc.core.utils.Pair;
 
 
 
@@ -164,8 +164,8 @@ public class FrequencyBackgroundModel extends BackgroundModel {
       List<Pair<Integer, Integer>> revCompPairs = BackgroundModel.computeDistinctRevCompPairs(currKmerLen);
 
       for (Pair<Integer, Integer> rcPair : revCompPairs) {
-        if (Math.abs(this.getFrequency(currKmerLen, rcPair.car()) - 
-            this.getFrequency(currKmerLen,rcPair.cdr())) > BackgroundModel.EPSILON) {
+        if (Math.abs(this.getFrequency(currKmerLen, rcPair.first()) - 
+            this.getFrequency(currKmerLen,rcPair.last())) > BackgroundModel.EPSILON) {
           isStranded = true;
           return isStranded;
         }
@@ -192,11 +192,11 @@ public class FrequencyBackgroundModel extends BackgroundModel {
     	List<Pair<Integer, Integer>> revCompPairs = BackgroundModel.computeDistinctRevCompPairs(currKmerLen);
 
     	for (Pair<Integer, Integer> rcPair : revCompPairs) {
-   			double freq = this.getFrequency(rcPair.car(), currKmerLen);
-    		double revCompFreq = this.getFrequency(rcPair.cdr(), currKmerLen);
+   			double freq = this.getFrequency(rcPair.first(), currKmerLen);
+    		double revCompFreq = this.getFrequency(rcPair.last(), currKmerLen);
     		double newFreq = (freq + revCompFreq) / 2.0;
-    		modelProbs[currKmerLen].put(BackgroundModel.int2seq(rcPair.car(), currKmerLen), newFreq);
-    		modelProbs[currKmerLen].put(BackgroundModel.int2seq(rcPair.cdr(), currKmerLen), newFreq);
+    		modelProbs[currKmerLen].put(BackgroundModel.int2seq(rcPair.first(), currKmerLen), newFreq);
+    		modelProbs[currKmerLen].put(BackgroundModel.int2seq(rcPair.last(), currKmerLen), newFreq);
     	}    	
     }
     isStranded = false;
