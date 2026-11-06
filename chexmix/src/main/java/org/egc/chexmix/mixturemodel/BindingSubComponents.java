@@ -147,12 +147,14 @@ public class BindingSubComponents implements Comparable<BindingSubComponents>{
 	
 	//Compare by responsibility
 	public int compareByResp(BindingSubComponents m) {
-		return Double.compare(sumRespW+sumRespC, m.sumRespW+m.sumRespC);
+		int compare = Double.compare(sumRespW+sumRespC, m.sumRespW+m.sumRespC);
+		return compare != 0 ? compare : getCoord().compareTo(m.getCoord());
 	}
 	
 	//Compare by tau probabilities
 	public int compareByTauProb(BindingSubComponents m){
-		return Double.compare(getMaxTypeProbability(), m.getMaxTypeProbability());
+		int compare = Double.compare(getMaxTypeProbability(), m.getMaxTypeProbability());
+		return compare != 0 ? compare : getCoord().compareTo(m.getCoord());
 	}
 	
 	public String toString(){

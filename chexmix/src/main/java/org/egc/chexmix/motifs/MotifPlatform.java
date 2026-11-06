@@ -2,6 +2,7 @@ package org.egc.chexmix.motifs;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -60,6 +61,13 @@ public class MotifPlatform {
 	protected MarkovBackgroundModel backMod;
 	protected SimpleMotifAligner aligner;
 	protected List<Region> cachedRegions;
+
+	/** Return a stable genomic order for components collected in parallel. */
+	private List<Region> sortedRegions(Collection<Region> regions){
+		List<Region> ordered = new ArrayList<Region>(regions);
+		Collections.sort(ordered);
+		return ordered;
+	}
 		
 	/**
 	 * Constructor for motif platform
@@ -247,7 +255,7 @@ public class MotifPlatform {
 		for (ExperimentCondition cond : manager.getConditions())
 			allpeaks.put(cond, new ArrayList<BindingSubComponents>());
 		//Choose which components to include
-		for(Region r : activeComponents.keySet()){
+		for(Region r : sortedRegions(activeComponents.keySet())){
 			for (ExperimentCondition cond : manager.getConditions()){
 				float edge = Math.max(config.getModelRange()/2, config.MOTIF_FINDING_SEQWINDOW/2);
 				List<BindingSubComponents> peaks = new ArrayList<BindingSubComponents>();

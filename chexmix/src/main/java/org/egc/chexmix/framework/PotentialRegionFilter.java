@@ -62,6 +62,20 @@ public class PotentialRegionFilter {
 	protected HashMap<ExperimentCondition, Double> nonPotRegCountsCtrlChannel = new HashMap<ExperimentCondition, Double>();	
 	protected HashMap<ControlledExperiment, Double> potRegCountsSigChannelByRep = new HashMap<ControlledExperiment, Double>();
 	protected HashMap<ControlledExperiment, Double> nonPotRegCountsSigChannelByRep = new HashMap<ControlledExperiment, Double>();
+
+	/** Per-worker count totals, merged in source chromosome order after joins. */
+	protected class PotentialCountTotals {
+		double[] potSig, nonPotSig, potCtrl, nonPotCtrl;
+		double[] potSigRep, nonPotSigRep;
+		PotentialCountTotals(){
+			potSig = new double[manager.getNumConditions()];
+			nonPotSig = new double[manager.getNumConditions()];
+			potCtrl = new double[manager.getNumConditions()];
+			nonPotCtrl = new double[manager.getNumConditions()];
+			potSigRep = new double[manager.getReplicates().size()];
+			nonPotSigRep = new double[manager.getReplicates().size()];
+		}
+	}
 	
 	public PotentialRegionFilter(EventsConfig ec, ChExMixConfig c, ExptConfig econ, ExperimentManager eman, BindingManager bman){
 		manager = eman;
@@ -137,16 +151,21 @@ public class PotentialRegionFilter {
 				
 		Thread[] threads = new Thread[numThreads];
         List<Region> threadRegions[] = new ArrayList[numThreads];
+	        PotentialRegionFinderThread[] workers = new PotentialRegionFinderThread[numThreads];
         int i = 0;
         for (i = 0 ; i < threads.length; i++) {
             threadRegions[i] = new ArrayList<Region>();
-        }i=0;
-        for(Region r : testRegions){ 
-            threadRegions[(i++) % numThreads].add(r);
+	        }
+	        int chunkSize = (testRegions.size()+numThreads-1)/numThreads;
+	        for (i = 0 ; i < threads.length; i++) {
+	            int from = Math.min(i*chunkSize, testRegions.size());
+	            int to = Math.min(from+chunkSize, testRegions.size());
+	            threadRegions[i].addAll(testRegions.subList(from, to));
         }
 
         for (i = 0 ; i < threads.length; i++) {
-            Thread t = new Thread(new PotentialRegionFinderThread(threadRegions[i]));
+	            workers[i] = new PotentialRegionFinderThread(threadRegions[i]);
+	            Thread t = new Thread(workers[i]);
             t.start();
             threads[i] = t;
         }
@@ -154,6 +173,26 @@ public class PotentialRegionFilter {
             try {
                 threads[i].join();
             } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+
+        // Merge worker results in source chromosome order.  This preserves
+        // the one-thread sequence while allowing workers to run concurrently.
+        potentialRegions.clear();
+        for (i = 0 ; i < workers.length; i++) {
+            potentialRegions.addAll(workers[i].getThreadPotentials());
+            PotentialCountTotals counts = workers[i].getCountTotals();
+            for (ExperimentCondition cond : manager.getConditions()) {
+                int c = cond.getIndex();
+                potRegCountsSigChannel.put(cond, potRegCountsSigChannel.get(cond)+counts.potSig[c]);
+                nonPotRegCountsSigChannel.put(cond, nonPotRegCountsSigChannel.get(cond)+counts.nonPotSig[c]);
+                potRegCountsCtrlChannel.put(cond, potRegCountsCtrlChannel.get(cond)+counts.potCtrl[c]);
+                nonPotRegCountsCtrlChannel.put(cond, nonPotRegCountsCtrlChannel.get(cond)+counts.nonPotCtrl[c]);
+            }
+            for (ControlledExperiment rep : manager.getReplicates()) {
+                int r = rep.getIndex();
+                potRegCountsSigChannelByRep.put(rep, potRegCountsSigChannelByRep.get(rep)+counts.potSigRep[r]);
+                nonPotRegCountsSigChannelByRep.put(rep, nonPotRegCountsSigChannelByRep.get(rep)+counts.nonPotSigRep[r]);
+            }
         }
         
         // For galaxy support, ChExMix always need to produce output files in absence of potential regions, hence commenting out this section. 
@@ -414,10 +453,14 @@ public class PotentialRegionFilter {
         private float[][] landscapeRep=null;
         private float[][] startsRep=null;
         private List<Region> threadPotentials = new ArrayList<Region>();
+	        private PotentialCountTotals countTotals = new PotentialCountTotals();
         
         public PotentialRegionFinderThread(Collection<Region> r) {
             regions = r;
         }
+
+	        public List<Region> getThreadPotentials(){return threadPotentials;}
+	        public PotentialCountTotals getCountTotals(){return countTotals;}
         
         public void run() {
         	int expansion = (int)(winExt + maxBinWidth/2);
@@ -538,8 +581,8 @@ public class PotentialRegionFilter {
                     	currPotRegions.add(lastPotential);
                     //The exclude filter here is very likely redundant with the first-pass filter in the main execute method, but I'm leaving it here in case there are other execution modes. 
                     currPotRegions = filterExcludedAnyOverlap(currPotRegions);
-                    countReadsInRegions(currPotRegions, ipHits, backHits, y==currentRegion.getEnd() ? y : y-expansion);
-                    countReadsInRegionsByRep(currPotRegions, ipHitsByRep, y==currentRegion.getEnd() ? y : y-expansion);
+	                    countReadsInRegions(currPotRegions, ipHits, backHits, y==currentRegion.getEnd() ? y : y-expansion, countTotals);
+	                    countReadsInRegionsByRep(currPotRegions, ipHitsByRep, y==currentRegion.getEnd() ? y : y-expansion, countTotals);
                     //Note: it looks like currPotRegions and threadPotentials are redundant in the above, but they are not.
                     //currPotRegions is only used to count sig/noise reads in the current section. threadPotentials stores regions over the entire run.
                 }
@@ -562,11 +605,6 @@ public class PotentialRegionFilter {
                 }
                 threadPotentials = filterExcludedAnyOverlap(threadPotentials);
             }
-        	if(threadPotentials.size()>0){
-        		synchronized(potentialRegions){
-        			potentialRegions.addAll(threadPotentials);
-        		}
-        	}	
         }
         
         //Break up a long window into parts
@@ -674,7 +712,7 @@ public class PotentialRegionFilter {
     	 * @param ctrlHits
     	 * @param endCoord
     	 */
-    	protected void countReadsInRegions(List<Region> regs, List<List<StrandedBaseCount>> ipHits, List<List<StrandedBaseCount>> ctrlHits, int endCoord){
+	    protected void countReadsInRegions(List<Region> regs, List<List<StrandedBaseCount>> ipHits, List<List<StrandedBaseCount>> ctrlHits, int endCoord, PotentialCountTotals totals){
     		//Iterate through experiments
     		for(ExperimentCondition cond : manager.getConditions()){
     			double currPotWeightSig=0, currNonPotWeightSig=0, currPotWeightCtrl=0, currNonPotWeightCtrl=0;
@@ -734,18 +772,10 @@ public class PotentialRegionFilter {
         				}
     				}
     			}
-    			synchronized(potRegCountsSigChannel){
-    				potRegCountsSigChannel.put(cond, potRegCountsSigChannel.get(cond)+currPotWeightSig);
-    			}
-    			synchronized(nonPotRegCountsSigChannel){
-    				nonPotRegCountsSigChannel.put(cond, nonPotRegCountsSigChannel.get(cond)+currNonPotWeightSig);
-    			}
-    			synchronized(potRegCountsCtrlChannel){
-    				potRegCountsCtrlChannel.put(cond, potRegCountsCtrlChannel.get(cond)+currPotWeightCtrl);
-    			}
-    			synchronized(nonPotRegCountsCtrlChannel){
-    				nonPotRegCountsCtrlChannel.put(cond, nonPotRegCountsCtrlChannel.get(cond)+currNonPotWeightCtrl);
-    			}
+				totals.potSig[cond.getIndex()] += currPotWeightSig;
+				totals.nonPotSig[cond.getIndex()] += currNonPotWeightSig;
+				totals.potCtrl[cond.getIndex()] += currPotWeightCtrl;
+				totals.nonPotCtrl[cond.getIndex()] += currNonPotWeightCtrl;
     		}
 	    }
     }
@@ -762,7 +792,7 @@ public class PotentialRegionFilter {
 	 * @param ctrlHits
 	 * @param endCoord
 	 */
-	protected void countReadsInRegionsByRep(List<Region> regs, List<List<StrandedBaseCount>> ipHitsByRep, int endCoord){
+	protected void countReadsInRegionsByRep(List<Region> regs, List<List<StrandedBaseCount>> ipHitsByRep, int endCoord, PotentialCountTotals totals){
 		//Iterate through experiments
 		for(ExperimentCondition cond : manager.getConditions()){
 			for(ControlledExperiment rep : cond.getReplicates()){
@@ -796,12 +826,8 @@ public class PotentialRegionFilter {
 					}
 				}
 				
-				synchronized(potRegCountsSigChannelByRep){
-					potRegCountsSigChannelByRep.put(rep, potRegCountsSigChannelByRep.get(rep)+currPotWeightSig);
-				}
-				synchronized(nonPotRegCountsSigChannelByRep){
-					nonPotRegCountsSigChannelByRep.put(rep, nonPotRegCountsSigChannelByRep.get(rep)+currNonPotWeightSig);
-				}
+					totals.potSigRep[rep.getIndex()] += currPotWeightSig;
+					totals.nonPotSigRep[rep.getIndex()] += currNonPotWeightSig;
 			}
 		}
     }

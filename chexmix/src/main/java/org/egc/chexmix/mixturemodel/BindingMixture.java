@@ -78,6 +78,25 @@ public class BindingMixture {
 	protected double relativeCtrlNoise[]; //Defines global noise
 	protected HashMap<Region, Double[]> noiseResp = new HashMap<Region, Double[]>(); //noise responsibilities after a round of execute(). Hashed by Region, indexed by condition
 	protected MotifPlatform motifFinder;
+
+	/** Return a stable genomic order for data collected by parallel workers. */
+	private List<Region> sortedRegions(Collection<Region> regions){
+		List<Region> ordered = new ArrayList<Region>(regions);
+		Collections.sort(ordered);
+		return ordered;
+	}
+
+	/** Results are collected by workers, then committed in source region order. */
+	protected class RegionResult {
+		List<List<BindingSubComponents>> components;
+		Double[] noise;
+		List<BindingEvent> events;
+		RegionResult(List<List<BindingSubComponents>> c, Double[] n, List<BindingEvent> e){
+			components = c;
+			noise = n;
+			events = e;
+		}
+	}
 	
 	public BindingMixture(GenomeConfig gcon, ExptConfig econ, EventsConfig evcon, ChExMixConfig c,XLAnalysisConfig mixcon,ShapeAlignConfig sc, ExperimentManager eMan, BindingManager bMan, PotentialRegionFilter filter){
 		gconfig = gcon;
@@ -150,6 +169,7 @@ public class BindingMixture {
 		if(testRegions.size()>0){
 			int numThreads = Math.min(config.getMaxThreads(), testRegions.size());
 			Thread[] threads = new Thread[numThreads];
+			BindingMixtureThread[] workers = new BindingMixtureThread[numThreads];
 	        ArrayList<Region> threadRegions[] = new ArrayList[numThreads];
 	        int i = 0;
 	        for (i = 0 ; i < threads.length; i++) {
@@ -160,7 +180,8 @@ public class BindingMixture {
 	        }
 	
 	        for (i = 0 ; i < threads.length; i++) {
-	            Thread t = new Thread(new BindingMixtureThread(threadRegions[i], EM, uniformBindingSubComponents, multiGPSML));
+	            workers[i] = new BindingMixtureThread(threadRegions[i], EM, uniformBindingSubComponents, multiGPSML);
+	            Thread t = new Thread(workers[i]);
 	            t.start();
 	            threads[i] = t;
 	        }
@@ -169,6 +190,23 @@ public class BindingMixture {
 	                threads[i].join();
 	            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 	        }
+
+		// Commit results in the original test-region sequence.  This preserves
+		// the one-thread HashMap insertion and floating-reduction order.
+		HashMap<Region, RegionResult> orderedResults = new HashMap<Region, RegionResult>();
+		for (i = 0 ; i < workers.length; i++)
+			orderedResults.putAll(workers[i].getResults());
+		for (Region rr : testRegions) {
+			RegionResult result = orderedResults.get(rr);
+			if (EM) {
+				activeComponents.put(rr, result.components);
+				noiseResp.put(rr, result.noise);
+			} else {
+				bindingEvents.addAll(result.events);
+			}
+		}
+		if (!EM)
+			Collections.sort(bindingEvents);
 		}
 	}
 	
@@ -180,7 +218,7 @@ public class BindingMixture {
 		List<List<BindingSubComponents>> comps = new ArrayList<List<BindingSubComponents>>();
 		for(int c=0; c<manager.getNumConditions(); c++)
 			comps.add(new ArrayList<BindingSubComponents>());
-		for(Region r : activeComponents.keySet()){
+		for(Region r : sortedRegions(activeComponents.keySet())){
 			for(int c=0; c<manager.getNumConditions(); c++){
 				comps.get(c).addAll(activeComponents.get(r).get(c));
 			}
@@ -285,7 +323,7 @@ public class BindingMixture {
 	    			double currAlpha = calcAlpha(cond);
 	 
 	    			//Choose which components to include
-	    			for(Region r : activeComponents.keySet()){
+					for(Region r : sortedRegions(activeComponents.keySet())){
 	    				for(BindingSubComponents bc : activeComponents.get(r).get(cond.getIndex())){
 	    					//1) Component must not be at the edge of the region 
 	    					if((bc.getPosition()-r.getStart()>config.getModelRange()/2) && (r.getEnd()-bc.getPosition()>config.getModelRange()/2)){
@@ -716,7 +754,7 @@ public class BindingMixture {
     		//Don't need to examine noise reads in the update
     		double noiseReads=potRegFilter.getNonPotRegCountsSigChannel(cond); 
     		
-    		for(Region r : noiseResp.keySet())
+			for(Region r : sortedRegions(noiseResp.keySet()))
     			noiseReads+=noiseResp.get(r)[e];
     		noisePerBase[e] = noiseReads/config.getGenome().getGenomeLength();  //Signal channel noise per base
     	}
@@ -747,7 +785,7 @@ public class BindingMixture {
     	try {
     		String filename = config.getOutputIntermediateDir()+File.separator+config.getOutBase()+"_t"+trainingRound+".components";
 			FileWriter fout = new FileWriter(filename);
-			for(Region rr : activeComponents.keySet()){
+				for(Region rr : sortedRegions(activeComponents.keySet())){
 	    		List<List<BindingSubComponents>> comps = activeComponents.get(rr);
 	    		for(ExperimentCondition cond : manager.getConditions()){
 	    			for(BindingSubComponents comp : comps.get(cond.getIndex())){
@@ -766,7 +804,7 @@ public class BindingMixture {
      * TESTING ONLY 
      */
     public void printActiveComponents(){
-    	for(Region rr : activeComponents.keySet()){
+		for(Region rr : sortedRegions(activeComponents.keySet())){
     		List<List<BindingSubComponents>> comps = activeComponents.get(rr);
     		for(ExperimentCondition cond : manager.getConditions()){
     			for(BindingSubComponents comp : comps.get(cond.getIndex())){
@@ -860,6 +898,7 @@ public class BindingMixture {
 		private boolean runEM = true;
 		private boolean uniformBindingComponents=false;
 		private boolean runMultiGPSML = false;
+		private HashMap<Region, RegionResult> results = new HashMap<Region, RegionResult>();
 		
 		public BindingMixtureThread(Collection<Region> regs, boolean EM, boolean uniformBindingComponents, boolean multiGPSML){
 			regions = regs;	
@@ -867,6 +906,8 @@ public class BindingMixture {
 			runEM=EM;
 			runMultiGPSML = multiGPSML;
 		}
+
+		public HashMap<Region, RegionResult> getResults(){return results;}
 		
 		/**
 		 * Run the binding mixture over each test region
@@ -891,18 +932,16 @@ public class BindingMixture {
 		        			currComps.get(e).addAll(wComps.last().get(e));
 	                    }
 		        		
-		        		//Only non-zero components are returned by analyzeWindow, so add them to the recorded active components
-		        		synchronized(activeComponents){	activeComponents.put(rr, currComps);}
-		        		
-		        		//Add the sum of noise responsibilities to this region
-		        		synchronized(noiseResp){ noiseResp.put(rr, noiseRSums);}
+						//Only non-zero components are returned by analyzeWindow.  The
+						//parent commits this result in source region order after joins.
+						results.put(rr, new RegionResult(currComps, noiseRSums, null));
 		        		
                     }else{
                     	//Run ML assignment
                     	List<BindingEvent> windowBindingEvents = new ArrayList<BindingEvent>(); 
                     	windowBindingEvents.addAll(  analyzeWindowML(rr) ); 
 
-                    	synchronized(bindingEvents){bindingEvents.addAll(windowBindingEvents);}
+						results.put(rr, new RegionResult(null, null, windowBindingEvents));
                     }
         		} catch(Exception e){
                     System.err.println("ERROR: Exception when analyzing region "+rr.toString());
