@@ -200,7 +200,8 @@ public class BindingEvent implements Comparable<BindingEvent>{
 		else{
 			if(this.getCondSigHits(sortingCondition)>p.getCondSigHits(sortingCondition)){return(-1);}
 			else if(this.getCondSigHits(sortingCondition)<p.getCondSigHits(sortingCondition)){return(1);}
-		}return(0);	
+		}
+		return compareByLocation(p);
 	}
 	
 	/**
@@ -212,7 +213,8 @@ public class BindingEvent implements Comparable<BindingEvent>{
 		else{
 			if(this.getRepSigHits(rep)>p.getRepSigHits(rep)){return(-1);}
 			else if(this.getRepSigHits(rep)<p.getRepSigHits(rep)){return(1);}
-		}return(0);	
+		}
+		return compareByLocation(p);
 	}
 	
 	/**
@@ -224,7 +226,8 @@ public class BindingEvent implements Comparable<BindingEvent>{
 		else{
 			if(this.getCondSigHits(sortingCondition)>p.getCondSigHits(sortingCondition)){return(-1);}
 			else if(this.getCondSigHits(sortingCondition)<p.getCondSigHits(sortingCondition)){return(1);}
-		}return(0);
+		}
+		return compareByLocation(p);
 	}
 	
 	/**
@@ -236,7 +239,8 @@ public class BindingEvent implements Comparable<BindingEvent>{
 		else{
 			if(this.getCondSigHits(sortingCondition)>p.getCondSigHits(sortingCondition)){return(-1);}
 			else if(this.getCondSigHits(sortingCondition)<p.getCondSigHits(sortingCondition)){return(1);}
-		}return(0);	
+		}
+		return compareByLocation(p);
 	}
 	
 	/**
@@ -245,7 +249,7 @@ public class BindingEvent implements Comparable<BindingEvent>{
 	public int compareBySigCounts(BindingEvent p){
 		if(this.getCondSigHits(sortingCondition)>p.getCondSigHits(sortingCondition)){return(-1);}
 		else if(this.getCondSigHits(sortingCondition)<p.getCondSigHits(sortingCondition)){return(1);}
-		return(0);
+		return compareByLocation(p);
 	}
 	
 	/**
