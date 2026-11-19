@@ -340,6 +340,17 @@ public class BindingEM {
         int[][] muSumStarts = new int[numConditions][numComp]; //Start positions of muSum arrays (start of maximization window).
         int[][] muSumWidths = new int[numConditions][numComp]; //Effective widths of muSum arrays (width of maximization window).
         int[][][][] newMu = new int[numConditions][numComponents][][];// mu update  
+        double[] forwardPositionScores = new double[config.EM_MU_UPDATE_WIN*2];
+        double[] reversePositionScores = new double[config.EM_MU_UPDATE_WIN*2];
+        boolean[][] subtypeHasMotif = new boolean[numConditions][];
+        for (int c=0; c<numConditions; c++){
+            subtypeHasMotif[c] = new boolean[numBindingType[c]];
+            if (config.useMotifPrior()){
+                ExperimentCondition ec = manager.getConditions().get(c);
+                for (int bt=0; bt<numBindingType[c]; bt++)
+                    subtypeHasMotif[c][bt] = bindingManager.getBindingSubtype(ec).get(bt).hasMotif();
+            }
+        }
         
         //Initialize arrays
         for(int c=0; c<numConditions; c++)
@@ -463,62 +474,14 @@ public class BindingEM {
         				muSumStarts[c][j] = start; muSumWidths[c][j] = end-start;
         			}
         			//Score the current window
-        			double[][] currScore = new double[numBindingType[c]][2]; // scores are indexed by binding type and strand        			
-        			double[][] maxScore = new double[numBindingType[c]][2];
-        			int[][] maxPos = new int[numBindingType[c]][2];
-        			for (int bt=0; bt< numBindingType[c]; bt++){
-    					for (int s=0; s<2; s++){
-    						currScore[bt][s]=0;
-    						maxScore[bt][s]=-Double.MAX_VALUE;
-    						maxPos[bt][s]=0;
-    					}
-        			}
         			
-        			for(int x=start; x<end; x++){
-        				for (int bt=0; bt<numBindingType[c];bt++)
-        					for (int s=0; s<2 ; s++)
-        						currScore[bt][s]=0;
-        				for(int i=0;i<numBases;i++){
-        					int dist = hitPos[c][i]-x;
-        					for (int bt=0; bt<numBindingType[c];bt++){
-        						if (hitPlusStr[c][i]){
-        							// Case 1 : component location is at positive strand
-        							currScore[bt][0]+=(rBind[c][j][i][bt][0]*hitCounts[c][i])*TagProbabilityDensities[repIndices[c][i]][bt].logProbability(dist,true); //Watson
-        							// Case 2 : component location is at negative strand
-        							currScore[bt][1]+=(rBind[c][j][i][bt][1]*hitCounts[c][i])*TagProbabilityDensities[repIndices[c][i]][bt].logProbability(-dist, false); //Crick
-        							
-        						}else{
-        							// Case 1 : component location is at positive strand
-        							currScore[bt][0]+=(rBind[c][j][i][bt][0]*hitCounts[c][i])*TagProbabilityDensities[repIndices[c][i]][bt].logProbability(dist,false);	//Crick
-        							// Case 2 : component location is at negative strand
-        							currScore[bt][1]+=(rBind[c][j][i][bt][1]*hitCounts[c][i])*TagProbabilityDensities[repIndices[c][i]][bt].logProbability(-dist, true); //Watson
-        				}}}		
-       				
-        				ExperimentCondition ec = manager.getConditions().get(c); 
-        				// add scores from motif prior
-        				if (config.useMotifPrior()){
-        					for (int bt=0; bt < numBindingType[c]; bt++){
-        						if (bindingManager.getBindingSubtype(ec).get(bt).hasMotif()){
-        							currScore[bt][0] += (forMotifPrior[c][bt][x-regStart]*config.getPosPriorScaling());
-        							currScore[bt][1] += (revMotifPrior[c][bt][x-regStart]*config.getPosPriorScaling());    							
-        						}}}
-        				
-        				// Needed in multi-condition
-//        				if(numConditions>1 && t>config.ALPHA_ANNEALING_ITER)   //Save the score
-//            				muSums[c][j][x-start] = currScore;
-        				
-        				// Store positions and strands for each binding type
-        				for (int bt=0; bt<numBindingType[c]; bt++){
-        					for (int s=0; s<2 ; s++){
-        						if (currScore[bt][s] > maxScore[bt][s]){
-        							maxPos[bt][s]=x;
-        							maxScore[bt][s]=currScore[bt][s];
-        				}}}
-        			}										
-     
-        			for (int bt=0; bt<numBindingType[c]; bt++)
-    					for (int s=0; s<2 ; s++)
-    						newMu[c][j][bt][s]=maxPos[bt][s];
+				double[][] forwardMotif = forMotifPrior == null ? null : forMotifPrior[c];
+				double[][] reverseMotif = revMotifPrior == null ? null : revMotifPrior[c];
+				scorePositionWindow(start, end, regStart, numBindingType[c], hitPos[c],
+					hitPlusStr[c], repIndices[c], hitCounts[c], rBind[c][j],
+					TagProbabilityDensities, subtypeHasMotif[c], forwardMotif,
+					reverseMotif, config.getPosPriorScaling(), forwardPositionScores,
+					reversePositionScores, newMu[c][j]);
 
 //        			System.out.println("printing log likelihood scores");
 //        			for (int bt=0; bt<numBindingType[c]; bt++){
@@ -917,6 +880,66 @@ public class BindingEM {
             }
         } //LOOP: Run EM while not converged
     }//end of EM_MAP method
+
+    /**
+     * Score one component's candidate window. Hits are intentionally traversed
+     * before candidate positions so each candidate retains the original hit
+     * accumulation order while each hit/type weight is computed once.
+     */
+    static void scorePositionWindow(int start, int end, int regStart, int numBindingTypes,
+                                    int[] hitPos, boolean[] hitPlusStr, int[] repIndices,
+                                    double[] hitCounts, double[][][] componentResponsibilities,
+                                    TagProbabilityDensity[][] densities, boolean[] hasMotif,
+                                    double[][] forwardMotif, double[][] reverseMotif,
+                                    double motifScale, double[] forwardPositionScores,
+                                    double[] reversePositionScores, int[][] newMu){
+        for (int bt=0; bt<numBindingTypes; bt++){
+            double maxForwardScore=-Double.MAX_VALUE;
+            double maxReverseScore=-Double.MAX_VALUE;
+            int maxForwardPosition=0;
+            int maxReversePosition=0;
+            for (int k=0; k<end-start; k++){
+                forwardPositionScores[k]=0;
+                reversePositionScores[k]=0;
+            }
+            for(int i=0; i<hitPos.length; i++){
+                double forwardWeight = componentResponsibilities[i][bt][0]*hitCounts[i];
+                double reverseWeight = componentResponsibilities[i][bt][1]*hitCounts[i];
+                int dist = hitPos[i]-start;
+                TagProbabilityDensity density = densities[repIndices[i]][bt];
+                for (int k=0; k<end-start; k++){
+                    if (hitPlusStr[i]){
+                        // Case 1 : component location is at positive strand
+                        forwardPositionScores[k]+=forwardWeight*density.logProbability(dist-k,true); //Watson
+                        // Case 2 : component location is at negative strand
+                        reversePositionScores[k]+=reverseWeight*density.logProbability(-(dist-k), false); //Crick
+                    }else{
+                        // Case 1 : component location is at positive strand
+                        forwardPositionScores[k]+=forwardWeight*density.logProbability(dist-k,false); //Crick
+                        // Case 2 : component location is at negative strand
+                        reversePositionScores[k]+=reverseWeight*density.logProbability(-(dist-k), true); //Watson
+                    }
+                }
+            }
+            for (int k=0; k<end-start; k++){
+                int x = start+k;
+                if (hasMotif[bt]){
+                    forwardPositionScores[k] += (forwardMotif[bt][x-regStart]*motifScale);
+                    reversePositionScores[k] += (reverseMotif[bt][x-regStart]*motifScale);
+                }
+                if (forwardPositionScores[k] > maxForwardScore){
+                    maxForwardPosition=x;
+                    maxForwardScore=forwardPositionScores[k];
+                }
+                if (reversePositionScores[k] > maxReverseScore){
+                    maxReversePosition=x;
+                    maxReverseScore=reversePositionScores[k];
+                }
+            }
+            newMu[bt][0]=maxForwardPosition;
+            newMu[bt][1]=maxReversePosition;
+        }
+    }
       
   
     /**
