@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.egc.core.data.motifdb.WeightMatrix;
 import org.egc.core.deepseq.RegionCounts;
@@ -170,17 +171,12 @@ public class BindingMixture {
 			int numThreads = Math.min(config.getMaxThreads(), testRegions.size());
 			Thread[] threads = new Thread[numThreads];
 			BindingMixtureThread[] workers = new BindingMixtureThread[numThreads];
-	        ArrayList<Region> threadRegions[] = new ArrayList[numThreads];
+			final Region[] regionSnapshot = testRegions.toArray(new Region[0]);
+			final AtomicInteger nextRegion = new AtomicInteger(0);
+	
 	        int i = 0;
 	        for (i = 0 ; i < threads.length; i++) {
-	            threadRegions[i] = new ArrayList<Region>();
-	        }i=0;
-	        for(Region r : testRegions){
-	            threadRegions[(i++) % numThreads].add(r);
-	        }
-	
-	        for (i = 0 ; i < threads.length; i++) {
-	            workers[i] = new BindingMixtureThread(threadRegions[i], EM, uniformBindingSubComponents, multiGPSML);
+	            workers[i] = new BindingMixtureThread(regionSnapshot, nextRegion, EM, uniformBindingSubComponents, multiGPSML);
 	            Thread t = new Thread(workers[i]);
 	            t.start();
 	            threads[i] = t;
@@ -893,15 +889,17 @@ public class BindingMixture {
 	 * @version	%I%, %G%
 	 */
 	class BindingMixtureThread implements Runnable{
-		private Collection<Region> regions;
+		private final Region[] regions;
+		private final AtomicInteger nextRegion;
 		private int numBindingComponents=1;	//Assuming that the total number of components (active+inactive) is the same in every condition makes coding easier in the BindingEM class.  
 		private boolean runEM = true;
 		private boolean uniformBindingComponents=false;
 		private boolean runMultiGPSML = false;
 		private HashMap<Region, RegionResult> results = new HashMap<Region, RegionResult>();
 		
-		public BindingMixtureThread(Collection<Region> regs, boolean EM, boolean uniformBindingComponents, boolean multiGPSML){
-			regions = regs;	
+		public BindingMixtureThread(Region[] regs, AtomicInteger cursor, boolean EM, boolean uniformBindingComponents, boolean multiGPSML){
+			regions = regs;
+			nextRegion = cursor;
 			this.uniformBindingComponents = uniformBindingComponents;
 			runEM=EM;
 			runMultiGPSML = multiGPSML;
@@ -910,11 +908,13 @@ public class BindingMixture {
 		public HashMap<Region, RegionResult> getResults(){return results;}
 		
 		/**
-		 * Run the binding mixture over each test region
+		 * Claim and run the binding mixture over each test region from the shared cursor.
 		 */
 		public void run() {
 			//For each region in the test set
-        	for (Region rr : regions) {
+			int regionIndex;
+			while ((regionIndex = nextRegion.getAndIncrement()) < regions.length) {
+				Region rr = regions[regionIndex];
         		try{
         			//Initialize array of binding component lists, indexed by condition
 
